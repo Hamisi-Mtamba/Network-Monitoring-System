@@ -1,50 +1,80 @@
 <div class="page-container">
   <header class="page-heading">
-    <div><p>OVERVIEW</p><h1>Good day, {{ auth.admin()?.name?.split(' ')?.[0] || 'Admin' }}</h1><span>Here is what is happening across your network today.</span></div>
-    <ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Refresh</ion-button>
+    <div><p>OVERVIEW</p><h1>Good day, {{ auth.admin()?.name?.split(' ')?.[0] ||
+        'Admin' }}</h1><span>Here is what is happening across your network
+        today.</span></div>
+    <ion-button fill="outline" (click)="load()"><ion-icon slot="start"
+        name="refresh-outline"></ion-icon>Refresh</ion-button>
   </header>
 
   @if (loading()) {
-    <div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading network statistics…</p></div>
+  <div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading
+      network statistics…</p></div>
   } @else if (error()) {
-    <div class="state-card error-state"><h2>Dashboard unavailable</h2><p>We could not load current statistics.</p><ion-button (click)="load()">Try again</ion-button></div>
+  <div class="state-card error-state"><h2>Dashboard unavailable</h2><p>We could
+      not load current statistics.</p><ion-button (click)="load()">Try
+      again</ion-button></div>
   } @else if (stats(); as dashboard) {
-    <section class="revenue-hero">
-      <div class="revenue-icon"><ion-icon name="cash-outline"></ion-icon></div>
-      <div><p>TOTAL CONFIRMED REVENUE</p><h2>{{ money(dashboard.total_revenue) }}</h2><span>Lifetime revenue recorded by the payment service</span></div>
-      <a routerLink="/reports">View revenue report <ion-icon name="arrow-forward-outline"></ion-icon></a>
-    </section>
+  <section class="revenue-hero">
+    <div class="revenue-icon"><ion-icon name="cash-outline"></ion-icon></div>
+    <div><p>TOTAL CONFIRMED REVENUE</p><h2>{{ money(dashboard.total_revenue)
+        }}</h2><span>Lifetime revenue recorded by the payment
+        service</span></div>
+    <a routerLink="/reports">View revenue report <ion-icon
+        name="arrow-forward-outline"></ion-icon></a>
+  </section>
 
-    <section class="stats-grid">
-      @for (card of cards(); track card.label) {
-        <article class="stat-card">
-          <div class="stat-icon" [class]="card.tone"><ion-icon [name]="card.icon"></ion-icon></div>
-          <span>{{ card.label }}</span><strong>{{ card.value | number }}</strong><small>{{ card.note }}</small>
-        </article>
-      }
-    </section>
+  <section class="stats-grid">
+    @for (card of cards(); track card.label) {
+    <article class="stat-card">
+      <div class="stat-icon" [class]="card.tone"><ion-icon
+          [name]="card.icon"></ion-icon></div>
+      <span>{{ card.label }}</span><strong>{{ card.value | number
+        }}</strong><small>{{ card.note }}</small>
+    </article>
+    }
+  </section>
 
-    <section class="operations-grid">
-      <article class="status-panel">
-        <div class="panel-heading"><div><p>LIVE OPERATIONS</p><h2>Session health</h2></div><span class="status-pill"><i></i>Live</span></div>
-        <div class="session-summary">
-          <div class="ring" [style.--value]="dashboard.active_sessions + dashboard.expired_sessions ? (dashboard.active_sessions / (dashboard.active_sessions + dashboard.expired_sessions) * 100) : 0">
-            <span><strong>{{ dashboard.active_sessions }}</strong><small>online</small></span>
-          </div>
-          <div class="summary-list">
-            <p><i class="active-dot"></i><span>Active sessions</span><strong>{{ dashboard.active_sessions }}</strong></p>
-            <p><i class="expired-dot"></i><span>Expired sessions</span><strong>{{ dashboard.expired_sessions }}</strong></p>
-          </div>
+  <section class="operations-grid">
+    <article class="status-panel">
+      <div class="panel-heading"><div><p>LIVE OPERATIONS</p><h2>Session
+            health</h2></div><span class="status-pill"><i></i>Live</span></div>
+      <div class="session-summary">
+        <div class="ring"
+          [style.--value]="dashboard.active_sessions + dashboard.expired_sessions ? (dashboard.active_sessions / (dashboard.active_sessions + dashboard.expired_sessions) * 100) : 0">
+          <span><strong>{{ dashboard.active_sessions
+              }}</strong><small>online</small></span>
         </div>
-        <a routerLink="/sessions">Manage all sessions <ion-icon name="arrow-forward-outline"></ion-icon></a>
-      </article>
+        <div class="summary-list">
+          <p><i class="active-dot"></i><span>Active sessions</span><strong>{{
+              dashboard.active_sessions }}</strong></p>
+          <p><i class="expired-dot"></i><span>Expired sessions</span><strong>{{
+              dashboard.expired_sessions }}</strong></p>
+        </div>
+      </div>
+      <a routerLink="/sessions">Manage all sessions <ion-icon
+          name="arrow-forward-outline"></ion-icon></a>
+    </article>
 
-      <article class="quick-panel">
-        <div class="panel-heading"><div><p>QUICK ACCESS</p><h2>Common actions</h2></div></div>
-        <a routerLink="/packages"><span class="quick-icon blue"><ion-icon name="cube-outline"></ion-icon></span><span><strong>Manage packages</strong><small>Create, schedule or update offers</small></span><ion-icon name="arrow-forward-outline"></ion-icon></a>
-        <a routerLink="/payments"><span class="quick-icon purple"><ion-icon name="card-outline"></ion-icon></span><span><strong>Review payments</strong><small>Search and inspect transactions</small></span><ion-icon name="arrow-forward-outline"></ion-icon></a>
-        <a routerLink="/reports"><span class="quick-icon green"><ion-icon name="cash-outline"></ion-icon></span><span><strong>Open reports</strong><small>Revenue and usage insights</small></span><ion-icon name="arrow-forward-outline"></ion-icon></a>
-      </article>
-    </section>
+    <article class="quick-panel">
+      <div class="panel-heading"><div><p>QUICK ACCESS</p><h2>Common
+            actions</h2></div></div>
+      <a routerLink="/packages"><span class="quick-icon blue"><ion-icon
+            name="cube-outline"></ion-icon></span><span><strong>Manage
+            packages</strong><small>Create, schedule or update
+            offers</small></span><ion-icon
+          name="arrow-forward-outline"></ion-icon></a>
+      <a routerLink="/payments"><span class="quick-icon purple"><ion-icon
+            name="card-outline"></ion-icon></span><span><strong>Review
+            payments</strong><small>Search and inspect
+            transactions</small></span><ion-icon
+          name="arrow-forward-outline"></ion-icon></a>
+      <a routerLink="/reports"><span class="quick-icon green"><ion-icon
+            name="cash-outline"></ion-icon></span><span><strong>Open
+            reports</strong><small>Revenue and usage
+            insights</small></span><ion-icon
+          name="arrow-forward-outline"></ion-icon></a>
+    </article>
+  </section>
   }
 </div>

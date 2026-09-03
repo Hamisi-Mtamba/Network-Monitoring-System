@@ -1,24 +1,51 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
 
-// Import admin session controller
-import { getAllSessions, getSessionById, updateSessionStatus } from "../../controllers/admin/session.controller.js";
+// Import authentication middleware
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
 
-// Import admin authentication middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
+// Import company administrator authorization middleware
+import requireCompanyAdmin from "../../middlewares/requireCompanyAdmin.middleware.js";
 
-const router = Router();
+// Import session controllers
+import {
+    getSessions,
+    getSessionById,
+    updateSessionStatus
+} from "../../controllers/admin/session.controller.js";
 
-// Protect all session routes
+
+// Create router
+const router = express.Router();
+
+
+// Require authentication for every session route
 router.use(adminAuth);
 
-// Get every internet session
-router.get("/", getAllSessions);
+// Only normal company admins use these routes
+router.use(requireCompanyAdmin);
 
-// Get one session by ID
-router.get("/:id", getSessionById);
 
-// Update one session status
-router.patch("/:id/status", updateSessionStatus);
+// Get all sessions belonging to the authenticated company
+router.get(
+    "/",
+    getSessions
+);
 
+
+// Get one session belonging to the authenticated company
+router.get(
+    "/:id",
+    getSessionById
+);
+
+
+// Update one session belonging to the authenticated company
+router.patch(
+    "/:id/status",
+    updateSessionStatus
+);
+
+
+// Export router
 export default router;

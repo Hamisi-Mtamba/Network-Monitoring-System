@@ -1,250 +1,393 @@
-    <main class="page-shell cash-status-page">
+<main class="page-shell cash-status-page">
 
-    <a
-        routerLink="/packages"
-        class="back-link"
-    >
-        ← Back to packages
-    </a>
+    <!-- ======================================================
+         BACK TO PACKAGES
+         ====================================================== -->
 
+    @if (tenantService.companySlug()) {
+
+        <a
+            class="back-link"
+            [routerLink]="[
+                '/',
+                tenantService.companySlug(),
+                'packages'
+            ]"
+        >
+            ← Back to packages
+        </a>
+
+    }
+
+
+    <!-- ======================================================
+         LOADING STATE
+         ====================================================== -->
 
     @if (loading()) {
 
         <section class="status-card">
-        <div class="status-loader"></div>
-
-        <h1>Loading your cash request...</h1>
-
-        <p>
-            Please wait while we retrieve your payment information.
-        </p>
-        </section>
-
-    } @else if (!payment()) {
-
-        <section class="status-card status-card--error">
-
-        <span
-            class="status-icon status-icon--error"
-            aria-hidden="true"
-        >
-            !
-        </span>
-
-        <h1>Cash request unavailable</h1>
-
-        <p>
-            {{
-            errorMessage() ||
-            'We could not find this cash payment request.'
-            }}
-        </p>
-
-        <a
-            routerLink="/packages"
-            class="button button--primary"
-        >
-            Choose a Package
-        </a>
-
-        </section>
-
-    } @else {
-
-        <section class="status-card">
-
-        <!-- Waiting status -->
-        @if (!confirmed() && !rejected()) {
-
-            <span
-            class="status-icon status-icon--waiting"
-            aria-hidden="true"
-            >
-            $
-            </span>
-
-            <span class="status-label">
-            Cash Payment Request
-            </span>
-
-            <h1>Request Submitted</h1>
-
-            <p class="status-intro">
-            Your request has been recorded successfully.
-            Pay the administrator using the reference below.
-            </p>
-
-
-            <!-- Important payment information -->
-            <div class="reference-box">
-
-            <span>Cash payment reference</span>
-
-            <strong>
-                {{ payment()!.transaction_reference }}
-            </strong>
-
-            <small>
-                Show this reference to the administrator when paying.
-            </small>
-
-            </div>
-
-
-            <div class="payment-details">
-
-            <div>
-                <span>Amount</span>
-
-                <strong>
-                TZS {{ (+payment()!.amount).toLocaleString() }}
-                </strong>
-            </div>
-
-            <div>
-                <span>Phone number</span>
-
-                <strong>
-                {{ payment()!.phone_number }}
-                </strong>
-            </div>
-
-            <div>
-                <span>Payment method</span>
-
-                <strong>
-                Cash
-                </strong>
-            </div>
-
-            <div>
-                <span>Status</span>
-
-                <strong class="waiting-badge">
-                Waiting for confirmation
-                </strong>
-            </div>
-
-            </div>
-
-
-            <!-- What customer should do next -->
-            <div class="instructions">
-
-            <h2>What to do next</h2>
-
-            <ol>
-                <li>
-                Go to the authorized administrator or cashier.
-                </li>
-
-                <li>
-                Show them your cash-payment reference.
-                </li>
-
-                <li>
-                Pay exactly
-                <strong>
-                    TZS {{ (+payment()!.amount).toLocaleString() }}
-                </strong>.
-                </li>
-
-                <li>
-                The administrator will confirm that the cash
-                has been received.
-                </li>
-
-                <li>
-                Your internet package will then be activated.
-                </li>
-            </ol>
-
-            </div>
-
-
-            <!-- Important architectural behaviour -->
-            <div class="leave-note">
-
-            <strong>You do not have to keep this page open.</strong>
-
-            <p>
-                Your request is already saved. The administrator
-                can confirm it even if you close this page.
-                When your device reconnects to the Wi-Fi later,
-                the activated package can be recognized by the
-                network system.
-            </p>
-
-            </div>
-
-
-            @if (checking()) {
-
-            <div class="checking-status">
-
-                <div class="status-loader status-loader--small"></div>
-
-                <span>
-                Waiting for administrator confirmation...
-                </span>
-
-            </div>
-
-            } @else {
-
-            <button
-                type="button"
-                class="button button--primary button--full"
-                (click)="checkAgain()"
-            >
-                Check Payment Status
-            </button>
-
-            }
-
-
-            @if (errorMessage()) {
 
             <div
-                class="inline-alert"
-                role="alert"
-            >
-                {{ errorMessage() }}
-            </div>
+                class="status-loader"
+                aria-hidden="true"
+            ></div>
 
-            }
-
-        }
-
-
-        <!-- Rejected status -->
-        @if (rejected()) {
-
-            <span
-            class="status-icon status-icon--error"
-            aria-hidden="true"
-            >
-            ×
-            </span>
-
-            <h1>Cash Request Not Confirmed</h1>
+            <h1>
+                Loading your cash request...
+            </h1>
 
             <p>
-            This cash request was cancelled, rejected or failed.
-            No internet package was activated.
+                Please wait while we retrieve your payment information.
             </p>
-
-            <a
-            routerLink="/packages"
-            class="button button--primary button--full"
-            >
-            Choose Another Package
-            </a>
-
-        }
 
         </section>
 
     }
 
-    </main>
+
+    <!-- ======================================================
+         REQUEST NOT AVAILABLE
+         ====================================================== -->
+
+    @else if (!payment()) {
+
+        <section
+            class="status-card status-card--error"
+            role="alert"
+        >
+
+            <span
+                class="status-icon status-icon--error"
+                aria-hidden="true"
+            >
+                !
+            </span>
+
+            <h1>
+                Cash request unavailable
+            </h1>
+
+            <p>
+                {{
+                    errorMessage() ||
+                    'We could not find this cash payment request.'
+                }}
+            </p>
+
+
+            @if (tenantService.companySlug()) {
+
+                <a
+                    class="button button--primary"
+                    [routerLink]="[
+                        '/',
+                        tenantService.companySlug(),
+                        'packages'
+                    ]"
+                >
+                    Choose another package
+                </a>
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         CASH REQUEST FOUND
+         ====================================================== -->
+
+    @else {
+
+        <section class="status-card">
+
+
+            <!-- ==================================================
+                 WAITING FOR ADMIN CONFIRMATION
+                 ================================================== -->
+
+            @if (
+                !confirmed() &&
+                !rejected()
+            ) {
+
+                <span
+                    class="status-icon status-icon--waiting"
+                    aria-hidden="true"
+                >
+                    $
+                </span>
+
+
+                <span class="status-label">
+                    Cash payment request
+                </span>
+
+
+                <h1>
+                    Request submitted
+                </h1>
+
+
+                <p class="status-intro">
+                    Your cash payment request has been recorded.
+                    Use the reference below when paying the administrator.
+                </p>
+
+
+                <!-- ==============================================
+                     PAYMENT REFERENCE
+                     ============================================== -->
+
+                <div class="reference-box">
+
+                    <span>
+                        Cash payment reference
+                    </span>
+
+                    <strong>
+                        {{ payment()!.transaction_reference }}
+                    </strong>
+
+                    <small>
+                        Show this reference to the administrator
+                        when making your payment.
+                    </small>
+
+                </div>
+
+
+                <!-- ==============================================
+                     PAYMENT DETAILS
+                     ============================================== -->
+
+                <div class="payment-details">
+
+                    <div>
+
+                        <span>
+                            Amount
+                        </span>
+
+                        <strong>
+                            TZS
+                            {{
+                                (+payment()!.amount).toLocaleString()
+                            }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Phone number
+                        </span>
+
+                        <strong>
+                            {{ payment()!.phone_number }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Payment method
+                        </span>
+
+                        <strong>
+                            Cash
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Status
+                        </span>
+
+                        <strong class="waiting-badge">
+                            Waiting for confirmation
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==============================================
+                     CUSTOMER INSTRUCTIONS
+                     ============================================== -->
+
+                <div class="instructions">
+
+                    <h2>
+                        What to do next
+                    </h2>
+
+                    <ol>
+
+                        <li>
+                            Go to the authorized administrator
+                            or cashier.
+                        </li>
+
+                        <li>
+                            Show them your cash payment reference.
+                        </li>
+
+                        <li>
+                            Pay exactly
+                            <strong>
+                                TZS
+                                {{
+                                    (+payment()!.amount).toLocaleString()
+                                }}
+                            </strong>.
+                        </li>
+
+                        <li>
+                            The administrator will confirm
+                            that the cash has been received.
+                        </li>
+
+                        <li>
+                            Your internet package will be activated
+                            after confirmation.
+                        </li>
+
+                    </ol>
+
+                </div>
+
+
+                <!-- ==============================================
+                     REQUEST PERSISTENCE NOTE
+                     ============================================== -->
+
+                <div class="leave-note">
+
+                    <strong>
+                        You do not need to keep this page open.
+                    </strong>
+
+                    <p>
+                        Your cash request is already saved.
+                        The administrator can confirm it even if
+                        you close this page.
+                    </p>
+
+                    <p>
+                        You can return using the same payment
+                        reference to check the status again.
+                    </p>
+
+                </div>
+
+
+                <!-- ==============================================
+                     STATUS CHECKING
+                     ============================================== -->
+
+                @if (checking()) {
+
+                    <div class="checking-status">
+
+                        <div
+                            class="status-loader status-loader--small"
+                            aria-hidden="true"
+                        ></div>
+
+                        <span>
+                            Waiting for administrator confirmation...
+                        </span>
+
+                    </div>
+
+                } @else {
+
+                    <button
+                        type="button"
+                        class="button button--primary button--full"
+                        (click)="checkAgain()"
+                    >
+                        Check payment status
+                    </button>
+
+                }
+
+
+                <!-- ==============================================
+                     STATUS ERROR
+                     ============================================== -->
+
+                @if (errorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+                        {{ errorMessage() }}
+                    </div>
+
+                }
+
+            }
+
+
+            <!-- ==================================================
+                 REQUEST REJECTED
+                 ================================================== -->
+
+            @if (rejected()) {
+
+                <span
+                    class="status-icon status-icon--error"
+                    aria-hidden="true"
+                >
+                    ×
+                </span>
+
+
+                <h1>
+                    Cash request not confirmed
+                </h1>
+
+
+                <p>
+                    This cash payment request was cancelled,
+                    rejected, or failed. No internet package
+                    was activated.
+                </p>
+
+
+                @if (tenantService.companySlug()) {
+
+                    <a
+                        class="button button--primary button--full"
+                        [routerLink]="[
+                            '/',
+                            tenantService.companySlug(),
+                            'packages'
+                        ]"
+                    >
+                        Choose another package
+                    </a>
+
+                }
+
+            }
+
+        </section>
+
+    }
+
+</main>

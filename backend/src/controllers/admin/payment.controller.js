@@ -1,408 +1,1256 @@
 // Import PostgreSQL connection pool
-import { pool } from "../../database/database.js";
+import {
+    pool
+} from "../../database/database.js";
 
-// TEMPORARY: Simulate successful payment and create internet session
-const markPaymentSuccessful = async (req, res) => {
-    // Get a dedicated database client so we can use a transaction
-    const client = await pool.connect();
 
-    try {
-        // Get transaction reference from URL
-        const { reference } = req.params;
+// Import MikroTik provisioning service
+import {
+    provisionHotspotAccess,
+    removeExistingHotspotHost
+} from "../../../services/mikrotik.service.js";
 
-        // Start PostgreSQL transaction
-        await client.query("BEGIN");
 
-        // Find the payment together with its package duration
-        const paymentResult = await client.query(
-            `
-            SELECT
-                payments.*,
-                packages.duration_minutes
-            FROM payments
-            JOIN packages
-                ON payments.package_id = packages.id
-            WHERE payments.transaction_reference = $1
-            `,
-            [reference]
-        );
+// =========================================================
+// COMPANY CONTEXT
+// =========================================================
 
-        // Stop if payment does not exist
-        if (paymentResult.rows.length === 0) {
-            await client.query("ROLLBACK");
+const getRequestCompanyId = (req) => {
 
-            return res.status(404).json({
-                success: false,
-                message: "Payment not found"
-            });
-        }
-
-        const payment = paymentResult.rows[0];
-
-        // Prevent the same payment from creating multiple sessions
-        if (payment.status === "successful") {
-            await client.query("ROLLBACK");
-
-            return res.status(400).json({
-                success: false,
-                message: "Payment has already been processed"
-            });
-        }
-
-        // Mark payment as successful
-        await client.query(
-            `
-            UPDATE payments
-            SET
-                status = 'successful',
-                paid_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-            `,
-            [payment.id]
-        );
-
-        // Create the internet session.
-        // PostgreSQL adds the package duration in minutes to the current time.
-        const sessionResult = await client.query(
-            `
-            INSERT INTO internet_sessions (
-                payment_id,
-                package_id,
-                started_at,
-                expires_at,
-                status
-            )
-            VALUES (
-                $1,
-                $2,
-                CURRENT_TIMESTAMP,
-                CURRENT_TIMESTAMP + ($3 * INTERVAL '1 minute'),
-                'active'
-            )
-            RETURNING *
-            `,
-            [
-                payment.id,
-                payment.package_id,
-                payment.duration_minutes
-            ]
-        );
-
-        // Save both changes permanently
-        await client.query("COMMIT");
-
-        // Return the newly created session
-        res.status(200).json({
-            success: true,
-            message: "Payment successful and internet session created",
-            session: sessionResult.rows[0]
-        });
-
-    } catch (error) {
-        // Undo all database changes if anything fails
-        await client.query("ROLLBACK");
-
-        console.error(
-            "Error processing successful payment:",
-            error.message
-        );
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to process successful payment"
-        });
-
-    } finally {
-        // Return database connection to the pool
-        client.release();
+    // Superadmin uses explicitly selected company
+    if (
+        req.admin.role === "superadmin" &&
+        req.platformCompany
+    ) {
+        return req.platformCompany.id;
     }
+
+    // Normal admin always uses authenticated company
+    return req.admin.companyId;
 };
 
-// Get all payment records for the admin dashboard
-const getAllPayments = async (req, res) => {
+
+// =========================================================
+// GET ALL COMPANY PAYMENTS
+// =========================================================
+
+const getPayments = async (
+    req,
+    res
+) => {
+
     try {
-        // Fetch payments together with their related package information
-        const result = await pool.query(
-            `
-            SELECT
-                payments.id,
-                payments.transaction_reference,
-                payments.phone_number,
-                payments.payment_method,
-                payments.amount,
-                payments.status,
-                payments.created_at,
-                payments.paid_at,
 
-                packages.id AS package_id,
-                packages.name AS package_name,
-                packages.duration_minutes,
-                packages.speed
+        const companyId =
+            getRequestCompanyId(req);
 
-            FROM payments
 
-            JOIN packages
-                ON payments.package_id = packages.id
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
 
-            ORDER BY payments.id DESC
-            `
-        );
+                    COALESCE(
+                        pay.amount,
+                        p.price
+                    ) AS amount,
 
-        // Return all payment records
-        res.status(200).json({
+                    pay.transaction_reference,
+                    pay.status,
+
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.price AS package_price,
+                    p.duration_minutes
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.company_id = $1
+
+                ORDER BY pay.created_at DESC
+                `,
+                [
+                    companyId
+                ]
+            );
+
+
+        return res.status(200).json({
             success: true,
             payments: result.rows
         });
 
     } catch (error) {
-        // Log the real backend error
-        console.error("Error fetching admin payments:", error.message);
 
-        res.status(500).json({
+        console.error(
+            "Get payments error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
             success: false,
             message: "Failed to fetch payments"
         });
     }
 };
 
-// Get one payment by its ID
-const getPaymentById = async (req, res) => {
+
+// =========================================================
+// GET ONE PAYMENT
+// =========================================================
+
+const getPaymentById = async (
+    req,
+    res
+) => {
+
     try {
-        // Read payment ID from the URL
-        const { id } = req.params;
 
-        // Fetch payment together with package and session information
-        const result = await pool.query(
-            `
-            SELECT
-                payments.id,
-                payments.transaction_reference,
-                payments.phone_number,
-                payments.payment_method,
-                payments.amount,
-                payments.status,
-                payments.created_at,
-                payments.paid_at,
+        const companyId =
+            getRequestCompanyId(req);
 
-                packages.id AS package_id,
-                packages.name AS package_name,
-                packages.duration_minutes,
-                packages.speed,
 
-                internet_sessions.id AS session_id,
-                internet_sessions.started_at,
-                internet_sessions.expires_at,
-                internet_sessions.status AS session_status
+        const paymentId =
+            Number(
+                req.params.id
+            );
 
-            FROM payments
 
-            JOIN packages
-                ON payments.package_id = packages.id
+        if (
+            !Number.isInteger(paymentId) ||
+            paymentId <= 0
+        ) {
 
-            LEFT JOIN internet_sessions
-                ON internet_sessions.payment_id = payments.id
+            return res.status(400).json({
+                success: false,
+                message: "Invalid payment ID"
+            });
+        }
 
-            WHERE payments.id = $1
-            LIMIT 1
-            `,
-            [id]
-        );
 
-        // Stop if payment does not exist
-        if (result.rows.length === 0) {
+        const paymentResult =
+            await pool.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
+
+                    COALESCE(
+                        pay.amount,
+                        p.price
+                    ) AS amount,
+
+                    pay.transaction_reference,
+                    pay.status,
+
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.price AS package_price,
+                    p.duration_minutes
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.id = $1
+                  AND pay.company_id = $2
+
+                LIMIT 1
+                `,
+                [
+                    paymentId,
+                    companyId
+                ]
+            );
+
+
+        if (
+            paymentResult.rows.length === 0
+        ) {
+
             return res.status(404).json({
                 success: false,
                 message: "Payment not found"
             });
         }
 
-        // Return full payment details
-        res.status(200).json({
+
+        const sessionResult =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    company_id,
+                    payment_id,
+                    package_id,
+
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+
+                    started_at,
+                    expires_at,
+                    status,
+                    created_at
+
+                FROM internet_sessions
+
+                WHERE payment_id = $1
+                  AND company_id = $2
+
+                ORDER BY id DESC
+
+                LIMIT 1
+                `,
+                [
+                    paymentId,
+                    companyId
+                ]
+            );
+
+
+        return res.status(200).json({
+
             success: true,
-            payment: result.rows[0]
+
+            payment:
+                paymentResult.rows[0],
+
+            session:
+                sessionResult.rows.length > 0
+                    ? sessionResult.rows[0]
+                    : null
         });
 
     } catch (error) {
-        // Log actual backend error
-        console.error("Error fetching payment:", error.message);
 
-        res.status(500).json({
+        console.error(
+            "Get payment error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
             success: false,
             message: "Failed to fetch payment"
         });
     }
 };
 
-// Get cash-payment requests waiting for administrator confirmation
-const getCashRequests = async (req, res) => {
+
+// =========================================================
+// GET PENDING CASH REQUESTS
+// =========================================================
+
+const getCashRequests = async (
+    req,
+    res
+) => {
+
     try {
-        const result = await pool.query(
-            `
-            SELECT
-                payments.id,
-                payments.transaction_reference,
-                payments.phone_number,
-                payments.amount,
-                payments.status,
-                payments.created_at,
 
-                packages.id AS package_id,
-                packages.name AS package_name,
-                packages.duration_minutes,
-                packages.speed
+        const companyId =
+            getRequestCompanyId(req);
 
-            FROM payments
 
-            JOIN packages
-                ON payments.package_id = packages.id
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
 
-            WHERE payments.payment_method = 'cash'
+                    COALESCE(
+                        pay.amount,
+                        p.price
+                    ) AS amount,
 
-            ORDER BY payments.id DESC
-            `
-        );
+                    pay.transaction_reference,
+                    pay.status,
 
-        res.status(200).json({
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.price AS package_price,
+                    p.duration_minutes
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.company_id = $1
+                  AND pay.payment_method = 'cash'
+                  AND pay.status =
+                      'awaiting_cash_confirmation'
+
+                ORDER BY pay.created_at ASC
+                `,
+                [
+                    companyId
+                ]
+            );
+
+
+        return res.status(200).json({
             success: true,
             cash_requests: result.rows
         });
 
     } catch (error) {
+
         console.error(
-            "Error fetching cash requests:",
+            "Get cash requests error:",
             error.message
         );
 
-        res.status(500).json({
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to fetch cash payment requests"
+            message:
+                "Failed to fetch cash payment requests"
         });
     }
 };
 
-// Confirm that the administrator physically received the cash payment
-const confirmCashPayment = async (req, res) => {
 
-    // Use one PostgreSQL client so payment + session creation
-    // happen inside the same database transaction.
-    const client = await pool.connect();
+// =========================================================
+// PROVISION PAYMENT SESSION ON MIKROTIK
+// =========================================================
 
-    try {
-        const { reference } = req.params;
+const provisionPaymentOnMikrotik = async (
+    payment
+) => {
 
-        await client.query("BEGIN");
+    if (!payment.device_mac) {
 
-        // Find the cash request and package duration
-        const paymentResult = await client.query(
-            `
-            SELECT
-                payments.*,
-                packages.duration_minutes
+        throw new Error(
+            "Payment device MAC address is missing"
+        );
+    }
 
-            FROM payments
 
-            JOIN packages
-                ON payments.package_id = packages.id
-
-            WHERE payments.transaction_reference = $1
-            AND payments.payment_method = 'cash'
-            `,
-            [reference]
+    const durationMinutes =
+        Number(
+            payment.duration_minutes
         );
 
-        if (paymentResult.rows.length === 0) {
-            await client.query("ROLLBACK");
 
-            return res.status(404).json({
+    if (
+        !Number.isInteger(durationMinutes) ||
+        durationMinutes <= 0
+    ) {
+
+        throw new Error(
+            "Package duration is invalid"
+        );
+    }
+
+
+    await provisionHotspotAccess({
+
+        macAddress:
+            payment.device_mac,
+
+        durationMinutes
+    });
+};
+
+
+// =========================================================
+// CONFIRM CASH PAYMENT
+// =========================================================
+
+const confirmCashPayment = async (
+    req,
+    res
+) => {
+
+    const client =
+        await pool.connect();
+
+
+    try {
+
+        const companyId =
+            getRequestCompanyId(req);
+
+
+        const transactionReference =
+            req.params.reference
+                ?.trim();
+
+
+        if (!transactionReference) {
+
+            return res.status(400).json({
                 success: false,
-                message: "Cash payment request not found"
+                message:
+                    "Payment reference is required"
             });
         }
 
-        const payment = paymentResult.rows[0];
 
-        // Only waiting cash requests can be confirmed
+        await client.query(
+            "BEGIN"
+        );
+
+
+        // =================================================
+        // FIND AND LOCK CASH PAYMENT
+        // =========================================================
+
+        const paymentResult =
+            await client.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
+                    pay.amount,
+                    pay.transaction_reference,
+                    pay.status,
+
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.price AS package_price,
+                    p.duration_minutes
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.transaction_reference = $1
+                  AND pay.company_id = $2
+
+                LIMIT 1
+
+                FOR UPDATE OF pay
+                `,
+                [
+                    transactionReference,
+                    companyId
+                ]
+            );
+
+
+        if (
+            paymentResult.rows.length === 0
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Cash payment request not found"
+            });
+        }
+
+
+        const payment =
+            paymentResult.rows[0];
+
+
+        // =================================================
+        // MAKE SURE THIS IS CASH
+        // =========================================================
+
+        if (
+            payment.payment_method !==
+            "cash"
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment is not a cash payment"
+            });
+        }
+
+
+        // =================================================
+        // MAKE SURE IT IS STILL WAITING
+        // =========================================================
+
         if (
             payment.status !==
             "awaiting_cash_confirmation"
         ) {
-            await client.query("ROLLBACK");
 
-            return res.status(400).json({
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(409).json({
                 success: false,
                 message:
                     "Cash payment has already been processed"
             });
         }
 
-        // Mark payment successful
+
+        // =================================================
+        // REQUIRE MIKROTIK CONTEXT
+        // =========================================================
+
+        if (
+            !payment.router_id ||
+            !payment.device_mac ||
+            !payment.device_ip ||
+            !payment.mikrotik_login_url
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment is missing MikroTik connection information"
+            });
+        }
+
+
+        // =================================================
+        // CHECK EXISTING SESSION
+        // =========================================================
+
+        const existingSession =
+            await client.query(
+                `
+                SELECT
+                    id
+
+                FROM internet_sessions
+
+                WHERE payment_id = $1
+                  AND company_id = $2
+
+                LIMIT 1
+                `,
+                [
+                    payment.id,
+                    companyId
+                ]
+            );
+
+
+        if (
+            existingSession.rows.length > 0
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(409).json({
+                success: false,
+                message:
+                    "Internet session already exists for this payment"
+            });
+        }
+
+
+        // =================================================
+        // RESOLVE PAYMENT AMOUNT
+        // =========================================================
+
+        const resolvedAmount =
+            payment.amount !== null &&
+            payment.amount !== undefined
+                ? Number(
+                    payment.amount
+                )
+                : Number(
+                    payment.package_price
+                );
+
+
+        // =================================================
+        // MARK PAYMENT SUCCESSFUL
+        // =========================================================
+
+        const updatedPaymentResult =
+            await client.query(
+                `
+                UPDATE payments
+
+                SET
+                    amount = $3,
+                    status = 'successful',
+                    paid_at = CURRENT_TIMESTAMP
+
+                WHERE id = $1
+                  AND company_id = $2
+
+                RETURNING
+                    id,
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+
+                    created_at,
+                    paid_at
+                `,
+                [
+                    payment.id,
+                    companyId,
+                    resolvedAmount
+                ]
+            );
+
+
+        // =================================================
+        // CREATE INTERNET SESSION
+        // =========================================================
+
+        const sessionResult =
+            await client.query(
+                `
+                INSERT INTO internet_sessions (
+                    company_id,
+                    payment_id,
+                    package_id,
+
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+
+                    started_at,
+                    expires_at,
+                    status,
+                    created_at
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+
+                    $4,
+                    $5,
+                    $6,
+                    $7,
+
+                    CURRENT_TIMESTAMP,
+
+                    CURRENT_TIMESTAMP +
+                        ($8 * INTERVAL '1 minute'),
+
+                    'active',
+                    CURRENT_TIMESTAMP
+                )
+
+                RETURNING *
+                `,
+                [
+                    companyId,
+                    payment.id,
+                    payment.package_id,
+
+                    payment.router_id,
+                    payment.device_mac,
+                    payment.device_ip,
+                    payment.mikrotik_login_url,
+
+                    payment.duration_minutes
+                ]
+            );
+
+
+        // =================================================
+        // PROVISION MIKROTIK ACCESS
+        // =========================================================
+
+        await provisionPaymentOnMikrotik(
+            payment
+        );
+
+
+        // =================================================
+        // COMMIT
+        // =========================================================
+
         await client.query(
-            `
-            UPDATE payments
-            SET
-                status = 'successful',
-                paid_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-            `,
-            [payment.id]
+            "COMMIT"
         );
 
-        // Create the customer's internet session
-        const sessionResult = await client.query(
-            `
-            INSERT INTO internet_sessions (
-                payment_id,
-                package_id,
-                started_at,
-                expires_at,
-                status
-            )
-            VALUES (
-                $1,
-                $2,
-                CURRENT_TIMESTAMP,
-                CURRENT_TIMESTAMP
-                    + ($3 * INTERVAL '1 minute'),
-                'active'
-            )
-            RETURNING *
-            `,
-            [
-                payment.id,
-                payment.package_id,
+
+        // =================================================
+        // BUILD COMPLETE RESPONSE
+        // =========================================================
+
+        const updatedPayment = {
+
+            ...updatedPaymentResult.rows[0],
+
+            amount:
+                resolvedAmount,
+
+            package_name:
+                payment.package_name,
+
+            package_price:
+                payment.package_price,
+
+            duration_minutes:
                 payment.duration_minutes
-            ]
-        );
+        };
 
-        await client.query("COMMIT");
 
-        res.status(200).json({
+        return res.status(200).json({
+
             success: true,
+
             message:
-                "Cash payment confirmed and internet session created",
-            payment_reference:
-                payment.transaction_reference,
-            session: sessionResult.rows[0]
+                "Cash payment confirmed and internet access activated",
+
+            payment:
+                updatedPayment,
+
+            session:
+                sessionResult.rows[0]
         });
 
     } catch (error) {
-        await client.query("ROLLBACK");
+
+        try {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+        } catch (rollbackError) {
+
+            console.error(
+                "Cash confirmation rollback error:",
+                rollbackError.message
+            );
+        }
+
 
         console.error(
-            "Error confirming cash payment:",
+            "Confirm cash payment error:",
             error.message
         );
 
-        res.status(500).json({
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to confirm cash payment"
+            message:
+                "Failed to confirm cash payment or activate internet access"
         });
 
     } finally {
+
         client.release();
     }
 };
 
-// Keep your existing temporary success function too
 
-export { markPaymentSuccessful, getAllPayments, getPaymentById, getCashRequests, confirmCashPayment };
+// =========================================================
+// DEVELOPMENT PAYMENT SUCCESS
+// =========================================================
+
+const markPaymentSuccessful = async (
+    req,
+    res
+) => {
+
+    const client =
+        await pool.connect();
+
+
+    try {
+
+        const companyId =
+            getRequestCompanyId(req);
+
+
+        const transactionReference =
+            req.params.reference
+                ?.trim();
+
+
+        if (!transactionReference) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment reference is required"
+            });
+        }
+
+
+        await client.query(
+            "BEGIN"
+        );
+
+
+        // =================================================
+        // FIND AND LOCK PAYMENT
+        // =========================================================
+
+        const paymentResult =
+            await client.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
+                    pay.amount,
+                    pay.transaction_reference,
+                    pay.status,
+
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.price AS package_price,
+                    p.duration_minutes
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.transaction_reference = $1
+                  AND pay.company_id = $2
+
+                LIMIT 1
+
+                FOR UPDATE OF pay
+                `,
+                [
+                    transactionReference,
+                    companyId
+                ]
+            );
+
+
+        if (
+            paymentResult.rows.length === 0
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Payment not found"
+            });
+        }
+
+
+        const payment =
+            paymentResult.rows[0];
+
+
+        // =================================================
+        // CASH MUST USE ADMIN CONFIRMATION
+        // =========================================================
+
+        if (
+            payment.payment_method ===
+            "cash"
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Cash payments must be confirmed by the company administrator"
+            });
+        }
+
+
+        // =================================================
+        // PREVENT DUPLICATE SUCCESS
+        // =========================================================
+
+        if (
+            payment.status ===
+            "successful"
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(409).json({
+                success: false,
+                message:
+                    "Payment has already been marked successful"
+            });
+        }
+
+
+        // =================================================
+        // REQUIRE MIKROTIK CONTEXT
+        // =========================================================
+
+        if (
+            !payment.router_id ||
+            !payment.device_mac ||
+            !payment.device_ip ||
+            !payment.mikrotik_login_url
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment is missing MikroTik connection information"
+            });
+        }
+
+
+        // =================================================
+        // CHECK EXISTING SESSION
+        // =========================================================
+
+        const existingSession =
+            await client.query(
+                `
+                SELECT
+                    id
+
+                FROM internet_sessions
+
+                WHERE payment_id = $1
+                  AND company_id = $2
+
+                LIMIT 1
+                `,
+                [
+                    payment.id,
+                    companyId
+                ]
+            );
+
+
+        if (
+            existingSession.rows.length > 0
+        ) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            return res.status(409).json({
+                success: false,
+                message:
+                    "Internet session already exists for this payment"
+            });
+        }
+
+
+        // =================================================
+        // RESOLVE PAYMENT AMOUNT
+        // =========================================================
+
+        const resolvedAmount =
+            payment.amount !== null &&
+            payment.amount !== undefined
+                ? Number(
+                    payment.amount
+                )
+                : Number(
+                    payment.package_price
+                );
+
+
+        // =================================================
+        // MARK PAYMENT SUCCESSFUL
+        // =========================================================
+
+        const updatedPaymentResult =
+            await client.query(
+                `
+                UPDATE payments
+
+                SET
+                    amount = $3,
+                    status = 'successful',
+                    paid_at = CURRENT_TIMESTAMP
+
+                WHERE id = $1
+                  AND company_id = $2
+
+                RETURNING
+                    id,
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+
+                    created_at,
+                    paid_at
+                `,
+                [
+                    payment.id,
+                    companyId,
+                    resolvedAmount
+                ]
+            );
+
+
+        // =================================================
+        // CREATE INTERNET SESSION
+        // =========================================================
+
+        const sessionResult =
+            await client.query(
+                `
+                INSERT INTO internet_sessions (
+                    company_id,
+                    payment_id,
+                    package_id,
+
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+
+                    started_at,
+                    expires_at,
+                    status,
+                    created_at
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+
+                    $4,
+                    $5,
+                    $6,
+                    $7,
+
+                    CURRENT_TIMESTAMP,
+
+                    CURRENT_TIMESTAMP +
+                        ($8 * INTERVAL '1 minute'),
+
+                    'active',
+                    CURRENT_TIMESTAMP
+                )
+
+                RETURNING *
+                `,
+                [
+                    companyId,
+                    payment.id,
+                    payment.package_id,
+
+                    payment.router_id,
+                    payment.device_mac,
+                    payment.device_ip,
+                    payment.mikrotik_login_url,
+
+                    payment.duration_minutes
+                ]
+            );
+
+
+        // =================================================
+        // PROVISION MIKROTIK ACCESS
+        // =========================================================
+
+        await provisionPaymentOnMikrotik(
+            payment
+        );
+
+
+        // =================================================
+        // COMMIT
+        // =========================================================
+
+        await client.query(
+            "COMMIT"
+        );
+
+
+        const updatedPayment = {
+
+            ...updatedPaymentResult.rows[0],
+
+            amount:
+                resolvedAmount,
+
+            package_name:
+                payment.package_name,
+
+            package_price:
+                payment.package_price,
+
+            duration_minutes:
+                payment.duration_minutes
+        };
+
+
+        return res.status(200).json({
+
+            success: true,
+
+            message:
+                "Payment marked successful and internet access activated",
+
+            payment:
+                updatedPayment,
+
+            session:
+                sessionResult.rows[0]
+        });
+
+    } catch (error) {
+
+        try {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+        } catch (rollbackError) {
+
+            console.error(
+                "Payment success rollback error:",
+                rollbackError.message
+            );
+        }
+
+
+        console.error(
+            "Mark payment successful error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Failed to mark payment successful or activate internet access"
+        });
+
+    } finally {
+
+        client.release();
+    }
+};
+
+
+// =========================================================
+// EXPORTS
+// =========================================================
+
+export {
+    getPayments,
+    getPaymentById,
+    getCashRequests,
+    confirmCashPayment,
+    markPaymentSuccessful
+};

@@ -1,28 +1,607 @@
-:host { display: block; height: 100%; }
-ion-split-pane { --side-width: 268px; --side-max-width: 268px; }
-ion-menu { --background: #0b1f3a; --ion-background-color: #0b1f3a; color: #fff; }
-ion-menu ion-header { background: #0b1f3a; }
-.brand { min-height: 86px; padding: 20px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
-.brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: #2dd4bf; color: #082f49; font-size: 23px; }
-.brand strong, .brand small, .admin-card strong, .admin-card small { display: block; }
-.brand strong { font-size: 18px; letter-spacing: -.02em; }
-.brand small { color: #8da2bd; margin-top: 2px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
-.admin-card { margin: 20px 14px 22px; padding: 13px; display: flex; align-items: center; gap: 11px; border-radius: 14px; background: rgba(255,255,255,.07); }
-.admin-card ion-avatar { width: 38px; height: 38px; display: grid; place-items: center; background: #2563eb; font-size: 13px; font-weight: 800; }
-.admin-card strong { font-size: 13px; }
-.admin-card small { max-width: 155px; margin-top: 3px; color: #8da2bd; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
-.nav-label { padding: 0 22px; color: #6f87a5; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-ion-menu ion-list { padding: 4px 10px; background: transparent; }
-ion-menu ion-item { --background: transparent; --color: #adc0d6; --border-radius: 11px; --min-height: 47px; margin: 3px 0; font-size: 14px; font-weight: 600; }
-ion-menu ion-item ion-icon { color: #7f96b1; font-size: 20px; }
-ion-menu ion-item.active { --background: rgba(37,99,235,.24); --color: #fff; }
-ion-menu ion-item.active ion-icon { color: #60a5fa; }
-.logout { --color: #fda4af; margin: 10px; font-weight: 700; }
-footer { padding: 18px 20px; color: #8da2bd; border-top: 1px solid rgba(255,255,255,.08); font-size: 11px; }
-.live-dot { width: 7px; height: 7px; display: inline-block; margin-right: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.12); }
-.main-shell { min-width: 0; width: 100%; height: 100%; background: #f4f7fb; }
-.main-shell ion-toolbar { --background: rgba(255,255,255,.94); --color: #0f2744; --min-height: 68px; padding-inline: 10px; border-bottom: 1px solid #e6ebf2; }
-.main-shell ion-title { font-size: 15px; font-weight: 750; letter-spacing: -.01em; }
-.workspace { --background: #f4f7fb; }
-.toolbar-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #e7efff; color: #1d4ed8; font-size: 12px; font-weight: 800; }
-@media (min-width: 992px) { ion-menu-button { display: none; } }
+/* =========================================================
+   ADMIN LAYOUT HOST
+   ========================================================= */
+
+:host {
+    display: block;
+    height: 100%;
+}
+
+
+/* =========================================================
+   SPLIT PANE
+   ========================================================= */
+
+ion-split-pane {
+    --side-width: 272px;
+    --side-max-width: 272px;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+ion-menu {
+    --background: #0b1728;
+    --ion-background-color: #0b1728;
+
+    color: #ffffff;
+}
+
+
+ion-menu ion-header {
+    background: #0b1728;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 82px;
+
+    padding: 18px;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+}
+
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 11px;
+
+    background: #2dd4bf;
+
+    color: #082f49;
+
+    font-size: 22px;
+}
+
+
+.brand > span:last-child {
+    min-width: 0;
+}
+
+
+.brand strong,
+.brand small {
+    display: block;
+}
+
+
+.brand strong {
+    color: #f8fafc;
+
+    font-size: 17px;
+    font-weight: 780;
+
+    letter-spacing: -0.025em;
+}
+
+
+.brand small {
+    margin-top: 3px;
+
+    color: #7f94ad;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   ADMIN ACCOUNT CARD
+   ========================================================= */
+
+.admin-card {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    margin:
+        18px
+        14px
+        10px;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+
+    border-radius: 12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.045
+        );
+}
+
+
+.admin-card ion-avatar {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.admin-card > span {
+    min-width: 0;
+}
+
+
+.admin-card strong,
+.admin-card small {
+    display: block;
+}
+
+
+.admin-card strong {
+    overflow: hidden;
+
+    color: #f8fafc;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.admin-card small {
+    overflow: hidden;
+
+    max-width: 165px;
+
+    margin-top: 3px;
+
+    color: #8297af;
+
+    font-size: 10.5px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   ROLE CARD
+   ========================================================= */
+
+.role-card {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin:
+        0
+        14px
+        22px;
+
+    padding:
+        10px
+        12px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(
+            37,
+            99,
+            235,
+            0.10
+        );
+}
+
+
+.role-card--platform {
+    background:
+        rgba(
+            45,
+            212,
+            191,
+            0.09
+        );
+}
+
+
+.role-card__indicator {
+    display: block;
+
+    flex: 0 0 auto;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #60a5fa;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(
+            96,
+            165,
+            250,
+            0.10
+        );
+}
+
+
+.role-card--platform
+.role-card__indicator {
+    background: #2dd4bf;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(
+            45,
+            212,
+            191,
+            0.10
+        );
+}
+
+
+.role-card div {
+    min-width: 0;
+}
+
+
+.role-card small,
+.role-card strong {
+    display: block;
+}
+
+
+.role-card small {
+    color: #7188a3;
+
+    font-size: 9.5px;
+    font-weight: 650;
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+
+.role-card strong {
+    margin-top: 2px;
+
+    color: #dbeafe;
+
+    font-size: 11px;
+    font-weight: 720;
+}
+
+
+.role-card--platform strong {
+    color: #ccfbf1;
+}
+
+
+/* =========================================================
+   NAVIGATION LABEL
+   ========================================================= */
+
+.nav-label {
+    margin:
+        0
+        0
+        6px;
+
+    padding:
+        0
+        22px;
+
+    color: #607995;
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+ion-menu ion-list {
+    padding:
+        2px
+        10px;
+
+    background: transparent;
+}
+
+
+ion-menu ion-item {
+    --background: transparent;
+    --color: #9fb1c5;
+
+    --border-radius: 9px;
+
+    --min-height: 44px;
+
+    margin:
+        2px
+        0;
+
+    font-size: 13px;
+    font-weight: 620;
+}
+
+
+ion-menu ion-item ion-icon {
+    color: #7188a3;
+
+    font-size: 19px;
+
+    transition:
+        color
+        150ms
+        ease;
+}
+
+
+ion-menu ion-item:hover {
+    --background:
+        rgba(
+            255,
+            255,
+            255,
+            0.045
+        );
+
+    --color: #ffffff;
+}
+
+
+ion-menu ion-item.active {
+    --background:
+        rgba(
+            37,
+            99,
+            235,
+            0.18
+        );
+
+    --color: #ffffff;
+}
+
+
+ion-menu ion-item.active ion-icon {
+    color: #60a5fa;
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+.logout {
+    --color: #fda4af;
+
+    margin:
+        12px
+        10px;
+
+    font-size: 12px;
+    font-weight: 720;
+}
+
+
+.logout:hover {
+    --background:
+        rgba(
+            244,
+            63,
+            94,
+            0.08
+        );
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
+
+footer {
+    padding:
+        16px
+        20px;
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+
+    color: #7188a3;
+
+    font-size: 10px;
+}
+
+
+.live-dot {
+    display: inline-block;
+
+    width: 7px;
+    height: 7px;
+
+    margin-right: 7px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(
+            34,
+            197,
+            94,
+            0.10
+        );
+}
+
+
+/* =========================================================
+   MAIN APPLICATION SHELL
+   ========================================================= */
+
+.main-shell {
+    min-width: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: #f6f8fb;
+}
+
+
+/* =========================================================
+   TOP TOOLBAR
+   ========================================================= */
+
+.main-shell ion-toolbar {
+    --background: #ffffff;
+    --color: #142033;
+
+    --min-height: 66px;
+
+    padding-inline: 10px;
+
+    border-bottom: 1px solid #e7ebf0;
+}
+
+
+.main-shell ion-title {
+    font-size: 14px;
+    font-weight: 760;
+
+    letter-spacing: -0.015em;
+}
+
+
+/* =========================================================
+   TOOLBAR AVATAR
+   ========================================================= */
+
+.toolbar-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+
+    border:
+        1px solid
+        #dbe4f0;
+
+    border-radius: 9px;
+
+    background: #f1f5f9;
+
+    color: #1d4ed8;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
+.workspace {
+    --background: #f6f8fb;
+}
+
+
+/* =========================================================
+   LARGE SCREEN
+   ========================================================= */
+
+@media (min-width: 992px) {
+
+    ion-menu-button {
+        display: none;
+    }
+}
+
+
+/* =========================================================
+   SMALL SCREEN
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    ion-split-pane {
+        --side-width: 278px;
+        --side-max-width: 278px;
+    }
+
+
+    .main-shell ion-toolbar {
+        --min-height: 60px;
+    }
+
+
+    .main-shell ion-title {
+        font-size: 13px;
+    }
+}

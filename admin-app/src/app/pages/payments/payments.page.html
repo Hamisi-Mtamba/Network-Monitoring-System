@@ -1,34 +1,50 @@
 <div class="page-container">
 
   <!-- =====================================================
-      PAGE HEADER
-  ====================================================== -->
+       PAGE HEADER
+       ===================================================== -->
+
   <header class="page-heading">
+
     <div>
-      <p>FINANCIAL OPERATIONS</p>
-      <h1>Payments</h1>
+
+      <p>
+        FINANCIAL OPERATIONS
+      </p>
+
+      <h1>
+        Payments
+      </h1>
+
       <span>
         Monitor customer payments and confirm cash requests.
       </span>
+
     </div>
+
 
     <ion-button
       fill="outline"
-      (click)="activeView() === 'all' ? load() : loadCashRequests()"
+      (click)="refreshCurrentView()"
+      [disabled]="loading() || cashLoading()"
     >
+
       <ion-icon
         slot="start"
         name="refresh-outline"
       ></ion-icon>
 
       Refresh
+
     </ion-button>
+
   </header>
 
 
   <!-- =====================================================
-      PAYMENT VIEW SWITCH
-  ====================================================== -->
+       PAYMENT VIEW SWITCH
+       ===================================================== -->
+
   <div class="payment-view-switch">
 
     <button
@@ -39,32 +55,56 @@
       All Payments
     </button>
 
+
     <button
       type="button"
       [class.active]="activeView() === 'cash'"
       (click)="changeView('cash')"
     >
+
       Cash Requests
+
+      @if (pendingCashCount() > 0) {
+
+        <span class="view-count-badge">
+          {{ pendingCashCount() }}
+        </span>
+
+      }
+
     </button>
 
   </div>
 
 
   <!-- =====================================================
-      ALL PAYMENTS VIEW
-  ====================================================== -->
+       ALL PAYMENTS VIEW
+       ===================================================== -->
+
   @if (activeView() === 'all') {
 
-    <!-- Filters -->
+    <!-- ===================================================
+         FILTERS
+         =================================================== -->
+
     <section class="filter-panel">
 
       <div class="search-control">
-        <ion-icon name="search-outline"></ion-icon>
+
+        <ion-icon
+          name="search-outline"
+        ></ion-icon>
+
 
         <ion-input
-          placeholder="Reference or phone number"
-          (ionInput)="query.set($any($event.target).value || '')"
+          placeholder="Reference, phone, package or method"
+          (ionInput)="
+            query.set(
+              $any($event.target).value || ''
+            )
+          "
         ></ion-input>
+
       </div>
 
 
@@ -72,14 +112,23 @@
         label="Status"
         labelPlacement="stacked"
         value="all"
-        (ionChange)="status.set($event.detail.value)"
+        (ionChange)="
+          status.set(
+            $event.detail.value
+          )
+        "
       >
+
         <ion-select-option value="all">
           All statuses
         </ion-select-option>
 
         <ion-select-option value="pending">
           Pending
+        </ion-select-option>
+
+        <ion-select-option value="awaiting_cash_confirmation">
+          Awaiting Cash Confirmation
         </ion-select-option>
 
         <ion-select-option value="successful">
@@ -89,6 +138,7 @@
         <ion-select-option value="failed">
           Failed
         </ion-select-option>
+
       </ion-select>
 
 
@@ -96,65 +146,116 @@
         label="Payment method"
         labelPlacement="stacked"
         value="all"
-        (ionChange)="method.set($event.detail.value)"
+        (ionChange)="
+          method.set(
+            $event.detail.value
+          )
+        "
       >
+
         <ion-select-option value="all">
           All methods
         </ion-select-option>
 
-        @for (item of methods(); track item) {
-          <ion-select-option [value]="item">
-            {{ item }}
+
+        @for (
+          item of methods();
+          track item
+        ) {
+
+          <ion-select-option
+            [value]="item"
+          >
+            {{ methodLabel(item) }}
           </ion-select-option>
+
         }
+
       </ion-select>
 
 
       <span class="result-count">
+
         {{ filtered().length }}
-        result{{ filtered().length === 1 ? '' : 's' }}
+
+        result{{
+          filtered().length === 1
+            ? ''
+            : 's'
+        }}
+
       </span>
 
     </section>
 
 
-    <!-- Loading -->
+    <!-- ===================================================
+         LOADING
+         =================================================== -->
+
     @if (loading()) {
 
       <div class="state-card">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Loading payments…</p>
+
+        <ion-spinner
+          name="crescent"
+        ></ion-spinner>
+
+        <p>
+          Loading payments…
+        </p>
+
       </div>
 
     }
 
-    <!-- Error -->
+
+    <!-- ===================================================
+         ERROR
+         =================================================== -->
+
     @else if (error()) {
 
       <div class="state-card error-state">
-        <h2>Payments unavailable</h2>
+
+        <h2>
+          Payments unavailable
+        </h2>
 
         <p>
           We could not retrieve transactions.
         </p>
 
-        <ion-button (click)="load()">
+        <ion-button
+          (click)="load()"
+        >
           Try again
         </ion-button>
+
       </div>
 
     }
 
-    <!-- Empty -->
+
+    <!-- ===================================================
+         EMPTY
+         =================================================== -->
+
     @else if (filtered().length === 0) {
 
       <div class="state-card">
 
         <span class="empty-icon">
-          <ion-icon name="card-outline"></ion-icon>
+
+          <ion-icon
+            name="card-outline"
+          ></ion-icon>
+
         </span>
 
-        <h2>No payments found</h2>
+        <h2>
+          No payments found
+        </h2>
 
         <p>
           Adjust the filters or wait for a new transaction.
@@ -164,35 +265,72 @@
 
     }
 
-    <!-- Payment records -->
+
+    <!-- ===================================================
+         PAYMENT RECORDS
+         =================================================== -->
+
     @else {
 
-      <!-- Desktop table -->
+      <!-- ===============================================
+           DESKTOP TABLE
+           =============================================== -->
+
       <section class="data-panel desktop-table">
 
         <table>
 
           <thead>
+
             <tr>
-              <th>Transaction</th>
-              <th>Customer</th>
-              <th>Package</th>
-              <th>Method</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th></th>
+
+              <th>
+                Transaction
+              </th>
+
+              <th>
+                Customer
+              </th>
+
+              <th>
+                Package
+              </th>
+
+              <th>
+                Method
+              </th>
+
+              <th>
+                Amount
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+              </th>
+
             </tr>
+
           </thead>
 
 
           <tbody>
 
-            @for (payment of filtered(); track payment.id) {
+            @for (
+              payment of filtered();
+              track payment.id
+            ) {
 
               <tr>
 
                 <td>
+
                   <strong>
                     {{ payment.transaction_reference }}
                   </strong>
@@ -200,58 +338,101 @@
                   <small>
                     #{{ payment.id }}
                   </small>
+
                 </td>
 
 
                 <td>
-                  {{ payment.phone_number }}
+                  {{ payment.phone_number || '—' }}
                 </td>
 
 
                 <td>
-                  {{ payment.package_name }}
+
+                  <strong>
+                    {{ payment.package_name || '—' }}
+                  </strong>
+
+                  @if (payment.speed) {
+
+                    <small>
+                      {{ payment.speed }}
+                    </small>
+
+                  }
+
                 </td>
 
 
                 <td>
+
                   <span class="method-badge">
-                    {{ payment.payment_method }}
+
+                    {{ methodLabel(payment.payment_method) }}
+
                   </span>
+
                 </td>
 
 
                 <td>
+
                   <strong>
                     {{ money(payment.amount) }}
                   </strong>
+
                 </td>
 
 
                 <td>
+
                   <span
                     class="status-badge"
-                    [class.success]="payment.status === 'successful'"
-                    [class.failed]="payment.status === 'failed'"
+                    [class]="
+                      'status-badge ' +
+                      statusClass(payment.status)
+                    "
                   >
                     {{ statusLabel(payment.status) }}
                   </span>
+
                 </td>
 
 
                 <td>
-                  {{ payment.created_at | date:'medium' }}
+
+                  @if (payment.created_at) {
+
+                    {{
+                      payment.created_at
+                        | date:'medium'
+                    }}
+
+                  } @else {
+
+                    —
+
+                  }
+
                 </td>
 
 
                 <td>
+
                   <a
-                    [routerLink]="['/payments', payment.id]"
+                    [routerLink]="[
+                      '/payments',
+                      payment.id
+                    ]"
                     aria-label="View payment details"
                   >
+
                     <ion-icon
                       name="chevron-forward-outline"
                     ></ion-icon>
+
                   </a>
+
                 </td>
 
               </tr>
@@ -265,14 +446,23 @@
       </section>
 
 
-      <!-- Mobile payment cards -->
+      <!-- ===============================================
+           MOBILE PAYMENT CARDS
+           =============================================== -->
+
       <section class="mobile-cards">
 
-        @for (payment of filtered(); track payment.id) {
+        @for (
+          payment of filtered();
+          track payment.id
+        ) {
 
           <a
             class="record-card"
-            [routerLink]="['/payments', payment.id]"
+            [routerLink]="[
+              '/payments',
+              payment.id
+            ]"
           >
 
             <div>
@@ -281,10 +471,13 @@
                 {{ payment.transaction_reference }}
               </strong>
 
+
               <span
                 class="status-badge"
-                [class.success]="payment.status === 'successful'"
-                [class.failed]="payment.status === 'failed'"
+                [class]="
+                  'status-badge ' +
+                  statusClass(payment.status)
+                "
               >
                 {{ statusLabel(payment.status) }}
               </span>
@@ -293,9 +486,17 @@
 
 
             <p>
-              {{ payment.phone_number }}
+
+              {{ payment.phone_number || 'No phone number' }}
+
               ·
-              {{ payment.package_name }}
+
+              {{ payment.package_name || 'Unknown package' }}
+
+              ·
+
+              {{ methodLabel(payment.payment_method) }}
+
             </p>
 
 
@@ -305,8 +506,22 @@
                 {{ money(payment.amount) }}
               </b>
 
+
               <span>
-                {{ payment.created_at | date:'mediumDate' }}
+
+                @if (payment.created_at) {
+
+                  {{
+                    payment.created_at
+                      | date:'mediumDate'
+                  }}
+
+                } @else {
+
+                  —
+
+                }
+
               </span>
 
             </footer>
@@ -323,39 +538,95 @@
 
 
   <!-- =====================================================
-      CASH REQUESTS VIEW
-  ====================================================== -->
-  @if (activeView() === 'cash') {
+       CASH REQUESTS VIEW
+       ===================================================== -->
+
+  @else if (activeView() === 'cash') {
+
+    <!-- ===================================================
+         CASH HEADER
+         =================================================== -->
 
     <section class="cash-header">
 
       <div>
-        <p>MANUAL PAYMENT CONFIRMATION</p>
 
-        <h2>Cash Requests</h2>
+        <p>
+          MANUAL PAYMENT CONFIRMATION
+        </p>
+
+        <h2>
+          Cash Requests
+        </h2>
 
         <span>
           Confirm a request only after physically receiving the cash.
         </span>
+
       </div>
 
     </section>
 
 
-    <!-- Loading cash requests -->
+    <!-- ===================================================
+         CASH SUMMARY
+         =================================================== -->
+
+    <section class="cash-summary-grid">
+
+      <article class="cash-summary-card">
+
+        <span>
+          Awaiting confirmation
+        </span>
+
+        <strong>
+          {{ pendingCashCount() }}
+        </strong>
+
+      </article>
+
+
+      <article class="cash-summary-card">
+
+        <span>
+          Pending cash value
+        </span>
+
+        <strong>
+          {{ money(pendingCashAmount()) }}
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <!-- ===================================================
+         CASH LOADING
+         =================================================== -->
+
     @if (cashLoading()) {
 
       <div class="state-card">
-        <ion-spinner name="crescent"></ion-spinner>
+
+        <ion-spinner
+          name="crescent"
+        ></ion-spinner>
 
         <p>
           Loading cash requests…
         </p>
+
       </div>
 
     }
 
-    <!-- Cash error -->
+
+    <!-- ===================================================
+         CASH ERROR
+         =================================================== -->
+
     @else if (cashError()) {
 
       <div class="state-card error-state">
@@ -378,45 +649,86 @@
 
     }
 
-    <!-- No cash requests -->
+
+    <!-- ===================================================
+         NO CASH REQUESTS
+         =================================================== -->
+
     @else if (cashRequests().length === 0) {
 
       <div class="state-card">
 
         <span class="empty-icon">
-          <ion-icon name="cash-outline"></ion-icon>
+
+          <ion-icon
+            name="cash-outline"
+          ></ion-icon>
+
         </span>
 
+
         <h2>
-          No cash requests
+          No pending cash requests
         </h2>
 
         <p>
-          New customer cash-payment requests will appear here.
+          New customer cash-payment requests will appear here
+          until an administrator confirms receipt of the money.
         </p>
 
       </div>
 
     }
 
-    <!-- Cash requests -->
+
+    <!-- ===================================================
+         CASH REQUEST RECORDS
+         =================================================== -->
+
     @else {
 
-      <!-- Desktop table -->
+      <!-- ===============================================
+           DESKTOP CASH TABLE
+           =============================================== -->
+
       <section class="data-panel desktop-table">
 
         <table>
 
           <thead>
+
             <tr>
-              <th>Reference</th>
-              <th>Customer</th>
-              <th>Package</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Requested</th>
-              <th>Action</th>
+
+              <th>
+                Reference
+              </th>
+
+              <th>
+                Customer
+              </th>
+
+              <th>
+                Package
+              </th>
+
+              <th>
+                Amount
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Requested
+              </th>
+
+              <th>
+                Action
+              </th>
+
             </tr>
+
           </thead>
 
 
@@ -430,6 +742,7 @@
               <tr>
 
                 <td>
+
                   <strong>
                     {{ request.transaction_reference }}
                   </strong>
@@ -437,29 +750,39 @@
                   <small>
                     #{{ request.id }}
                   </small>
+
                 </td>
 
 
                 <td>
-                  {{ request.phone_number }}
+                  {{ request.phone_number || '—' }}
                 </td>
 
 
                 <td>
+
                   <strong>
-                    {{ request.package_name }}
+                    {{ request.package_name || '—' }}
                   </strong>
 
-                  <small>
-                    {{ request.speed }}
-                  </small>
+
+                  @if (request.speed) {
+
+                    <small>
+                      {{ request.speed }}
+                    </small>
+
+                  }
+
                 </td>
 
 
                 <td>
+
                   <strong>
                     {{ money(request.amount) }}
                   </strong>
+
                 </td>
 
 
@@ -467,63 +790,66 @@
 
                   <span
                     class="status-badge"
-                    [class.success]="request.status === 'successful'"
+                    [class]="
+                      'status-badge ' +
+                      statusClass(request.status)
+                    "
                   >
-                    {{
-                      request.status === 'awaiting_cash_confirmation'
-                        ? 'Awaiting Cash'
-                        : request.status
-                    }}
+                    {{ statusLabel(request.status) }}
                   </span>
 
                 </td>
 
 
                 <td>
-                  {{ request.created_at | date:'medium' }}
+
+                  @if (request.created_at) {
+
+                    {{
+                      request.created_at
+                        | date:'medium'
+                    }}
+
+                  } @else {
+
+                    —
+
+                  }
+
                 </td>
 
 
                 <td>
 
-                  @if (
-                    request.status ===
-                    'awaiting_cash_confirmation'
-                  ) {
+                  <ion-button
+                    size="small"
+                    (click)="confirmCash(request)"
+                    [disabled]="
+                      confirmingReference() !== null
+                    "
+                  >
 
-                    <ion-button
-                      size="small"
-                      (click)="confirmCash(request)"
-                      [disabled]="
-                        confirmingReference() ===
-                        request.transaction_reference
-                      "
-                    >
+                    @if (isConfirming(request)) {
 
-                      @if (
-                        confirmingReference() ===
-                        request.transaction_reference
-                      ) {
+                      <ion-spinner
+                        slot="start"
+                        name="crescent"
+                      ></ion-spinner>
 
-                        <ion-spinner
-                          name="crescent"
-                        ></ion-spinner>
+                      Confirming...
 
-                      } @else {
+                    } @else {
 
-                        Confirm Cash Received
+                      <ion-icon
+                        slot="start"
+                        name="checkmark-circle-outline"
+                      ></ion-icon>
 
-                      }
+                      Confirm Cash Received
 
-                    </ion-button>
+                    }
 
-                  } @else {
-
-                    <span class="confirmed-label">
-                      Processed
-                    </span>
-
-                  }
+                  </ion-button>
 
                 </td>
 
@@ -538,7 +864,10 @@
       </section>
 
 
-      <!-- Mobile cash request cards -->
+      <!-- ===============================================
+           MOBILE CASH CARDS
+           =============================================== -->
+
       <section class="mobile-cards">
 
         @for (
@@ -557,24 +886,35 @@
 
               <span
                 class="status-badge"
-                [class.success]="request.status === 'successful'"
+                [class]="
+                  'status-badge ' +
+                  statusClass(request.status)
+                "
               >
-                {{
-                  request.status ===
-                  'awaiting_cash_confirmation'
-                    ? 'Awaiting Cash'
-                    : request.status
-                }}
+                {{ statusLabel(request.status) }}
               </span>
 
             </div>
 
 
             <p>
-              {{ request.phone_number }}
+
+              {{ request.phone_number || 'No phone number' }}
+
               ·
-              {{ request.package_name }}
+
+              {{ request.package_name || 'Unknown package' }}
+
             </p>
+
+
+            @if (request.speed) {
+
+              <p class="cash-record__speed">
+                {{ request.speed }}
+              </p>
+
+            }
 
 
             <footer>
@@ -583,46 +923,57 @@
                 {{ money(request.amount) }}
               </b>
 
+
               <span>
-                {{ request.created_at | date:'mediumDate' }}
+
+                @if (request.created_at) {
+
+                  {{
+                    request.created_at
+                      | date:'mediumDate'
+                  }}
+
+                } @else {
+
+                  —
+
+                }
+
               </span>
 
             </footer>
 
 
-            @if (
-              request.status ===
-              'awaiting_cash_confirmation'
-            ) {
+            <ion-button
+              expand="block"
+              class="cash-confirm-button"
+              (click)="confirmCash(request)"
+              [disabled]="
+                confirmingReference() !== null
+              "
+            >
 
-              <ion-button
-                expand="block"
-                class="cash-confirm-button"
-                (click)="confirmCash(request)"
-                [disabled]="
-                  confirmingReference() ===
-                  request.transaction_reference
-                "
-              >
+              @if (isConfirming(request)) {
 
-                @if (
-                  confirmingReference() ===
-                  request.transaction_reference
-                ) {
+                <ion-spinner
+                  slot="start"
+                  name="crescent"
+                ></ion-spinner>
 
-                  <ion-spinner
-                    name="crescent"
-                  ></ion-spinner>
+                Confirming...
 
-                } @else {
+              } @else {
 
-                  Confirm Cash Received
+                <ion-icon
+                  slot="start"
+                  name="checkmark-circle-outline"
+                ></ion-icon>
 
-                }
+                Confirm Cash Received
 
-              </ion-button>
+              }
 
-            }
+            </ion-button>
 
           </article>
 

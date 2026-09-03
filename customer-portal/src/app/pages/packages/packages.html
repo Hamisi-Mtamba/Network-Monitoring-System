@@ -1,46 +1,199 @@
 <main class="page-shell packages-page">
-<header class="page-heading">
-    <span class="eyebrow">Simple plans. Instant access.</span>
-    <h1>Choose Your Internet Package</h1>
-    <p>Select a package and enjoy fast, reliable internet.</p>
-</header>
 
-@if (packageService.usingMockData()) {
-    <div class="demo-note" role="note">
-    Backend is coming soon, We're setting things well. Thank you
-    </div>
-}
+    <!-- ======================================================
+         PAGE HEADING
+         ====================================================== -->
 
-@if (loading()) {
-    <app-loading-spinner message="Loading available packages..." />
-} @else if (errorMessage()) {
-    <section class="state-panel state-panel--error" role="alert">
-    <span class="state-panel__icon" aria-hidden="true">!</span>
-    <h2>Unable to load packages</h2>
-    <p>{{ errorMessage() }}</p>
-    <button type="button" class="button button--primary" (click)="loadPackages()">Try Again</button>
-    </section>
-} @else if (packages().length === 0) {
-    <section class="state-panel">
-    <span class="state-panel__icon" aria-hidden="true">⌁</span>
-    <h2>No packages available</h2>
-    <p>Please check again soon or contact support for assistance.</p>
-    </section>
-} @else {
-    <section class="package-grid" aria-label="Available internet packages">
-    @for (packageItem of packages(); track packageItem.id) {
-        <app-package-card
-        [packageItem]="packageItem"
-        (selected)="choosePackage($event)"
-        />
+    <header class="page-heading">
+
+        <span class="eyebrow">
+            Simple plans. Instant access.
+        </span>
+
+        <h1>
+            Choose your internet package
+        </h1>
+
+        <p>
+            @if (tenantService.company(); as company) {
+                Select a package from {{ company.name }}
+                and get connected.
+            } @else {
+                Select a package and get connected.
+            }
+        </p>
+
+    </header>
+
+
+    <!-- ======================================================
+         DEVELOPMENT FALLBACK NOTICE
+         ====================================================== -->
+
+    @if (packageService.usingMockData()) {
+
+        <div
+            class="demo-note"
+            role="note"
+        >
+            Demo package information is currently being displayed.
+        </div>
+
     }
+
+
+    <!-- ======================================================
+         LOADING STATE
+         ====================================================== -->
+
+    @if (loading()) {
+
+        <app-loading-spinner
+            message="Loading available packages..."
+        />
+
+    }
+
+
+    <!-- ======================================================
+         ERROR STATE
+         ====================================================== -->
+
+    @else if (errorMessage()) {
+
+        <section
+            class="state-panel state-panel--error"
+            role="alert"
+        >
+
+            <span
+                class="state-panel__icon"
+                aria-hidden="true"
+            >
+                !
+            </span>
+
+            <h2>
+                Unable to load packages
+            </h2>
+
+            <p>
+                {{ errorMessage() }}
+            </p>
+
+            <p class="state-panel__hint">
+                Refresh the page to try again.
+            </p>
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         NO PACKAGES
+         ====================================================== -->
+
+    @else if (packages().length === 0) {
+
+        <section class="state-panel">
+
+            <span
+                class="state-panel__icon"
+                aria-hidden="true"
+            >
+                ⌁
+            </span>
+
+            <h2>
+                No packages available
+            </h2>
+
+            <p>
+                This provider does not currently have any
+                internet packages available for purchase.
+            </p>
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         PACKAGE LIST
+         ====================================================== -->
+
+    @else {
+
+        <section
+            class="package-grid"
+            aria-label="Available internet packages"
+        >
+
+            @for (
+                packageItem of packages();
+                track packageItem.id
+            ) {
+
+                <app-package-card
+                    [packageItem]="packageItem"
+                    (selected)="choosePackage($event)"
+                />
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         SERVICE BENEFITS
+         ====================================================== -->
+
+    <section
+        class="trust-row"
+        aria-label="Service benefits"
+    >
+
+        <div>
+
+            <span aria-hidden="true">
+                ⚡
+            </span>
+
+            <strong>
+                Quick activation
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span aria-hidden="true">
+                ⌁
+            </span>
+
+            <strong>
+                Reliable access
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span aria-hidden="true">
+                ✓
+            </span>
+
+            <strong>
+                Secure payments
+            </strong>
+
+        </div>
+
     </section>
-}
 
-<section class="trust-row" aria-label="Service benefits">
-    <div><span aria-hidden="true">⚡</span><strong>Instant activation</strong></div>
-    <div><span aria-hidden="true">⌁</span><strong>Reliable connection</strong></div>
-    <div><span aria-hidden="true">✓</span><strong>Secure mobile payment</strong></div>
-</section>
 </main>
-

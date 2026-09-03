@@ -1,22 +1,185 @@
+<!-- =========================================================
+     CUSTOMER PORTAL APPLICATION SHELL
+     ========================================================= -->
+
 <div class="app-shell">
-<header class="portal-header">
-    <a routerLink="/packages" class="brand" aria-label="Y4C WiFi packages">
-    <span class="brand__mark" aria-hidden="true">Y4C</span>
-    <span>
-        <strong>Y4C WiFi</strong>
-        <small>Fast. Simple. Connected.</small>
-    </span>
-    </a>
-    <div class="connection-badge"><span aria-hidden="true"></span> Wi-Fi Portal</div>
-</header>
 
-<div class="page-area">
-    <router-outlet />
+    <!-- =====================================================
+         DYNAMIC COMPANY HEADER
+         ===================================================== -->
+
+    @if (tenantService.company(); as company) {
+
+        <header class="portal-header">
+
+            <!-- Company identity -->
+            <a
+                class="brand"
+                [routerLink]="[
+                    '/',
+                    company.slug,
+                    'packages'
+                ]"
+                [attr.aria-label]="
+                    company.name + ' internet packages'
+                "
+            >
+
+                <!-- Company logo -->
+                @if (
+                    getPublicFileUrl(
+                        company.logo_url
+                    );
+                    as logoUrl
+                ) {
+
+                    <span class="brand__logo">
+
+                        <img
+                            [src]="logoUrl"
+                            [alt]="company.name + ' logo'"
+                        />
+
+                    </span>
+
+                } @else {
+
+                    <!-- Fallback when company has no uploaded logo -->
+                    <span
+                        class="brand__fallback"
+                        aria-hidden="true"
+                    >
+                        {{
+                            company.name
+                                .charAt(0)
+                                .toUpperCase()
+                        }}
+                    </span>
+
+                }
+
+
+                <!-- Company name -->
+                <span class="brand__content">
+
+                    <strong>
+                        {{ company.name }}
+                    </strong>
+
+                    <small>
+                        Internet access portal
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <!-- Company navigation -->
+            <nav
+                class="portal-nav"
+                aria-label="Customer portal navigation"
+            >
+
+                <a
+                    [routerLink]="[
+                        '/',
+                        company.slug,
+                        'packages'
+                    ]"
+                >
+                    Packages
+                </a>
+
+
+                <!--
+                    We will create this company profile page next.
+                -->
+                <a
+                    [routerLink]="[
+                        '/',
+                        company.slug,
+                        'company'
+                    ]"
+                >
+                    Company
+                </a>
+
+            </nav>
+
+        </header>
+
+    }
+
+
+    <!-- =====================================================
+         ROUTED PAGE AREA
+         ===================================================== -->
+
+    <main class="page-area">
+
+        <router-outlet />
+
+    </main>
+
+
+    <!-- =====================================================
+         DYNAMIC COMPANY FOOTER
+         ===================================================== -->
+
+    @if (tenantService.company(); as company) {
+
+        <footer class="portal-footer">
+
+            <div class="portal-footer__identity">
+
+                <strong>
+                    {{ company.name }}
+                </strong>
+
+                <span>
+                    Customer internet portal
+                </span>
+
+            </div>
+
+
+            <div class="portal-footer__contact">
+
+                @if (company.phone) {
+
+                    <a
+                        [href]="'tel:' + company.phone"
+                    >
+                        {{ company.phone }}
+                    </a>
+
+                }
+
+
+                @if (company.email) {
+
+                    <a
+                        [href]="'mailto:' + company.email"
+                    >
+                        {{ company.email }}
+                    </a>
+
+                }
+
+
+                @if (company.address) {
+
+                    <span>
+                        {{ company.address }}
+                    </span>
+
+                }
+
+            </div>
+
+        </footer>
+
+    }
+
 </div>
-
-<footer class="portal-footer">
-    <span>Need help? Contact Support</span>
-    <a href="tel:+255 689 650 757">+255 689 650 757</a>
-</footer>
-</div>
-

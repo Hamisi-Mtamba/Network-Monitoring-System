@@ -1,16 +1,42 @@
-/**
- * Change this single value when the Express backend is deployed.
- * Components never repeat backend URLs directly.
- */
-export const API_BASE_URL = 'http://localhost:4000';
+// Backend server URL
+export const API_CONFIG = {
 
-/**
- * When true, the packages page uses clearly separated demo data if the API
- * cannot be reached. Set to false before production if fallback is unwanted.
- */
-export const USE_PACKAGE_FALLBACK = false;
+    // Main backend server
+    backendUrl: 'http://192.168.88.254:4000',
 
-/** Five seconds keeps payment checks responsive without overwhelming the API. */
-export const PAYMENT_POLL_INTERVAL_MS = 5_000;
-export const MAX_PAYMENT_POLLS = 24;
+    // Public API root
+    publicApiUrl: 'http://192.168.88.254:4000/api/public'
 
+} as const;
+
+
+// Build one company's public API URL
+export const getCompanyPublicApiUrl = (
+    companySlug: string
+): string => {
+
+    return `${API_CONFIG.publicApiUrl}/companies/${companySlug}`;
+};
+
+
+// Convert backend upload paths into browser URLs
+export const getPublicFileUrl = (
+    filePath?: string | null
+): string | null => {
+
+    // Stop when there is no file
+    if (!filePath) {
+        return null;
+    }
+
+    // Leave complete external URLs unchanged
+    if (
+        filePath.startsWith('http://') ||
+        filePath.startsWith('https://')
+    ) {
+        return filePath;
+    }
+
+    // Prefix locally uploaded images with backend server
+    return `${API_CONFIG.backendUrl}${filePath}`;
+};

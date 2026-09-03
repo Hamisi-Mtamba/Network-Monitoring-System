@@ -1,112 +1,177 @@
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
-// Get all internet sessions for the admin dashboard
-const getAllSessions = async (req, res) => {
+
+// Resolve the company that the current request is allowed to manage
+const getRequestCompanyId = (req) => {
+
+    // Superadmin manages an explicitly selected company
+    if (
+        req.admin.role === "superadmin" &&
+        req.platformCompany
+    ) {
+        return req.platformCompany.id;
+    }
+
+    // Normal admin always manages their authenticated company
+    return req.admin.companyId;
+};
+
+
+// Get all internet sessions for the current company
+const getSessions = async (req, res) => {
     try {
-        // Fetch session data together with package and payment details
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
+
+        // Stop if company context is missing
+        if (!companyId) {
+            return res.status(403).json({
+                success: false,
+                message: "Company context is required"
+            });
+        }
+
+        // Get only sessions belonging to the selected company
         const result = await pool.query(
             `
             SELECT
-                internet_sessions.id,
-                internet_sessions.started_at,
-                internet_sessions.expires_at,
-                internet_sessions.status,
-                internet_sessions.created_at,
+                s.id,
+                s.company_id,
+                s.payment_id,
+                s.package_id,
+                s.started_at,
+                s.expires_at,
 
-                packages.id AS package_id,
-                packages.name AS package_name,
-                packages.duration_minutes,
-                packages.speed,
+                CASE
+                    WHEN s.status = 'active'
+                    AND s.expires_at <= CURRENT_TIMESTAMP
+                    THEN 'expired'
+                    ELSE s.status
+                END AS status,
 
-                payments.id AS payment_id,
-                payments.transaction_reference,
-                payments.phone_number,
-                payments.payment_method,
-                payments.amount,
-                payments.paid_at
+                s.created_at,
 
-            FROM internet_sessions
+                p.name AS package_name,
+                p.speed,
+                p.duration_minutes,
 
-            JOIN packages
-                ON internet_sessions.package_id = packages.id
+                pay.amount,
+                pay.payment_method,
+                pay.phone_number,
+                pay.transaction_reference
 
-            JOIN payments
-                ON internet_sessions.payment_id = payments.id
+            FROM internet_sessions s
 
-            ORDER BY internet_sessions.id DESC
-            `
+            JOIN packages p
+                ON p.id = s.package_id
+                AND p.company_id = s.company_id
+
+            JOIN payments pay
+                ON pay.id = s.payment_id
+                AND pay.company_id = s.company_id
+
+            WHERE s.company_id = $1
+
+            ORDER BY s.created_at DESC
+            `,
+            [companyId]
         );
 
-        // Return all session records
+        // Return company-specific sessions
         res.status(200).json({
             success: true,
             sessions: result.rows
         });
 
     } catch (error) {
-        // Log the actual backend error
-        console.error("Error fetching admin sessions:", error.message);
+        // Log actual backend error
+        console.error("Get sessions error:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Failed to fetch sessions"
+            message: "Failed to fetch internet sessions"
         });
     }
 };
 
-// Get one internet session by ID
+
+// Get one internet session
 const getSessionById = async (req, res) => {
     try {
-        // Read session ID from the URL
-        const { id } = req.params;
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
 
-        // Fetch session together with payment and package details
-        const result = await pool.query(
-            `
-            SELECT
-                internet_sessions.id,
-                internet_sessions.started_at,
-                internet_sessions.expires_at,
-                internet_sessions.status,
-                internet_sessions.created_at,
+        // Get session ID from URL
+        const sessionId = Number(req.params.id);
 
-                packages.id AS package_id,
-                packages.name AS package_name,
-                packages.duration_minutes,
-                packages.speed,
-
-                payments.id AS payment_id,
-                payments.transaction_reference,
-                payments.phone_number,
-                payments.payment_method,
-                payments.amount,
-                payments.status AS payment_status,
-                payments.paid_at
-
-            FROM internet_sessions
-
-            JOIN packages
-                ON internet_sessions.package_id = packages.id
-
-            JOIN payments
-                ON internet_sessions.payment_id = payments.id
-
-            WHERE internet_sessions.id = $1
-            LIMIT 1
-            `,
-            [id]
-        );
-
-        // Stop if session does not exist
-        if (result.rows.length === 0) {
-            return res.status(404).json({
+        // Validate session ID
+        if (!Number.isInteger(sessionId) || sessionId <= 0) {
+            return res.status(400).json({
                 success: false,
-                message: "Session not found"
+                message: "Invalid session ID"
             });
         }
 
-        // Return full session details
+        // Fetch the session only when it belongs to the current company
+        const result = await pool.query(
+            `
+            SELECT
+                s.id,
+                s.company_id,
+                s.payment_id,
+                s.package_id,
+                s.started_at,
+                s.expires_at,
+
+                CASE
+                    WHEN s.status = 'active'
+                    AND s.expires_at <= CURRENT_TIMESTAMP
+                    THEN 'expired'
+                    ELSE s.status
+                END AS status,
+
+                s.created_at,
+
+                p.name AS package_name,
+                p.speed,
+                p.duration_minutes,
+
+                pay.amount,
+                pay.payment_method,
+                pay.phone_number,
+                pay.transaction_reference
+
+            FROM internet_sessions s
+
+            JOIN packages p
+                ON p.id = s.package_id
+                AND p.company_id = s.company_id
+
+            JOIN payments pay
+                ON pay.id = s.payment_id
+                AND pay.company_id = s.company_id
+
+            WHERE s.id = $1
+            AND s.company_id = $2
+
+            LIMIT 1
+            `,
+            [
+                sessionId,
+                companyId
+            ]
+        );
+
+        // Hide sessions that belong to another company
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Internet session not found"
+            });
+        }
+
+        // Return session
         res.status(200).json({
             success: true,
             session: result.rows[0]
@@ -114,25 +179,37 @@ const getSessionById = async (req, res) => {
 
     } catch (error) {
         // Log actual backend error
-        console.error("Error fetching session:", error.message);
+        console.error("Get session error:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Failed to fetch session"
+            message: "Failed to fetch internet session"
         });
     }
 };
 
-// Update the status of an internet session
+
+// Update the status of one internet session
 const updateSessionStatus = async (req, res) => {
     try {
-        // Get session ID from the URL
-        const { id } = req.params;
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
 
-        // Get the requested new status from the admin app
+        // Get session ID
+        const sessionId = Number(req.params.id);
+
+        // Get requested status
         const { status } = req.body;
 
-        // Allow only known session states
+        // Validate session ID
+        if (!Number.isInteger(sessionId) || sessionId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid session ID"
+            });
+        }
+
+        // Define statuses supported by the current project
         const allowedStatuses = [
             "active",
             "suspended",
@@ -141,7 +218,7 @@ const updateSessionStatus = async (req, res) => {
             "pending_activation"
         ];
 
-        // Reject unsupported status values
+        // Reject unsupported status
         if (!allowedStatuses.includes(status)) {
             return res.status(400).json({
                 success: false,
@@ -149,44 +226,60 @@ const updateSessionStatus = async (req, res) => {
             });
         }
 
-        // Update the session status in PostgreSQL
+        // Update only a session owned by this company
         const result = await pool.query(
             `
             UPDATE internet_sessions
             SET status = $1
             WHERE id = $2
-            RETURNING *
+            AND company_id = $3
+            RETURNING
+                id,
+                company_id,
+                payment_id,
+                package_id,
+                started_at,
+                expires_at,
+                status,
+                created_at
             `,
-            [status, id]
+            [
+                status,
+                sessionId,
+                companyId
+            ]
         );
 
-        // Stop if the session does not exist
+        // Return 404 if session belongs to another company
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Session not found"
+                message: "Internet session not found"
             });
         }
 
-        // Return the updated session
+        // Return updated session
         res.status(200).json({
             success: true,
-            message: "Session status updated successfully",
+            message: "Internet session status updated successfully",
             session: result.rows[0]
         });
 
     } catch (error) {
-        // Log the real backend error
-        console.error(
-            "Error updating session status:",
-            error.message
-        );
+        // Log actual backend error
+        console.error("Update session status error:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Failed to update session status"
+            message: "Failed to update internet session"
         });
     }
 };
 
-export { getAllSessions, getSessionById, updateSessionStatus };
+
+// Export session controllers
+export {
+    getSessions,
+    getSessionById,
+    updateSessionStatus
+};

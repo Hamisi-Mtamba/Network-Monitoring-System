@@ -1,12 +1,22 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
 
-// Import session controller
-import { getSession } from "../../controllers/public/session.controller.js";
+// Import public session controller
+import {
+    getPublicSessionById
+} from "../../controllers/public/session.controller.js";
 
-const router = Router();
 
-// Get a customer's internet session
-router.get("/:id", getSession);
+// Create router
+const router = express.Router();
 
+
+// Get one public session belonging to one company
+router.get(
+    "/companies/:companySlug/sessions/:id",
+    getPublicSessionById
+);
+
+
+// Export router
 export default router;

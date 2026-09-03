@@ -1,19 +1,55 @@
 <main class="page-shell expired-page">
-  <section class="expired-card">
-    <div class="expired-icon" aria-hidden="true">⌛</div>
-    <span class="expired-kicker">Session ended</span>
-    <h1>Your Internet Package Has Expired</h1>
-    <p>Choose another package to reconnect and continue browsing.</p>
 
-    @if (sessionService.expiredSession(); as session) {
-      <dl>
-        <div><dt>Previous package</dt><dd>{{ session.package_name }}</dd></div>
-        <div><dt>Expiry time</dt><dd>{{ session.expires_at | date: 'medium' }}</dd></div>
-      </dl>
-    }
+    <section class="expired-card">
 
-    <a routerLink="/packages" class="button button--primary button--full">Buy Another Package</a>
-    <p class="support-copy">Need help? Contact Support using the number below.</p>
-  </section>
+        <!-- Expired session icon -->
+        <div
+            class="expired-icon"
+            aria-hidden="true"
+        >
+            ⌛
+        </div>
+
+
+        <!-- Page status -->
+        <span class="expired-kicker">
+            Session ended
+        </span>
+
+
+        <!-- Main message -->
+        <h1>
+            Your internet package has expired
+        </h1>
+
+
+        <p>
+            Choose another package to reconnect and continue browsing.
+        </p>
+
+
+        <!-- Return to this company's packages -->
+        @if (tenantService.companySlug()) {
+
+            <a
+                class="button button--primary button--full"
+                [routerLink]="[
+                    '/',
+                    tenantService.companySlug(),
+                    'packages'
+                ]"
+            >
+                Buy another package
+            </a>
+
+        }
+
+
+        <!-- Support note -->
+        <p class="support-copy">
+            Need help? Contact your Wi-Fi provider for assistance.
+        </p>
+
+    </section>
+
 </main>
-

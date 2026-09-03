@@ -1,0 +1,1163 @@
+/* =========================================================
+   PLATFORM COMPANIES PAGE
+   ========================================================= */
+
+.page {
+    display: grid;
+    gap: 22px;
+
+    padding:
+        26px
+        clamp(
+            18px,
+            3vw,
+            34px
+        )
+        40px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 24px;
+}
+
+
+.page-header > div:first-child {
+    max-width: 760px;
+}
+
+
+.eyebrow {
+    color: #0f766e;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+
+.page-header h1,
+.form-panel__header h2 {
+    margin:
+        6px 0 8px;
+
+    color: #142033;
+
+    font-weight: 800;
+
+    letter-spacing: -0.03em;
+}
+
+
+.page-header h1 {
+    font-size:
+        clamp(
+            1.8rem,
+            4vw,
+            2.45rem
+        );
+}
+
+
+.page-header p,
+.form-panel__header p {
+    margin: 0;
+
+    color: #64748b;
+
+    line-height: 1.6;
+}
+
+
+.page-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.page-actions ion-button {
+    --border-radius: 9px;
+}
+
+
+/* =========================================================
+   SUMMARY GRID
+   ========================================================= */
+
+.summary-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 14px;
+}
+
+
+.summary-card {
+    min-width: 0;
+
+    padding: 17px;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 14px
+        rgba(
+            15,
+            23,
+            42,
+            0.03
+        );
+}
+
+
+.summary-card__label,
+.summary-card__note {
+    display: block;
+}
+
+
+.summary-card__label {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.summary-card strong {
+    display: block;
+
+    margin-top: 10px;
+
+    color: #0f172a;
+
+    font-size: 1.7rem;
+    font-weight: 820;
+
+    letter-spacing: -0.04em;
+}
+
+
+.summary-card__note {
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 9.5px;
+}
+
+
+/* =========================================================
+   INLINE ALERT
+   ========================================================= */
+
+.inline-alert {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    padding: 13px 14px;
+
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+
+    background: #fffafa;
+}
+
+
+.inline-alert > span {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 26px;
+    height: 26px;
+
+    border-radius: 7px;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+.inline-alert p {
+    margin: 3px 0 0;
+
+    color: #991b1b;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SEARCH TOOLBAR
+   ========================================================= */
+
+.toolbar-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding:
+        12px
+        14px;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 12px;
+
+    background: #ffffff;
+}
+
+
+.search-box {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    flex: 1;
+
+    max-width: 560px;
+
+    min-height: 40px;
+
+    padding:
+        0
+        12px;
+
+    border: 1px solid #dce3ea;
+    border-radius: 9px;
+
+    background: #f8fafc;
+}
+
+
+.search-box ion-icon {
+    flex: 0 0 auto;
+
+    color: #94a3b8;
+
+    font-size: 17px;
+}
+
+
+.search-box ion-input {
+    --padding-start: 0;
+    --padding-end: 0;
+
+    --color: #172033;
+    --placeholder-color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.result-count {
+    flex: 0 0 auto;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   STATE PANELS
+   ========================================================= */
+
+.state-panel {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    min-height: 96px;
+
+    padding: 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+.state-panel ion-spinner {
+    color: #0f766e;
+}
+
+
+.state-panel > div:not(.state-panel__symbol) {
+    display: grid;
+    gap: 3px;
+}
+
+
+.state-panel strong {
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+.state-panel span {
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.state-panel--error {
+    border-color: #fecaca;
+
+    background: #fffafa;
+}
+
+
+.state-panel__symbol {
+    display: grid;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 9px;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.state-panel--error ion-button {
+    margin-left: auto;
+}
+
+
+/* =========================================================
+   COMPANIES PANEL
+   ========================================================= */
+
+.companies-panel {
+    overflow: hidden;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   COMPANY TABLE
+   ========================================================= */
+
+.company-table__header,
+.company-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(
+            230px,
+            1.7fr
+        )
+        minmax(
+            90px,
+            0.65fr
+        )
+        minmax(
+            65px,
+            0.45fr
+        )
+        minmax(
+            70px,
+            0.5fr
+        )
+        minmax(
+            70px,
+            0.5fr
+        )
+        minmax(
+            100px,
+            0.7fr
+        )
+        minmax(
+            160px,
+            1fr
+        );
+
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.company-table__header {
+    min-height: 42px;
+
+    padding:
+        0
+        18px;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+.company-row {
+    min-height: 76px;
+
+    padding:
+        13px
+        18px;
+
+    border-top: 1px solid #eef2f6;
+}
+
+
+.company-row:first-of-type {
+    border-top: 0;
+}
+
+
+/* =========================================================
+   COMPANY CELL
+   ========================================================= */
+
+.company-cell {
+    min-width: 0;
+
+    color: #475569;
+
+    font-size: 10.5px;
+}
+
+
+.company-cell > strong {
+    color: #172033;
+
+    font-weight: 750;
+}
+
+
+.company-cell--identity {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+}
+
+
+.company-avatar {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    background: #ecfeff;
+
+    color: #0f766e;
+
+    font-size: 12px;
+    font-weight: 820;
+}
+
+
+.company-cell--identity > div {
+    min-width: 0;
+}
+
+
+.company-cell--identity strong,
+.company-cell--identity small,
+.company-cell--identity span {
+    display: block;
+}
+
+
+.company-cell--identity strong {
+    overflow: hidden;
+
+    color: #172033;
+
+    font-size: 12px;
+    font-weight: 760;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.company-cell--identity small {
+    overflow: hidden;
+
+    margin-top: 2px;
+
+    color: #94a3b8;
+
+    font-size: 9.5px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.company-cell--identity span {
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 24px;
+
+    padding:
+        0
+        9px;
+
+    border-radius: 999px;
+
+    font-size: 9.5px;
+    font-weight: 750;
+}
+
+
+.status--active {
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.status--suspended {
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.company-cell--actions {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    min-height: 30px;
+
+    padding:
+        0
+        9px;
+
+    border: 1px solid #dbe4ec;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family: inherit;
+    font-size: 9.5px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        color 140ms ease;
+}
+
+
+.action-link:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.action-link ion-icon {
+    font-size: 14px;
+}
+
+
+.action-link ion-spinner {
+    width: 13px;
+    height: 13px;
+}
+
+
+.action-link--danger {
+    border-color: #fecdd3;
+
+    color: #be123c;
+}
+
+
+.action-link--danger:hover {
+    border-color: #fda4af;
+
+    background: #fff1f2;
+
+    color: #9f1239;
+}
+
+
+.action-link--success {
+    border-color: #a7f3d0;
+
+    color: #047857;
+}
+
+
+.action-link--success:hover {
+    border-color: #6ee7b7;
+
+    background: #ecfdf5;
+
+    color: #065f46;
+}
+
+
+.action-link:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MOBILE LABELS
+   ========================================================= */
+
+.mobile-label {
+    display: none;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+    display: grid;
+    place-items: center;
+
+    min-height: 270px;
+
+    padding: 34px;
+
+    text-align: center;
+}
+
+
+.empty-state__icon {
+    display: grid;
+    place-items: center;
+
+    width: 50px;
+    height: 50px;
+
+    margin-bottom: 13px;
+
+    border-radius: 12px;
+
+    background: #ecfeff;
+
+    color: #0f766e;
+
+    font-size: 23px;
+}
+
+
+.empty-state strong {
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+.empty-state p {
+    max-width: 360px;
+
+    margin:
+        6px 0 16px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   CREATE COMPANY BACKDROP
+   ========================================================= */
+
+.form-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: flex-end;
+
+    background:
+        rgba(
+            15,
+            23,
+            42,
+            0.42
+        );
+
+    backdrop-filter: blur(2px);
+}
+
+
+/* =========================================================
+   CREATE COMPANY PANEL
+   ========================================================= */
+
+.form-panel {
+    width:
+        min(
+            100%,
+            520px
+        );
+
+    height: 100%;
+
+    overflow-y: auto;
+
+    border-left: 1px solid #dfe5ec;
+
+    background: #ffffff;
+
+    box-shadow:
+        -18px 0 44px
+        rgba(
+            15,
+            23,
+            42,
+            0.14
+        );
+}
+
+
+.form-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding:
+        26px
+        24px;
+
+    border-bottom: 1px solid #edf1f5;
+}
+
+
+.form-panel__header > div {
+    max-width: 410px;
+}
+
+
+.form-panel__header h2 {
+    font-size: 1.45rem;
+}
+
+
+.form-panel__header p {
+    font-size: 11px;
+}
+
+
+.close-button {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: 1px solid #dce3ea;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 400;
+
+    cursor: pointer;
+}
+
+
+.close-button:hover {
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.close-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   COMPANY FORM
+   ========================================================= */
+
+.company-form {
+    display: grid;
+    gap: 18px;
+
+    padding: 24px;
+}
+
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 14px;
+}
+
+
+.form-field {
+    display: grid;
+
+    gap: 7px;
+}
+
+
+.form-field > span {
+    color: #334155;
+
+    font-size: 10.5px;
+    font-weight: 720;
+}
+
+
+.form-field ion-input {
+    min-height: 43px;
+
+    --padding-start: 12px;
+    --padding-end: 12px;
+
+    --background: #f8fafc;
+
+    --color: #172033;
+    --placeholder-color: #94a3b8;
+
+    border: 1px solid #dce3ea;
+    border-radius: 8px;
+
+    font-size: 11.5px;
+}
+
+
+.field-help {
+    color: #94a3b8;
+
+    font-size: 9.5px;
+    line-height: 1.45;
+}
+
+
+.field-error {
+    color: #b91c1c;
+
+    font-size: 9.5px;
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+   ========================================================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 9px;
+
+    margin-top: 8px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #edf1f5;
+}
+
+
+.form-actions ion-button {
+    --border-radius: 8px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1180px) {
+
+    .summary-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .company-table__header {
+        display: none;
+    }
+
+
+    .company-row {
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            14px
+            22px;
+
+        padding: 18px;
+    }
+
+
+    .company-cell--identity {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .company-cell--actions {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .mobile-label {
+        display: block;
+
+        margin-bottom: 3px;
+
+        color: #94a3b8;
+
+        font-size: 8.5px;
+        font-weight: 750;
+
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}
+
+
+@media (max-width: 720px) {
+
+    .page {
+        gap: 18px;
+
+        padding:
+            20px
+            16px
+            30px;
+    }
+
+
+    .page-header {
+        flex-direction: column;
+    }
+
+
+    .page-actions {
+        width: 100%;
+    }
+
+
+    .toolbar-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .search-box {
+        width: 100%;
+        max-width: none;
+    }
+
+
+    .result-count {
+        padding-left: 2px;
+    }
+
+
+    .company-row {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .form-panel {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .company-row {
+        grid-template-columns: 1fr;
+    }
+
+
+    .company-cell--identity,
+    .company-cell--actions {
+        grid-column: auto;
+    }
+
+
+    .company-cell--actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .action-link {
+        width: 100%;
+    }
+
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+
+    .form-actions ion-button {
+        width: 100%;
+    }
+}

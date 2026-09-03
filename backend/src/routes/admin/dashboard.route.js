@@ -1,18 +1,35 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
+
+// Import authentication middleware
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
+
+// Import company administrator authorization middleware
+import requireCompanyAdmin from "../../middlewares/requireCompanyAdmin.middleware.js";
 
 // Import dashboard controller
-import { getDashboardSummary } from "../../controllers/admin/dashboard.controller.js";
+import {
+    getDashboard
+} from "../../controllers/admin/dashboard.controller.js";
 
-// Import admin authentication middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
 
-const router = Router();
+// Create router
+const router = express.Router();
 
-// Protect all dashboard routes
+
+// Require authentication
 router.use(adminAuth);
 
-// Return dashboard summary statistics
-router.get("/", getDashboardSummary);
+// Only normal company admins use this route
+router.use(requireCompanyAdmin);
 
+
+// Get dashboard statistics for the authenticated company
+router.get(
+    "/",
+    getDashboard
+);
+
+
+// Export router
 export default router;

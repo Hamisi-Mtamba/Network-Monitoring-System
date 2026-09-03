@@ -33,3 +33,6 @@ coverage/
 # Capacitor native projects
 android/
 ios/
+
+# Uploads
+uploads/

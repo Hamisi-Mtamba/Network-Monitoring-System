@@ -1,47 +1,220 @@
-// Import jsonwebtoken so we can verify JWT tokens
+// Import jsonwebtoken to verify administrator authentication tokens
 import jwt from "jsonwebtoken";
 
-// Middleware that protects administrator-only routes
-const adminAuth = (req, res, next) => {
+// Import PostgreSQL connection pool
+import { pool } from "../database/database.js";
+
+
+// Middleware used to authenticate both Superadmin and company administrators
+const adminAuth = async (req, res, next) => {
     try {
-        // Read the Authorization header
-        // Expected format:
-        // Authorization: Bearer YOUR_TOKEN
+        // Get the Authorization header sent by the frontend/Postman
         const authHeader = req.headers.authorization;
 
-        // Stop if no token was provided
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        // Stop if the Authorization header is missing
+        if (!authHeader) {
             return res.status(401).json({
                 success: false,
                 message: "Authentication required"
             });
         }
 
-        // Remove "Bearer " and keep only the token
+        // Make sure Bearer authentication is being used
+        if (!authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid authentication format"
+            });
+        }
+
+        // Extract the JWT from the Authorization header
         const token = authHeader.split(" ")[1];
 
-        // Verify the token using the same JWT secret
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
+        // Stop if the JWT is missing
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication token is missing"
+            });
+        }
+
+        let decodedToken;
+
+        try {
+            // Verify that the JWT is valid and has not expired
+            decodedToken = jwt.verify(
+                token,
+                process.env.JWT_SECRET
+            );
+
+        } catch (error) {
+            // Reject invalid or expired tokens
+            return res.status(401).json({
+                success: false,
+                message: "Invalid or expired authentication token"
+            });
+        }
+
+        // Fetch the latest administrator information from PostgreSQL
+        // We deliberately do not trust companyId or role from the JWT alone
+        const result = await pool.query(
+            `
+            SELECT
+                id,
+                company_id,
+                name,
+                email,
+                role,
+                status,
+                is_active,
+                created_at
+            FROM admins
+            WHERE id = $1
+            LIMIT 1
+            `,
+            [decodedToken.adminId]
         );
 
-        // Store decoded admin information on the request
-        // Other controllers can now access req.admin
-        req.admin = decoded;
+        // Stop if the administrator has been deleted
+        if (result.rows.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: "Administrator account no longer exists"
+            });
+        }
 
-        // Allow the request to continue
+        // Store the latest administrator record
+        const admin = result.rows[0];
+
+        // Prevent suspended or disabled administrators from using protected APIs
+        if (admin.status !== "active" || !admin.is_active) {
+            return res.status(403).json({
+                success: false,
+                code: "ADMIN_SUSPENDED",
+                message: "Administrator account is suspended"
+            });
+        }
+
+        // Handle the platform-level Superadmin
+        if (admin.role === "superadmin") {
+
+            // Superadmin must not belong to a company
+            if (admin.company_id !== null) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Invalid Superadmin configuration"
+                });
+            }
+
+            // Attach trusted platform-level administrator context
+            req.admin = {
+                id: admin.id,
+                name: admin.name,
+                email: admin.email,
+                role: admin.role,
+                companyId: null,
+                company: null
+            };
+
+            // Continue to the requested controller
+            return next();
+        }
+
+        // Stop if an unsupported role exists
+        if (admin.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Administrator role is not supported"
+            });
+        }
+
+        // Every normal administrator must belong to a company
+        if (!admin.company_id) {
+            return res.status(403).json({
+                success: false,
+                code: "COMPANY_REQUIRED",
+                message: "Administrator is not assigned to a company"
+            });
+        }
+
+        // Fetch the administrator's current company
+        const companyResult = await pool.query(
+            `
+            SELECT
+                id,
+                name,
+                slug,
+                logo_url,
+                email,
+                phone,
+                address,
+                settings,
+                status,
+                created_at,
+                updated_at
+            FROM companies
+            WHERE id = $1
+            LIMIT 1
+            `,
+            [admin.company_id]
+        );
+
+        // Stop if the company no longer exists
+        if (companyResult.rows.length === 0) {
+            return res.status(403).json({
+                success: false,
+                code: "COMPANY_NOT_FOUND",
+                message: "Assigned company does not exist"
+            });
+        }
+
+        // Store the current company
+        const company = companyResult.rows[0];
+
+        // Immediately block users belonging to suspended/inactive companies
+        if (company.status !== "active") {
+            return res.status(403).json({
+                success: false,
+                code: "COMPANY_SUSPENDED",
+                message: "Company access has been suspended"
+            });
+        }
+
+        // Attach trusted tenant context to the request
+        // Controllers must use this companyId for company-owned data
+        req.admin = {
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            role: admin.role,
+            companyId: company.id,
+            company: {
+                id: company.id,
+                name: company.name,
+                slug: company.slug,
+                logo_url: company.logo_url,
+                email: company.email,
+                phone: company.phone,
+                address: company.address,
+                settings: company.settings,
+                status: company.status
+            }
+        };
+
+        // Continue to the requested controller
         next();
 
     } catch (error) {
-        // Token may be invalid, expired, or incorrectly signed
+        // Log unexpected authentication errors
         console.error("Admin authentication error:", error.message);
 
-        return res.status(401).json({
+        res.status(500).json({
             success: false,
-            message: "Invalid or expired authentication token"
+            message: "Authentication failed"
         });
     }
 };
 
-export { adminAuth };
+
+// Export authentication middleware
+export default adminAuth;

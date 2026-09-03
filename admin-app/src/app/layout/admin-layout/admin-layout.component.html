@@ -1,47 +1,283 @@
-<ion-split-pane contentId="admin-content" when="lg">
-  <ion-menu menuId="admin-menu" contentId="admin-content" type="overlay">
-    <ion-header class="ion-no-border">
-      <div class="brand">
-        <span class="brand-mark"><ion-icon name="radio-outline"></ion-icon></span>
-        <span><strong>NetControl</strong><small>ISP Administration</small></span>
-      </div>
-    </ion-header>
+<ion-split-pane
+    contentId="admin-content"
+    when="lg"
+>
 
-    <ion-content>
-      <div class="admin-card">
-        <ion-avatar>{{ initials() }}</ion-avatar>
-        <span><strong>{{ auth.admin()?.name || 'Administrator' }}</strong><small>{{ auth.admin()?.email || 'Loading account…' }}</small></span>
-      </div>
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
-      <p class="nav-label">Workspace</p>
-      <ion-list lines="none">
-        @for (item of navItems; track item.route) {
-          <ion-item [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
-            <ion-icon slot="start" [name]="item.icon"></ion-icon>
-            <ion-label>{{ item.label }}</ion-label>
-          </ion-item>
-        }
-      </ion-list>
-      <ion-button class="logout" fill="clear" expand="block" (click)="logout()">
-        <ion-icon slot="start" name="log-out-outline"></ion-icon>Log out
-      </ion-button>
-    </ion-content>
+    <ion-menu
+        menuId="admin-menu"
+        contentId="admin-content"
+        type="overlay"
+    >
 
-    <footer><span class="live-dot"></span>System API connected</footer>
-  </ion-menu>
+        <ion-header class="ion-no-border">
 
-  <div class="main-shell" id="admin-content">
-    <ion-header class="ion-no-border">
-      <ion-toolbar>
-        <ion-buttons slot="start"><ion-menu-button menu="admin-menu"></ion-menu-button></ion-buttons>
-        <ion-title>Network Operations</ion-title>
-        <ion-buttons slot="end">
-          <ion-button routerLink="/settings" aria-label="Open administrator profile">
-            <span class="toolbar-avatar">{{ initials() }}</span>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="workspace"><router-outlet></router-outlet></ion-content>
-  </div>
+            <div class="brand">
+
+                <span class="brand-mark">
+                    <ion-icon
+                        name="radio-outline"
+                    ></ion-icon>
+                </span>
+
+                <span>
+
+                    <strong>
+                        NetControl
+                    </strong>
+
+                    <small>
+                        {{
+                            isSuperAdmin()
+                                ? 'Platform Administration'
+                                : 'ISP Administration'
+                        }}
+                    </small>
+
+                </span>
+
+            </div>
+
+        </ion-header>
+
+
+        <ion-content>
+
+            <!-- =================================================
+                 ADMIN ACCOUNT
+                 ================================================= -->
+
+            <div class="admin-card">
+
+                <ion-avatar>
+                    {{ initials() }}
+                </ion-avatar>
+
+
+                <span>
+
+                    <strong>
+                        {{
+                            auth.admin()?.name ||
+                            'Administrator'
+                        }}
+                    </strong>
+
+
+                    <small>
+                        {{
+                            auth.admin()?.email ||
+                            'Loading account…'
+                        }}
+                    </small>
+
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 ADMIN ROLE
+                 ================================================= -->
+
+            <div
+                class="role-card"
+                [class.role-card--platform]="
+                    isSuperAdmin()
+                "
+            >
+
+                <span class="role-card__indicator"></span>
+
+
+                <div>
+
+                    <small>
+                        Signed in as
+                    </small>
+
+                    <strong>
+                        {{ roleLabel() }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 NAVIGATION
+                 ================================================= -->
+
+            <p class="nav-label">
+
+                {{
+                    isSuperAdmin()
+                        ? 'Platform'
+                        : 'Company workspace'
+                }}
+
+            </p>
+
+
+            <ion-list lines="none">
+
+                @for (
+                    item of navItems();
+                    track item.route
+                ) {
+
+                    <ion-item
+                        [routerLink]="item.route"
+                        routerLinkActive="active"
+                        [routerLinkActiveOptions]="{
+                            exact: true
+                        }"
+                        (click)="closeMenu()"
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            [name]="item.icon"
+                        ></ion-icon>
+
+
+                        <ion-label>
+                            {{ item.label }}
+                        </ion-label>
+
+                    </ion-item>
+
+                }
+
+            </ion-list>
+
+
+            <!-- =================================================
+                 LOGOUT
+                 ================================================= -->
+
+            <ion-button
+                class="logout"
+                fill="clear"
+                expand="block"
+                (click)="logout()"
+            >
+
+                <ion-icon
+                    slot="start"
+                    name="log-out-outline"
+                ></ion-icon>
+
+                Log out
+
+            </ion-button>
+
+        </ion-content>
+
+
+        <!-- =====================================================
+             SIDEBAR FOOTER
+             ===================================================== -->
+
+        <footer>
+
+            <span class="live-dot"></span>
+
+            System API connected
+
+        </footer>
+
+    </ion-menu>
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+         ========================================================= -->
+
+    <div
+        class="main-shell"
+        id="admin-content"
+    >
+
+        <!-- =====================================================
+             TOP TOOLBAR
+             ===================================================== -->
+
+        <ion-header class="ion-no-border">
+
+            <ion-toolbar>
+
+                <ion-buttons slot="start">
+
+                    <ion-menu-button
+                        menu="admin-menu"
+                    ></ion-menu-button>
+
+                </ion-buttons>
+
+
+                <ion-title>
+
+                    {{
+                        isSuperAdmin()
+                            ? 'Platform Control'
+                            : 'Network Operations'
+                    }}
+
+                </ion-title>
+
+
+                <ion-buttons slot="end">
+
+                    @if (!isSuperAdmin()) {
+
+                        <ion-button
+                            routerLink="/settings"
+                            aria-label="Open administrator profile"
+                        >
+
+                            <span class="toolbar-avatar">
+                                {{ initials() }}
+                            </span>
+
+                        </ion-button>
+
+                    } @else {
+
+                        <ion-button
+                            routerLink="/platform/dashboard"
+                            aria-label="Open Superadmin dashboard"
+                        >
+
+                            <span class="toolbar-avatar">
+                                {{ initials() }}
+                            </span>
+
+                        </ion-button>
+
+                    }
+
+                </ion-buttons>
+
+            </ion-toolbar>
+
+        </ion-header>
+
+
+        <!-- =====================================================
+             ROUTED PAGE
+             ===================================================== -->
+
+        <ion-content class="workspace">
+
+            <router-outlet></router-outlet>
+
+        </ion-content>
+
+    </div>
+
 </ion-split-pane>

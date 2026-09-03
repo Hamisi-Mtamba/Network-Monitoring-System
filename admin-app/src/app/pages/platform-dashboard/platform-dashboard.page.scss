@@ -1,0 +1,1011 @@
+/* =========================================================
+   PLATFORM DASHBOARD PAGE
+   ========================================================= */
+
+.page {
+    display: grid;
+    gap: 24px;
+
+    padding:
+        26px
+        clamp(
+            18px,
+            3vw,
+            34px
+        )
+        40px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 22px;
+}
+
+
+.page-header > div {
+    max-width: 760px;
+}
+
+
+.eyebrow {
+    color: #0f766e;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+
+.page-header h1,
+.panel-header h2 {
+    margin:
+        6px 0 8px;
+
+    color: #142033;
+
+    letter-spacing: -0.03em;
+}
+
+
+.page-header h1 {
+    font-size:
+        clamp(
+            1.8rem,
+            4vw,
+            2.45rem
+        );
+
+    font-weight: 800;
+}
+
+
+.page-header p,
+.panel-header p {
+    margin: 0;
+
+    color: #64748b;
+
+    line-height: 1.6;
+}
+
+
+.page-header ion-button {
+    flex: 0 0 auto;
+
+    --border-color: #cbd5e1;
+    --color: #334155;
+
+    --border-radius: 9px;
+}
+
+
+/* =========================================================
+   LOADING / ERROR STATE
+   ========================================================= */
+
+.state-panel {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    min-height: 96px;
+
+    padding: 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+.state-panel ion-spinner {
+    color: #0f766e;
+}
+
+
+.state-panel > div:not(.state-panel__symbol) {
+    display: grid;
+
+    gap: 3px;
+}
+
+
+.state-panel strong {
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+.state-panel span {
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+.state-panel--error {
+    border-color: #fecaca;
+
+    background: #fffafa;
+}
+
+
+.state-panel__symbol {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 9px;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.state-panel--error ion-button {
+    margin-left: auto;
+
+    --background: #b91c1c;
+    --border-radius: 8px;
+}
+
+
+/* =========================================================
+   STAT GRID
+   ========================================================= */
+
+.stat-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            6,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 14px;
+}
+
+
+/* =========================================================
+   STAT CARD
+   ========================================================= */
+
+.stat-card {
+    min-width: 0;
+
+    padding: 16px;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 14px
+        rgba(
+            15,
+            23,
+            42,
+            0.035
+        );
+}
+
+
+.stat-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+}
+
+
+.stat-card__icon {
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 9px;
+
+    font-size: 17px;
+}
+
+
+.stat-card__note {
+    overflow: hidden;
+
+    color: #94a3b8;
+
+    font-size: 9.5px;
+    font-weight: 650;
+
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.stat-card__value {
+    margin-top: 18px;
+
+    color: #0f172a;
+
+    font-size: 1.65rem;
+    font-weight: 800;
+
+    letter-spacing: -0.035em;
+}
+
+
+.stat-card__label {
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   CARD TONES
+   ========================================================= */
+
+.stat-card--blue
+.stat-card__icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+.stat-card--purple
+.stat-card__icon {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+
+.stat-card--cyan
+.stat-card__icon {
+    background: #ecfeff;
+    color: #0891b2;
+}
+
+
+.stat-card--green
+.stat-card__icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+
+.stat-card--orange
+.stat-card__icon {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+
+.stat-card--slate
+.stat-card__icon {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* =========================================================
+   OVERVIEW GRID
+   ========================================================= */
+
+.overview-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 16px;
+}
+
+
+/* =========================================================
+   OVERVIEW CARD
+   ========================================================= */
+
+.overview-card {
+    min-width: 0;
+
+    padding: 22px;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+.overview-card__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+}
+
+
+.overview-card__heading span:first-child {
+    color: #94a3b8;
+
+    font-size: 9.5px;
+    font-weight: 780;
+
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+
+.overview-card__heading h2 {
+    margin:
+        5px 0 0;
+
+    color: #172033;
+
+    font-size: 15px;
+    font-weight: 760;
+}
+
+
+.overview-icon {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   REVENUE CARD
+   ========================================================= */
+
+.revenue-card
+.overview-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.revenue-value {
+    display: block;
+
+    margin-top: 24px;
+
+    color: #0f172a;
+
+    font-size:
+        clamp(
+            1.75rem,
+            4vw,
+            2.4rem
+        );
+
+    font-weight: 820;
+
+    letter-spacing: -0.04em;
+}
+
+
+.revenue-card > p {
+    margin:
+        7px 0 20px;
+
+    color: #64748b;
+
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   METRIC ROWS
+   ========================================================= */
+
+.metric-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding:
+        12px 0;
+
+    border-top: 1px solid #eef2f6;
+}
+
+
+.metric-row span {
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.metric-row strong {
+    color: #172033;
+
+    font-size: 12px;
+    font-weight: 760;
+}
+
+
+.metric-row--footer {
+    margin-top: 20px;
+}
+
+
+/* =========================================================
+   COMPANY HEALTH
+   ========================================================= */
+
+.company-health {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            1fr
+        );
+
+    gap: 10px;
+
+    margin-top: 24px;
+}
+
+
+.company-health > div {
+    padding: 14px 10px;
+
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+
+    background: #fafbfc;
+
+    text-align: center;
+}
+
+
+.company-health strong,
+.company-health span {
+    display: block;
+}
+
+
+.company-health strong {
+    color: #0f172a;
+
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+
+.company-health span {
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 9.5px;
+}
+
+
+/* =========================================================
+   SESSION ACTIVITY
+   ========================================================= */
+
+.session-value {
+    display: block;
+
+    margin-top: 24px;
+
+    color: #0f172a;
+
+    font-size: 2.35rem;
+    font-weight: 820;
+
+    letter-spacing: -0.045em;
+}
+
+
+.session-value__label {
+    display: block;
+
+    margin:
+        2px 0 19px;
+
+    color: #0f766e;
+
+    font-size: 10.5px;
+    font-weight: 720;
+}
+
+
+/* =========================================================
+   COMPANIES PANEL
+   ========================================================= */
+
+.companies-panel {
+    overflow: hidden;
+
+    border: 1px solid #e4e9ef;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+.panel-header {
+    padding: 22px;
+
+    border-bottom: 1px solid #edf1f5;
+}
+
+
+.panel-header h2 {
+    font-size: 17px;
+    font-weight: 780;
+}
+
+
+/* =========================================================
+   COMPANY TABLE
+   ========================================================= */
+
+.company-table {
+    width: 100%;
+}
+
+
+.company-table__header,
+.company-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(
+            220px,
+            1.7fr
+        )
+        minmax(
+            100px,
+            0.7fr
+        )
+        minmax(
+            70px,
+            0.5fr
+        )
+        minmax(
+            80px,
+            0.55fr
+        )
+        minmax(
+            110px,
+            0.8fr
+        );
+
+    align-items: center;
+
+    gap: 16px;
+}
+
+
+.company-table__header {
+    min-height: 40px;
+
+    padding:
+        0
+        22px;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+.company-row {
+    min-height: 72px;
+
+    padding:
+        12px
+        22px;
+
+    border-top: 1px solid #eef2f6;
+}
+
+
+.company-row:first-of-type {
+    border-top: 0;
+}
+
+
+/* =========================================================
+   COMPANY CELLS
+   ========================================================= */
+
+.company-cell {
+    min-width: 0;
+
+    color: #475569;
+
+    font-size: 11px;
+}
+
+
+.company-cell > strong {
+    color: #172033;
+
+    font-weight: 750;
+}
+
+
+.company-cell--identity {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+}
+
+
+.company-avatar {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 9px;
+
+    background: #ecfeff;
+
+    color: #0f766e;
+
+    font-size: 12px;
+    font-weight: 820;
+}
+
+
+.company-cell--identity > div {
+    min-width: 0;
+}
+
+
+.company-cell--identity strong,
+.company-cell--identity small {
+    display: block;
+}
+
+
+.company-cell--identity strong {
+    overflow: hidden;
+
+    color: #172033;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.company-cell--identity small {
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 9.5px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 24px;
+
+    padding:
+        0
+        9px;
+
+    border-radius: 999px;
+
+    font-size: 9.5px;
+    font-weight: 750;
+}
+
+
+.status--active {
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.status--suspended {
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+/* =========================================================
+   MOBILE LABEL
+   ========================================================= */
+
+.mobile-label {
+    display: none;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+    display: grid;
+    place-items: center;
+
+    min-height: 220px;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+
+.empty-state__icon {
+    display: grid;
+    place-items: center;
+
+    width: 48px;
+    height: 48px;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    background: #ecfeff;
+
+    color: #0f766e;
+
+    font-size: 22px;
+}
+
+
+.empty-state strong {
+    color: #172033;
+
+    font-size: 14px;
+}
+
+
+.empty-state p {
+    max-width: 360px;
+
+    margin:
+        5px 0 0;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE - DESKTOP / TABLET
+   ========================================================= */
+
+@media (max-width: 1250px) {
+
+    .stat-grid {
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+}
+
+
+@media (max-width: 980px) {
+
+    .overview-grid {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+@media (max-width: 760px) {
+
+    .page {
+        gap: 18px;
+
+        padding:
+            20px
+            16px
+            30px;
+    }
+
+
+    .page-header {
+        flex-direction: column;
+    }
+
+
+    .page-header ion-button {
+        align-self: flex-start;
+    }
+
+
+    .stat-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+
+    .company-table__header {
+        display: none;
+    }
+
+
+    .company-row {
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            14px
+            20px;
+
+        padding:
+            18px;
+    }
+
+
+    .company-cell--identity {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .mobile-label {
+        display: block;
+
+        margin-bottom: 3px;
+
+        color: #94a3b8;
+
+        font-size: 9px;
+        font-weight: 750;
+
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .company-health {
+        grid-template-columns: 1fr;
+    }
+
+
+    .company-row {
+        grid-template-columns: 1fr;
+    }
+
+
+    .company-cell--identity {
+        grid-column: auto;
+    }
+
+
+    .state-panel {
+        align-items: flex-start;
+    }
+
+
+    .state-panel--error {
+        flex-wrap: wrap;
+    }
+
+
+    .state-panel--error ion-button {
+        width: 100%;
+
+        margin-left: 0;
+    }
+}

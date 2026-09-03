@@ -1,28 +1,51 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
 
-// Import administrator report controller functions
+// Import authentication middleware
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
+
+// Import company administrator authorization middleware
+import requireCompanyAdmin from "../../middlewares/requireCompanyAdmin.middleware.js";
+
+// Import report controllers
 import {
     getRevenueReport,
-    getPaymentsReport,
-    getSessionsReport
+    getPaymentReport,
+    getSessionReport
 } from "../../controllers/admin/report.controller.js";
 
-// Import JWT authentication middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
 
-const router = Router();
+// Create report router
+const router = express.Router();
 
-// Every reports API must be accessible only by authenticated admins
+
+// Require authentication
 router.use(adminAuth);
 
-// Revenue statistics
-router.get("/revenue", getRevenueReport);
+// Only company admins use these routes
+router.use(requireCompanyAdmin);
 
-// Payment statistics
-router.get("/payments", getPaymentsReport);
 
-// Internet-session statistics
-router.get("/sessions", getSessionsReport);
+// Get company revenue report
+router.get(
+    "/revenue",
+    getRevenueReport
+);
 
+
+// Get company payment report
+router.get(
+    "/payments",
+    getPaymentReport
+);
+
+
+// Get company session report
+router.get(
+    "/sessions",
+    getSessionReport
+);
+
+
+// Export router
 export default router;

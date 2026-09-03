@@ -1,33 +1,83 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
 
-// Import admin package controller
-import { createPackage, updatePackage, deletePackage, getAllPackages, changePackageStatus, schedulePackage } from "../../controllers/admin/package.controller.js";
+// Import authentication middleware
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
 
-// Import admin authentication middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
+// Import company admin authorization middleware
+import requireCompanyAdmin from "../../middlewares/requireCompanyAdmin.middleware.js";
 
-const router = Router();
+// Import package controller functions
+import {
+    getPackages,
+    getPackageById,
+    createPackage,
+    updatePackage,
+    updatePackageStatus,
+    updatePackageSchedule,
+    deletePackage
+} from "../../controllers/admin/package.controller.js";
 
-// Every route below this line requires a valid admin JWT
+
+// Create package router
+const router = express.Router();
+
+
+// Every package management route requires authentication
 router.use(adminAuth);
 
-// Admin can create packages
-router.post("/", createPackage);
+// Every route here belongs to a company administrator
+router.use(requireCompanyAdmin);
 
-//Admin can update a package
-router.patch('/:id', updatePackage);
 
-//Admin can delete a package
-router.delete('/:id', deletePackage);
+// Get all packages for the authenticated company
+router.get(
+    "/",
+    getPackages
+);
 
-// Admin views all packages
-router.get("/", getAllPackages);
 
-// Admin enables or disables a package
-router.patch("/:id/status", changePackageStatus);
+// Get one package
+router.get(
+    "/:id",
+    getPackageById
+);
 
-// Admin sets temporary availability period
-router.patch("/:id/schedule", schedulePackage);
 
+// Create package
+router.post(
+    "/",
+    createPackage
+);
+
+
+// Update package
+router.patch(
+    "/:id",
+    updatePackage
+);
+
+
+// Change active status
+router.patch(
+    "/:id/status",
+    updatePackageStatus
+);
+
+
+// Change availability schedule
+router.patch(
+    "/:id/schedule",
+    updatePackageSchedule
+);
+
+
+// Delete package
+router.delete(
+    "/:id",
+    deletePackage
+);
+
+
+// Export package router
 export default router;

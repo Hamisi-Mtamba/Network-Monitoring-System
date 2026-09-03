@@ -2,58 +2,85 @@
 import { pool } from "../../database/database.js";
 
 
-// Get revenue report from successful payments
+// Resolve the company that the current request is allowed to manage
+const getRequestCompanyId = (req) => {
+
+    // Superadmin manages an explicitly selected company
+    if (
+        req.admin.role === "superadmin" &&
+        req.platformCompany
+    ) {
+        return req.platformCompany.id;
+    }
+
+    // Normal admin uses their authenticated company
+    return req.admin.companyId;
+};
+
+
+// Get revenue report for one company
 const getRevenueReport = async (req, res) => {
     try {
-        // Calculate total successful revenue
-        // and group revenue by payment date.
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
+
+        // Stop if company context is missing
+        if (!companyId) {
+            return res.status(403).json({
+                success: false,
+                message: "Company context is required"
+            });
+        }
+
+        // Get successful payment revenue grouped by date
         const result = await pool.query(
             `
             SELECT
                 DATE(paid_at) AS date,
                 COUNT(*) AS successful_payments,
-                SUM(amount) AS revenue
-
+                COALESCE(SUM(amount), 0) AS revenue
             FROM payments
-
-            WHERE status = 'successful'
+            WHERE company_id = $1
+            AND status = 'successful'
             AND paid_at IS NOT NULL
-
             GROUP BY DATE(paid_at)
-
-            ORDER BY date DESC
-            `
+            ORDER BY DATE(paid_at) DESC
+            `,
+            [companyId]
         );
 
-        // Calculate the overall successful revenue
+        // Convert PostgreSQL numeric values
+        const report = result.rows.map((row) => ({
+            date: row.date,
+            successful_payments:
+                Number(row.successful_payments),
+            revenue:
+                Number(row.revenue)
+        }));
+
+        // Calculate total company revenue
         const totalResult = await pool.query(
             `
             SELECT
                 COALESCE(SUM(amount), 0) AS total_revenue
-
             FROM payments
-
-            WHERE status = 'successful'
-            `
+            WHERE company_id = $1
+            AND status = 'successful'
+            `,
+            [companyId]
         );
 
         // Return revenue report
         res.status(200).json({
             success: true,
-
-            total_revenue: Number(
-                totalResult.rows[0].total_revenue
-            ),
-
-            revenue_by_date: result.rows
+            total_revenue:
+                Number(totalResult.rows[0].total_revenue),
+            report
         });
 
     } catch (error) {
-        // Log actual backend/database error
-        console.error(
-            "Error fetching revenue report:",
-            error.message
-        );
+        // Log actual backend error
+        console.error("Revenue report error:", error.message);
 
         res.status(500).json({
             success: false,
@@ -63,164 +90,115 @@ const getRevenueReport = async (req, res) => {
 };
 
 
-// Get payment statistics report
-const getPaymentsReport = async (req, res) => {
+// Get payment report for one company
+const getPaymentReport = async (req, res) => {
     try {
-        // Group payments by their current status
-        const statusResult = await pool.query(
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
+
+        // Get payment statistics grouped by payment status
+        const result = await pool.query(
             `
             SELECT
                 status,
-                COUNT(*) AS total,
-                COALESCE(SUM(amount), 0) AS amount
-
-            FROM payments
-
-            GROUP BY status
-
-            ORDER BY status ASC
-            `
-        );
-
-        // Group payments by mobile-money method
-        const methodResult = await pool.query(
-            `
-            SELECT
-                payment_method,
-                COUNT(*) AS total_transactions,
+                COUNT(*) AS payment_count,
                 COALESCE(SUM(amount), 0) AS total_amount
-
             FROM payments
-
-            GROUP BY payment_method
-
-            ORDER BY total_transactions DESC
-            `
-        );
-
-        // Return payment statistics
-        res.status(200).json({
-            success: true,
-
-            by_status: statusResult.rows,
-
-            by_payment_method: methodResult.rows
-        });
-
-    } catch (error) {
-        // Log actual backend/database error
-        console.error(
-            "Error fetching payments report:",
-            error.message
-        );
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch payments report"
-        });
-    }
-};
-
-
-// Get internet-session statistics report
-const getSessionsReport = async (req, res) => {
-    try {
-        // Count currently active sessions.
-        // We also check expires_at so an old session marked active
-        // is not counted as currently active.
-        const activeResult = await pool.query(
-            `
-            SELECT COUNT(*) AS total
-
-            FROM internet_sessions
-
-            WHERE status = 'active'
-            AND expires_at > CURRENT_TIMESTAMP
-            `
-        );
-
-        // Count sessions whose package time has already expired
-        const expiredResult = await pool.query(
-            `
-            SELECT COUNT(*) AS total
-
-            FROM internet_sessions
-
-            WHERE expires_at <= CURRENT_TIMESTAMP
-            `
-        );
-
-        // Group sessions by their stored status
-        const statusResult = await pool.query(
-            `
-            SELECT
-                status,
-                COUNT(*) AS total
-
-            FROM internet_sessions
-
+            WHERE company_id = $1
             GROUP BY status
-
             ORDER BY status ASC
-            `
+            `,
+            [companyId]
         );
 
-        // Find which packages are being used most
-        const packageResult = await pool.query(
-            `
-            SELECT
-                packages.id AS package_id,
-                packages.name AS package_name,
-                COUNT(internet_sessions.id) AS total_sessions
+        // Convert PostgreSQL values into normal JavaScript numbers
+        const report = result.rows.map((row) => ({
+            status: row.status,
+            payment_count:
+                Number(row.payment_count),
+            total_amount:
+                Number(row.total_amount)
+        }));
 
-            FROM internet_sessions
-
-            JOIN packages
-                ON internet_sessions.package_id = packages.id
-
-            GROUP BY
-                packages.id,
-                packages.name
-
-            ORDER BY total_sessions DESC
-            `
-        );
-
-        // Return session report
+        // Return company-specific payment report
         res.status(200).json({
             success: true,
-
-            active_sessions: Number(
-                activeResult.rows[0].total
-            ),
-
-            expired_sessions: Number(
-                expiredResult.rows[0].total
-            ),
-
-            by_status: statusResult.rows,
-
-            by_package: packageResult.rows
+            report
         });
 
     } catch (error) {
-        // Log actual backend/database error
-        console.error(
-            "Error fetching sessions report:",
-            error.message
-        );
+        // Log actual backend error
+        console.error("Payment report error:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Failed to fetch sessions report"
+            message: "Failed to fetch payment report"
         });
     }
 };
 
 
-// Export all administrator report controllers
+// Get internet session report for one company
+const getSessionReport = async (req, res) => {
+    try {
+        // Get trusted company ID
+        const companyId = getRequestCompanyId(req);
+
+        // Group sessions using their effective status
+        const result = await pool.query(
+            `
+            SELECT
+                effective_status AS status,
+                COUNT(*) AS session_count
+            FROM (
+                SELECT
+                    CASE
+                        WHEN status = 'active'
+                        AND expires_at <= CURRENT_TIMESTAMP
+                        THEN 'expired'
+
+                        ELSE status
+                    END AS effective_status
+
+                FROM internet_sessions
+
+                WHERE company_id = $1
+            ) sessions
+
+            GROUP BY effective_status
+            ORDER BY effective_status ASC
+            `,
+            [companyId]
+        );
+
+        // Convert count values into normal JavaScript numbers
+        const report = result.rows.map((row) => ({
+            status: row.status,
+            session_count:
+                Number(row.session_count)
+        }));
+
+        // Return company-specific session report
+        res.status(200).json({
+            success: true,
+            report
+        });
+
+    } catch (error) {
+        // Log actual backend error
+        console.error("Session report error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch session report"
+        });
+    }
+};
+
+
+// Export report controllers
 export {
     getRevenueReport,
-    getPaymentsReport,
-    getSessionsReport
+    getPaymentReport,
+    getSessionReport
 };

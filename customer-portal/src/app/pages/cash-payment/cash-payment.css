@@ -1,261 +1,645 @@
-    /* =========================================================
-    CASH PAYMENT PAGE
-    ========================================================= */
+/* =========================================================
+   CASH PAYMENT PAGE
+   ========================================================= */
 
-    .cash-page {
-    padding-bottom: 48px;
-    }
+.cash-page {
+    padding-bottom: 52px;
+}
 
-    .cash-heading {
-    margin-bottom: 28px;
+
+/* =========================================================
+   BACK LINK
+   ========================================================= */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-bottom: 24px;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.84rem;
+    font-weight: 650;
+
+    text-decoration: none;
+
+    transition: color 0.18s ease;
+}
+
+
+.back-link:hover {
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+}
+
+
+/* =========================================================
+   PAGE HEADING
+   ========================================================= */
+
+.cash-heading {
+    max-width: 620px;
+
+    margin: 0 auto 30px;
+
     text-align: center;
-    }
+}
 
-    .cash-label {
-    color: var(--primary);
-    font-size: 0.73rem;
-    font-weight: 850;
+
+.cash-label {
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+
+    font-size: 0.72rem;
+    font-weight: 740;
+
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    }
+}
 
-    .cash-heading h1 {
-    margin: 7px 0 8px;
-    color: var(--navy);
-    font-size: clamp(1.65rem, 4vw, 2.25rem);
+
+.cash-heading h1 {
+    margin: 8px 0 10px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: clamp(
+        1.7rem,
+        4vw,
+        2.3rem
+    );
+
+    font-weight: 760;
+
+    line-height: 1.15;
     letter-spacing: -0.035em;
-    }
+}
 
-    .cash-heading p {
-    max-width: 580px;
-    margin: 0 auto;
-    color: var(--text-muted);
+
+.cash-heading p {
+    margin: 0;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
     line-height: 1.6;
-    }
+}
 
 
-    /* Main layout */
-    .cash-layout {
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.cash-layout {
     display: grid;
-    gap: 18px;
     align-items: start;
-    }
+
+    gap: 20px;
+}
 
 
-    /* Package card and form card */
-    .package-summary,
-    .cash-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    box-shadow: var(--shadow-sm);
-    }
+/* =========================================================
+   SHARED CARD STYLES
+   ========================================================= */
+
+.package-summary,
+.cash-card {
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 16px;
+
+    background: var(
+        --surface,
+        #ffffff
+    );
+
+    box-shadow:
+        0 10px 30px
+        rgba(
+            15,
+            23,
+            42,
+            0.055
+        );
+}
 
 
-    /* Package summary */
-    .package-summary {
+/* =========================================================
+   PACKAGE SUMMARY
+   ========================================================= */
+
+.package-summary {
     padding: 22px;
-    }
+}
 
-    .package-summary__label {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    font-weight: 800;
+
+.package-summary__label {
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.7rem;
+    font-weight: 720;
+
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    }
+}
 
-    .package-summary h2 {
+
+.package-summary h2 {
     margin: 14px 0 6px;
-    color: var(--navy);
-    font-size: 1.12rem;
-    }
 
-    .package-summary__price {
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 1.1rem;
+    font-weight: 720;
+}
+
+
+.package-summary__price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+
     margin: 0 0 20px;
-    color: var(--primary);
-    font-size: 1.75rem;
-    font-weight: 850;
-    }
 
-    .package-summary__price span {
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+
+    font-size: 1.8rem;
+    font-weight: 780;
+}
+
+
+.package-summary__price span {
     font-size: 0.7rem;
-    }
+    font-weight: 700;
+}
 
-    .package-summary dl {
+
+.package-summary dl {
     display: grid;
     gap: 10px;
-    margin: 0;
-    }
 
-    .package-summary dl div {
+    margin: 0;
+}
+
+
+.package-summary dl div {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    padding-bottom: 9px;
-    border-bottom: 1px solid var(--border);
+
+    gap: 14px;
+
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
     font-size: 0.84rem;
-    }
+}
 
-    .package-summary dt {
-    color: var(--text-muted);
-    }
 
-    .package-summary dd {
+.package-summary dt {
+    color: var(
+        --text-muted,
+        #64748b
+    );
+}
+
+
+.package-summary dd {
     margin: 0;
-    font-weight: 750;
-    }
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-weight: 700;
+    text-align: right;
+}
 
 
-    /* Main form card */
-    .cash-card {
-    padding: clamp(18px, 4vw, 30px);
-    }
+/* =========================================================
+   MAIN CASH FORM CARD
+   ========================================================= */
 
-    .cash-card__heading {
+.cash-card {
+    padding: clamp(
+        20px,
+        4vw,
+        32px
+    );
+}
+
+
+.cash-card__heading {
     display: flex;
     align-items: flex-start;
+
     gap: 14px;
+
     margin-bottom: 24px;
-    }
+}
 
-    .cash-card__heading h2 {
-    margin: 0 0 5px;
-    color: var(--navy);
-    }
 
-    .cash-card__heading p {
+.cash-card__heading h2 {
+    margin: 0 0 6px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 1.1rem;
+    font-weight: 740;
+}
+
+
+.cash-card__heading p {
     margin: 0;
-    color: var(--text-muted);
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
     font-size: 0.84rem;
     line-height: 1.5;
-    }
+}
 
-    .cash-icon {
+
+.cash-icon {
     display: grid;
     place-items: center;
+
     flex: 0 0 auto;
+
     width: 44px;
     height: 44px;
-    border-radius: 13px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    font-size: 1.3rem;
-    font-weight: 900;
-    }
 
+    border-radius: 12px;
 
-    /* Phone field */
-    .phone-field label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 0.86rem;
+    background:
+        color-mix(
+            in srgb,
+            var(
+                --company-primary,
+                #2563eb
+            )
+            10%,
+            white
+        );
+
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+
+    font-size: 1.25rem;
     font-weight: 780;
-    }
+}
 
-    .phone-input-wrap {
+
+/* =========================================================
+   PHONE FIELD
+   ========================================================= */
+
+.phone-field label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 0.85rem;
+    font-weight: 680;
+}
+
+
+.phone-input-wrap {
     display: flex;
     align-items: center;
+
     min-height: 52px;
+
     overflow: hidden;
-    border: 1.5px solid #cad6e2;
-    border-radius: 12px;
-    background: #fff;
-    }
 
-    .phone-input-wrap:focus-within {
-    border-color: var(--primary);
+    border: 1px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.phone-input-wrap:focus-within {
+    border-color: var(
+        --company-primary,
+        #2563eb
+    );
+
     box-shadow:
-        0 0 0 3px rgba(20, 115, 230, 0.1);
-    }
+        0 0 0 3px
+        color-mix(
+            in srgb,
+            var(
+                --company-primary,
+                #2563eb
+            )
+            12%,
+            transparent
+        );
+}
 
-    .phone-input-wrap span {
+
+.phone-input-wrap span {
     align-self: stretch;
+
     display: grid;
     place-items: center;
-    padding: 0 12px;
-    border-right: 1px solid var(--border);
-    background: var(--surface-soft);
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    font-weight: 750;
-    }
 
-    .phone-input-wrap input {
+    padding: 0 13px;
+
+    border-right: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    background: #f8fafc;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+
+.phone-input-wrap input {
     min-width: 0;
+
     flex: 1;
+
     border: 0;
     outline: 0;
+
     padding: 0 14px;
+
+    background: transparent;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
     font: inherit;
-    color: var(--navy);
-    }
+}
 
-    .field-hint {
-    margin: 7px 0 0;
-    color: var(--text-muted);
+
+.field-hint {
+    margin: 8px 0 0;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
     font-size: 0.78rem;
-    }
-
-    .field-error {
-    margin: 7px 0 0;
-    color: var(--danger);
-    font-size: 0.78rem;
-    font-weight: 650;
-    }
-
-
-    /* Cash instructions preview */
-    .cash-info {
-    margin: 20px 0;
-    padding: 14px;
-    border-radius: 12px;
-    background: var(--surface-soft);
-    }
-
-    .cash-info strong {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--navy);
-    font-size: 0.85rem;
-    }
-
-    .cash-info p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.8rem;
     line-height: 1.5;
-    }
+}
 
 
-    /* Error feedback */
-    .inline-alert {
+.field-error {
+    margin: 8px 0 0;
+
+    color: #b42318;
+
+    font-size: 0.78rem;
+    font-weight: 620;
+}
+
+
+/* =========================================================
+   CASH INFO
+   ========================================================= */
+
+.cash-info {
+    margin: 22px 0;
+
+    padding: 16px;
+
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+}
+
+
+.cash-info strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+
+.cash-info p {
+    margin: 0;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+
+.cash-info p + p {
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.button--primary {
+    border: 1px solid var(
+        --company-primary,
+        #2563eb
+    );
+
+    background: var(
+        --company-primary,
+        #2563eb
+    );
+
+    color: #ffffff;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.button--primary:hover:not(:disabled) {
+    opacity: 0.92;
+}
+
+
+.button--primary:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+
+.button--primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+
+/* =========================================================
+   ERROR FEEDBACK
+   ========================================================= */
+
+.inline-alert {
     margin-top: 18px;
-    padding: 11px 13px;
-    border: 1px solid #f0b9bc;
+
+    padding: 12px 14px;
+
+    border: 1px solid #fecaca;
+
     border-radius: 10px;
-    background: var(--danger-soft);
-    color: var(--danger);
+
+    background: #fef2f2;
+
+    color: #b42318;
+
     font-size: 0.82rem;
-    }
+    line-height: 1.5;
+}
 
-    .cash-card--error {
+
+.cash-card--error {
     text-align: center;
-    }
+}
 
 
-    /* Desktop layout */
-    @media (min-width: 820px) {
+.cash-card--error h1 {
+    margin-top: 0;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+}
+
+
+.cash-card--error p {
+    color: var(
+        --text-muted,
+        #64748b
+    );
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 820px) {
+
     .cash-layout {
         grid-template-columns:
-        minmax(230px, 0.72fr)
-        minmax(0, 1.4fr);
+            minmax(
+                230px,
+                0.72fr
+            )
+            minmax(
+                0,
+                1.4fr
+            );
 
         gap: 24px;
     }
+
 
     .package-summary {
         position: sticky;
         top: 92px;
     }
+}
+
+
+@media (max-width: 560px) {
+
+    .cash-heading {
+        text-align: left;
     }
+
+
+    .package-summary,
+    .cash-card {
+        border-radius: 14px;
+    }
+
+
+    .package-summary dl div {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+
+    .package-summary dd {
+        text-align: left;
+    }
+}

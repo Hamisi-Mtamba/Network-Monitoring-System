@@ -1,45 +1,234 @@
 <main class="page-shell session-page">
-  <a routerLink="/packages" class="back-link">← Packages</a>
 
-  @if (loading()) {
-    <app-loading-spinner message="Loading your internet session..." />
-  } @else if (!session()) {
-    <section class="state-panel state-panel--error" role="alert">
-      <span class="state-panel__icon" aria-hidden="true">!</span>
-      <h1>Session unavailable</h1>
-      <p>{{ errorMessage() }}</p>
-      <a routerLink="/packages" class="button button--primary">View Packages</a>
-    </section>
-  } @else {
-    <section class="session-card">
-      <header>
-        <div>
-          <span class="eyebrow">Current connection</span>
-          <h1>Session Details</h1>
-        </div>
-        <span class="wifi-icon" aria-hidden="true">⌁</span>
-      </header>
+    <!-- ======================================================
+         BACK TO PACKAGES
+         ====================================================== -->
 
-      <app-status-card
-        [status]="session()!.status"
-        description="Your current internet access status."
-      />
+    @if (tenantService.companySlug()) {
 
-      <div class="countdown" aria-live="polite">
-        <span>Remaining time</span>
-        <strong>{{ remainingTime() }}</strong>
-      </div>
+        <a
+            class="back-link"
+            [routerLink]="[
+                '/',
+                tenantService.companySlug(),
+                'packages'
+            ]"
+        >
+            ← Packages
+        </a>
 
-      <dl class="session-details">
-        <div><dt>Package name</dt><dd>{{ session()!.package_name }}</dd></div>
-        <div><dt>Amount paid</dt><dd>TZS {{ session()!.amount_paid.toLocaleString() }}</dd></div>
-        <div><dt>Start time</dt><dd>{{ session()!.started_at | date: 'medium' }}</dd></div>
-        <div><dt>Expiry time</dt><dd>{{ session()!.expires_at | date: 'medium' }}</dd></div>
-        <div><dt>Transaction reference</dt><dd>{{ session()!.transaction_reference }}</dd></div>
-      </dl>
+    }
 
-      <a href="https://www.google.com" class="button button--primary button--full">Continue Browsing</a>
-    </section>
-  }
+
+    <!-- ======================================================
+         LOADING STATE
+         ====================================================== -->
+
+    @if (loading()) {
+
+        <app-loading-spinner
+            message="Loading your internet session..."
+        />
+
+    }
+
+
+    <!-- ======================================================
+         SESSION UNAVAILABLE
+         ====================================================== -->
+
+    @else if (!session()) {
+
+        <section
+            class="state-panel state-panel--error"
+            role="alert"
+        >
+
+            <span
+                class="state-panel__icon"
+                aria-hidden="true"
+            >
+                !
+            </span>
+
+
+            <h1>
+                Session unavailable
+            </h1>
+
+
+            <p>
+                {{ errorMessage() }}
+            </p>
+
+
+            @if (tenantService.companySlug()) {
+
+                <a
+                    class="button button--primary"
+                    [routerLink]="[
+                        '/',
+                        tenantService.companySlug(),
+                        'packages'
+                    ]"
+                >
+                    View packages
+                </a>
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         SESSION DETAILS
+         ====================================================== -->
+
+    @else {
+
+        <section class="session-card">
+
+            <header>
+
+                <div>
+
+                    <span class="eyebrow">
+                        Current connection
+                    </span>
+
+                    <h1>
+                        Session details
+                    </h1>
+
+                </div>
+
+
+                <span
+                    class="wifi-icon"
+                    aria-hidden="true"
+                >
+                    ⌁
+                </span>
+
+            </header>
+
+
+            <!-- Current session status -->
+            <app-status-card
+                [status]="session()!.status"
+                description="Your current internet access status."
+            />
+
+
+            <!-- Remaining session time -->
+            <div
+                class="countdown"
+                aria-live="polite"
+            >
+
+                <span>
+                    Remaining time
+                </span>
+
+                <strong>
+                    {{ remainingTime() }}
+                </strong>
+
+            </div>
+
+
+            <!-- Session information -->
+            <dl class="session-details">
+
+                <div>
+
+                    <dt>
+                        Package name
+                    </dt>
+
+                    <dd>
+                        {{ session()!.package_name }}
+                    </dd>
+
+                </div>
+
+
+                <div>
+
+                    <dt>
+                        Amount paid
+                    </dt>
+
+                    <dd>
+                        TZS
+                        {{
+                            session()!.amount_paid.toLocaleString()
+                        }}
+                    </dd>
+
+                </div>
+
+
+                <div>
+
+                    <dt>
+                        Start time
+                    </dt>
+
+                    <dd>
+                        {{
+                            session()!.started_at
+                                | date: 'medium'
+                        }}
+                    </dd>
+
+                </div>
+
+
+                <div>
+
+                    <dt>
+                        Expiry time
+                    </dt>
+
+                    <dd>
+                        {{
+                            session()!.expires_at
+                                | date: 'medium'
+                        }}
+                    </dd>
+
+                </div>
+
+
+                <div>
+
+                    <dt>
+                        Transaction reference
+                    </dt>
+
+                    <dd>
+                        {{ session()!.transaction_reference }}
+                    </dd>
+
+                </div>
+
+            </dl>
+
+
+            <!-- External browsing action -->
+            <a
+                href="https://www.google.com"
+                class="button button--primary button--full"
+                rel="noopener noreferrer"
+            >
+                Continue browsing
+            </a>
+
+        </section>
+
+    }
+
 </main>
-

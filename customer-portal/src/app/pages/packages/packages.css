@@ -1,49 +1,340 @@
-.packages-page { max-width: 1180px; }
+/* =========================================================
+   PACKAGES PAGE
+   ========================================================= */
 
-.page-heading { max-width: 640px; margin: 26px auto 34px; text-align: center; }
-.page-heading h1 { margin: 8px 0 10px; font-size: clamp(1.85rem, 5vw, 2.85rem); letter-spacing: -0.04em; }
-.page-heading p { margin: 0; color: var(--text-muted); font-size: 1rem; }
+.packages-page {
+    max-width: 1180px;
+}
+
+
+/* =========================================================
+   PAGE HEADING
+   ========================================================= */
+
+.page-heading {
+    max-width: 640px;
+
+    margin:
+        28px auto 36px;
+
+    text-align: center;
+}
+
+
+.page-heading h1 {
+    margin:
+        8px 0 10px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: clamp(
+        1.9rem,
+        5vw,
+        2.85rem
+    );
+
+    font-weight: 760;
+
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+
+.page-heading p {
+    margin: 0;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
 
 .eyebrow {
-color: var(--primary);
-font-size: 0.76rem;
-font-weight: 850;
-letter-spacing: 0.11em;
-text-transform: uppercase;
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+
+    font-size: 0.74rem;
+    font-weight: 740;
+
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
 }
+
+
+/* =========================================================
+   DEMO NOTICE
+   ========================================================= */
 
 .demo-note {
-max-width: 680px;
-margin: -16px auto 24px;
-padding: 10px 14px;
-border: 1px solid #b9d7f5;
-border-radius: 10px;
-background: #edf6ff;
-color: #245f99;
-font-size: 0.8rem;
-text-align: center;
+    max-width: 680px;
+
+    margin:
+        -14px auto 24px;
+
+    padding:
+        10px 14px;
+
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 10px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(
+                --company-primary,
+                #2563eb
+            )
+            6%,
+            white
+        );
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 0.8rem;
+    line-height: 1.45;
+
+    text-align: center;
 }
 
-.package-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+
+/* =========================================================
+   PACKAGE GRID
+   ========================================================= */
+
+.package-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr;
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   STATE PANELS
+   ========================================================= */
+
+.state-panel {
+    max-width: 560px;
+
+    margin:
+        32px auto;
+
+    padding:
+        30px;
+
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 16px;
+
+    background: var(
+        --surface,
+        #ffffff
+    );
+
+    text-align: center;
+
+    box-shadow:
+        0 10px 30px
+        rgba(
+            15,
+            23,
+            42,
+            0.05
+        );
+}
+
+
+.state-panel__icon {
+    display: grid;
+    place-items: center;
+
+    width: 52px;
+    height: 52px;
+
+    margin:
+        0 auto 16px;
+
+    border-radius: 50%;
+
+    background:
+        color-mix(
+            in srgb,
+            var(
+                --company-primary,
+                #2563eb
+            )
+            9%,
+            white
+        );
+
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+
+    font-size: 1.35rem;
+    font-weight: 780;
+}
+
+
+.state-panel--error
+.state-panel__icon {
+    background: #fef2f2;
+
+    color: #b42318;
+}
+
+
+.state-panel h2 {
+    margin:
+        0 0 8px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: 1.35rem;
+    font-weight: 740;
+}
+
+
+.state-panel p {
+    margin: 0;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    line-height: 1.55;
+}
+
+
+.state-panel__hint {
+    margin-top: 8px !important;
+
+    font-size: 0.8rem;
+}
+
+
+/* =========================================================
+   TRUST ROW
+   ========================================================= */
 
 .trust-row {
-margin: 34px auto 8px;
-display: flex;
-flex-wrap: wrap;
-justify-content: center;
-gap: 14px 30px;
-color: var(--text-muted);
-font-size: 0.82rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    gap:
+        14px 30px;
+
+    margin:
+        36px auto 8px;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.82rem;
 }
 
-.trust-row div { display: flex; align-items: center; gap: 8px; }
-.trust-row span { color: var(--primary); }
+
+.trust-row div {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.trust-row span {
+    color: var(
+        --company-primary,
+        #2563eb
+    );
+}
+
+
+.trust-row strong {
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (min-width: 620px) {
-.package-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .package-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
 }
+
 
 @media (min-width: 1020px) {
-.package-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .package-grid {
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
 }
 
+
+@media (max-width: 560px) {
+
+    .page-heading {
+        margin-top: 20px;
+
+        text-align: left;
+    }
+
+
+    .trust-row {
+        justify-content: flex-start;
+    }
+
+
+    .state-panel {
+        padding: 24px 18px;
+
+        border-radius: 14px;
+    }
+}

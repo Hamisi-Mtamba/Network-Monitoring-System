@@ -1,38 +1,239 @@
 <main class="page-shell result-page">
+
+  <!-- ======================================================
+     LOADING STATE
+     ====================================================== -->
+
   @if (loading()) {
-    <app-loading-spinner message="Loading payment confirmation..." />
-  } @else if (!details()) {
-    <section class="state-panel state-panel--error" role="alert">
-      <span class="state-panel__icon" aria-hidden="true">!</span>
-      <h1>Confirmation unavailable</h1>
-      <p>{{ errorMessage() }}</p>
-      <a routerLink="/packages" class="button button--primary">View Packages</a>
-    </section>
-  } @else {
-    <section class="success-card">
-      <div class="success-icon" aria-hidden="true">✓</div>
-      <span class="success-kicker">You're connected</span>
-      <h1>Payment Successful</h1>
-      <p>Your internet package is active and ready to use.</p>
 
-      <app-status-card status="active" description="Your browsing session is now active." />
+  <app-loading-spinner
+    message="Loading payment confirmation..." />
 
-      <dl class="details-grid">
-        <div><dt>Package</dt><dd>{{ details()!.packageName }}</dd></div>
-        <div><dt>Amount paid</dt><dd>TZS {{ details()!.amount.toLocaleString() }}</dd></div>
-        <div><dt>Transaction reference</dt><dd>{{ details()!.reference }}</dd></div>
-        <div><dt>Payment method</dt><dd>{{ details()!.paymentMethod }}</dd></div>
-        <div><dt>Phone number</dt><dd>{{ details()!.phoneNumber }}</dd></div>
-        <div><dt>Start time</dt><dd>{{ details()!.startedAt | date: 'medium' }}</dd></div>
-        <div><dt>Expiry time</dt><dd>{{ details()!.expiresAt | date: 'medium' }}</dd></div>
-        <div><dt>Internet status</dt><dd class="active-text">ACTIVE</dd></div>
-      </dl>
-
-      <a href="https://www.google.com" class="button button--primary button--full">Start Browsing</a>
-      @if (details()!.sessionId) {
-        <a [routerLink]="['/session', details()!.sessionId]" class="session-link">View session details</a>
-      }
-    </section>
   }
-</main>
 
+  <!-- ======================================================
+     CONFIRMATION UNAVAILABLE
+     ====================================================== -->
+
+  @else if (!details()) {
+
+  <section
+    class="state-panel state-panel--error"
+    role="alert">
+
+    <span
+      class="state-panel__icon"
+      aria-hidden="true">
+      !
+    </span>
+
+    <h1>
+      Confirmation unavailable
+    </h1>
+
+    <p>
+      {{ errorMessage() }}
+    </p>
+
+    @if (tenantService.companySlug()) {
+
+    <a
+      class="button button--primary"
+      [routerLink]="[
+                    '/',
+                    tenantService.companySlug(),
+                    'packages'
+                ]">
+      View packages
+    </a>
+
+    }
+
+  </section>
+
+  }
+
+  <!-- ======================================================
+     PAYMENT SUCCESS
+     ====================================================== -->
+
+  @else {
+
+  <section class="success-card">
+
+    <div
+      class="success-icon"
+      aria-hidden="true">
+      ✓
+    </div>
+
+    <span class="success-kicker">
+      Payment confirmed
+    </span>
+
+    <h1>
+      Payment successful
+    </h1>
+
+    <p>
+      Your payment has been confirmed and your
+      internet session has been created.
+    </p>
+
+    <app-status-card
+      status="active"
+      description="Your internet session is active." />
+
+    <!-- ==================================================
+             PAYMENT AND SESSION DETAILS
+             ================================================== -->
+
+    <dl class="details-grid">
+
+      <div>
+
+        <dt>
+          Package
+        </dt>
+
+        <dd>
+          {{ details()!.packageName }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Amount paid
+        </dt>
+
+        <dd>
+          TZS
+          {{
+          details()!.amount.toLocaleString()
+          }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Transaction reference
+        </dt>
+
+        <dd>
+          {{ details()!.reference }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Payment method
+        </dt>
+
+        <dd>
+          {{ details()!.paymentMethod }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Phone number
+        </dt>
+
+        <dd>
+          {{ details()!.phoneNumber }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Start time
+        </dt>
+
+        <dd>
+          {{
+          details()!.startedAt
+          | date: 'medium'
+          }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Expiry time
+        </dt>
+
+        <dd>
+          {{
+          details()!.expiresAt
+          | date: 'medium'
+          }}
+        </dd>
+
+      </div>
+
+      <div>
+
+        <dt>
+          Internet status
+        </dt>
+
+        <dd class="active-text">
+          {{
+          details()!.status?.toUpperCase() ?? ''
+          }}
+        </dd>
+
+      </div>
+
+    </dl>
+
+    <!-- ==================================================
+             PRIMARY ACTION
+             ================================================== -->
+
+    <a
+      href="https://www.google.com"
+      class="button button--primary button--full"
+      rel="noopener noreferrer">
+      Continue to the internet
+    </a>
+
+    <!-- ==================================================
+             SESSION DETAILS
+             ================================================== -->
+
+    @if (
+    details()!.sessionId &&
+    tenantService.companySlug()
+    ) {
+
+    <a
+      class="session-link"
+      [routerLink]="[
+                    '/',
+                    tenantService.companySlug(),
+                    'session',
+                    details()!.sessionId
+                ]">
+      View session details
+    </a>
+
+    }
+
+  </section>
+
+  }
+
+</main>

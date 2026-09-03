@@ -1,0 +1,5495 @@
+<!-- =========================================================
+     SUPERADMIN SELECTED COMPANY WORKSPACE
+     ========================================================= -->
+
+<section class="page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <header class="page-header">
+
+        <div class="page-header__identity">
+
+            <ion-button
+                fill="clear"
+                size="small"
+                class="back-button"
+                (click)="goBack()"
+                aria-label="Back to companies"
+            >
+
+                <ion-icon
+                    slot="icon-only"
+                    name="arrow-back-outline"
+                ></ion-icon>
+
+            </ion-button>
+
+
+            <div>
+
+                <span class="eyebrow">
+                    Company workspace
+                </span>
+
+                <h1>
+                    {{
+                        company()?.name ||
+                        'Loading company'
+                    }}
+                </h1>
+
+                @if (company()) {
+
+                    <div class="company-meta">
+
+                        <span>
+                            /{{ company()!.slug }}
+                        </span>
+
+                        <span
+                            class="status-badge"
+                            [class]="
+                                'status-badge ' +
+                                statusClass()
+                            "
+                        >
+                            {{ statusLabel() }}
+                        </span>
+
+                    </div>
+
+                }
+
+            </div>
+
+        </div>
+
+
+        <ion-button
+            fill="outline"
+            size="small"
+            (click)="loadCompany()"
+            [disabled]="loading()"
+        >
+
+            <ion-icon
+                slot="start"
+                name="refresh-outline"
+            ></ion-icon>
+
+            Refresh
+
+        </ion-button>
+
+    </header>
+
+
+    <!-- =====================================================
+         LOAD STATE
+         ===================================================== -->
+
+    @if (loading()) {
+
+        <section class="state-panel">
+
+            <ion-spinner
+                name="crescent"
+            ></ion-spinner>
+
+            <div>
+
+                <strong>
+                    Loading company workspace
+                </strong>
+
+                <span>
+                    Fetching tenant details from the platform.
+                </span>
+
+            </div>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         ERROR STATE
+         ===================================================== -->
+
+    @else if (error()) {
+
+        <section
+            class="state-panel state-panel--error"
+            role="alert"
+        >
+
+            <div class="state-panel__symbol">
+                !
+            </div>
+
+            <div>
+
+                <strong>
+                    Company unavailable
+                </strong>
+
+                <span>
+                    {{ errorMessage() }}
+                </span>
+
+            </div>
+
+
+            <ion-button
+                size="small"
+                (click)="loadCompany()"
+            >
+                Try again
+            </ion-button>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         COMPANY WORKSPACE
+         ===================================================== -->
+
+    @else if (company(); as selectedCompany) {
+
+        <!-- =================================================
+             SECTION NAVIGATION
+             ================================================= -->
+
+        <nav
+            class="workspace-nav"
+            aria-label="Company management sections"
+        >
+
+            @for (
+                section of sections;
+                track section.key
+            ) {
+
+                <button
+                    type="button"
+                    class="workspace-nav__item"
+                    [class.workspace-nav__item--active]="
+                        activeSection() === section.key
+                    "
+                    (click)="selectSection(section.key)"
+                >
+
+                    <ion-icon
+                        [name]="section.icon"
+                    ></ion-icon>
+
+                    <span>
+                        {{ section.label }}
+                    </span>
+
+                </button>
+
+            }
+
+        </nav>
+
+
+        <!-- =================================================
+             OVERVIEW SECTION
+             ================================================= -->
+
+        @if (activeSection() === 'overview') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Company profile
+                        </span>
+
+                        <h2>
+                            Basic information
+                        </h2>
+
+                        <p>
+                            Manage the public company identity and
+                            contact information used across the platform.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <section class="summary-grid">
+
+                    <article class="summary-card">
+
+                        <span>
+                            Company ID
+                        </span>
+
+                        <strong>
+                            #{{ selectedCompany.id }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Status
+                        </span>
+
+                        <strong>
+                            {{ statusLabel() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Created
+                        </span>
+
+                        <strong>
+
+                            @if (selectedCompany.created_at) {
+
+                                {{
+                                    selectedCompany.created_at
+                                        | date:'mediumDate'
+                                }}
+
+                            } @else {
+
+                                —
+
+                            }
+
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Customer portal
+                        </span>
+
+                        <strong class="summary-card__slug">
+                            /{{ selectedCompany.slug }}
+                        </strong>
+
+                    </article>
+
+                </section>
+
+
+                <section class="profile-card">
+
+                    <form
+                        class="company-form"
+                        [formGroup]="companyForm"
+                        (ngSubmit)="saveCompany()"
+                    >
+
+                        <div class="form-grid">
+
+                            <label class="form-field">
+
+                                <span>
+                                    Company name
+                                </span>
+
+                                <ion-input
+                                    formControlName="name"
+                                    placeholder="Company name"
+                                ></ion-input>
+
+                                @if (
+                                    companyForm.controls.name.touched &&
+                                    companyForm.controls.name.invalid
+                                ) {
+
+                                    <small class="field-error">
+                                        Enter a company name between
+                                        2 and 200 characters.
+                                    </small>
+
+                                }
+
+                            </label>
+
+
+                            <label class="form-field">
+
+                                <span>
+                                    Company slug
+                                </span>
+
+                                <ion-input
+                                    formControlName="slug"
+                                    placeholder="company-name"
+                                ></ion-input>
+
+                                <small class="field-help">
+                                    Used in the public customer portal URL.
+                                </small>
+
+                                @if (
+                                    companyForm.controls.slug.touched &&
+                                    companyForm.controls.slug.invalid
+                                ) {
+
+                                    <small class="field-error">
+                                        Use lowercase letters, numbers,
+                                        and hyphens only.
+                                    </small>
+
+                                }
+
+                            </label>
+
+
+                            <label class="form-field">
+
+                                <span>
+                                    Email
+                                </span>
+
+                                <ion-input
+                                    type="email"
+                                    formControlName="email"
+                                    placeholder="support@example.com"
+                                ></ion-input>
+
+                                @if (
+                                    companyForm.controls.email.touched &&
+                                    companyForm.controls.email.invalid
+                                ) {
+
+                                    <small class="field-error">
+                                        Enter a valid email address.
+                                    </small>
+
+                                }
+
+                            </label>
+
+
+                            <label class="form-field">
+
+                                <span>
+                                    Phone
+                                </span>
+
+                                <ion-input
+                                    type="tel"
+                                    formControlName="phone"
+                                    placeholder="+255..."
+                                ></ion-input>
+
+                            </label>
+
+                        </div>
+
+
+                        <label class="form-field">
+
+                            <span>
+                                Address
+                            </span>
+
+                            <ion-input
+                                formControlName="address"
+                                placeholder="Company address"
+                            ></ion-input>
+
+                        </label>
+
+
+                        @if (errorMessage()) {
+
+                            <div
+                                class="inline-alert"
+                                role="alert"
+                            >
+
+                                <span aria-hidden="true">
+                                    !
+                                </span>
+
+                                <p>
+                                    {{ errorMessage() }}
+                                </p>
+
+                            </div>
+
+                        }
+
+
+                        <div class="form-actions">
+
+                            <ion-button
+                                type="submit"
+                                [disabled]="saving()"
+                            >
+
+                                @if (saving()) {
+
+                                    <ion-spinner
+                                        slot="start"
+                                        name="crescent"
+                                    ></ion-spinner>
+
+                                    Saving...
+
+                                } @else {
+
+                                    Save company
+
+                                }
+
+                            </ion-button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+            </section>
+
+        }
+
+
+        <!-- =================================================
+             ADMINS SECTION
+             ================================================= -->
+
+        @else if (activeSection() === 'admins') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Administrators
+                        </span>
+
+                        <h2>
+                            Company admins
+                        </h2>
+
+                        <p>
+                            Create and manage administrators who can
+                            access this company's administration area.
+                        </p>
+
+                    </div>
+
+
+                    <ion-button
+                        size="small"
+                        (click)="openCreateAdminForm()"
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            name="add-outline"
+                        ></ion-icon>
+
+                        New admin
+
+                    </ion-button>
+
+                </div>
+
+
+                <section class="summary-grid admin-summary-grid">
+
+                    <article class="summary-card">
+
+                        <span>
+                            Total admins
+                        </span>
+
+                        <strong>
+                            {{ admins().length }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Active
+                        </span>
+
+                        <strong>
+                            {{ activeAdminCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Suspended
+                        </span>
+
+                        <strong>
+                            {{ suspendedAdminCount() }}
+                        </strong>
+
+                    </article>
+
+                </section>
+
+
+                @if (adminErrorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+
+                        <span aria-hidden="true">
+                            !
+                        </span>
+
+                        <p>
+                            {{ adminErrorMessage() }}
+                        </p>
+
+                    </div>
+
+                }
+
+
+                @if (adminsLoading()) {
+
+                    <section class="state-panel">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <div>
+
+                            <strong>
+                                Loading administrators
+                            </strong>
+
+                            <span>
+                                Fetching company administrator accounts.
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+                @else if (admins().length > 0) {
+
+                    <section class="admin-panel">
+
+                        <div class="admin-table__header">
+
+                            <span>
+                                Administrator
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
+
+                            <span>
+                                Created
+                            </span>
+
+                            <span>
+                                Actions
+                            </span>
+
+                        </div>
+
+
+                        @for (
+                            admin of admins();
+                            track admin.id
+                        ) {
+
+                            <article class="admin-row">
+
+                                <div class="admin-cell admin-cell--identity">
+
+                                    <span class="admin-avatar">
+
+                                        {{
+                                            admin.name
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        }}
+
+                                    </span>
+
+
+                                    <div>
+
+                                        <strong>
+                                            {{ admin.name }}
+                                        </strong>
+
+                                        <small>
+                                            {{ admin.email }}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="admin-cell">
+
+                                    <span class="mobile-label">
+                                        Status
+                                    </span>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            adminStatusClass(admin)
+                                        "
+                                    >
+                                        {{ adminStatusLabel(admin) }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="admin-cell">
+
+                                    <span class="mobile-label">
+                                        Created
+                                    </span>
+
+                                    <span>
+
+                                        @if (admin.created_at) {
+
+                                            {{
+                                                admin.created_at
+                                                    | date:'mediumDate'
+                                            }}
+
+                                        } @else {
+
+                                            —
+
+                                        }
+
+                                    </span>
+
+                                </div>
+
+
+                                <div class="admin-cell admin-cell--actions">
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="openEditAdminForm(admin)"
+                                    >
+                                        <ion-icon
+                                            name="person-outline"
+                                        ></ion-icon>
+
+                                        Edit
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="openPasswordForm(admin)"
+                                    >
+                                        <ion-icon
+                                            name="key-outline"
+                                        ></ion-icon>
+
+                                        Password
+                                    </button>
+
+
+                                    @if (adminIsActive(admin)) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--danger"
+                                            (click)="suspendAdmin(admin)"
+                                            [disabled]="
+                                                adminActionId() === admin.id
+                                            "
+                                        >
+
+                                            <ion-icon
+                                                name="close-circle-outline"
+                                            ></ion-icon>
+
+                                            Suspend
+
+                                        </button>
+
+                                    } @else {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--success"
+                                            (click)="activateAdmin(admin)"
+                                            [disabled]="
+                                                adminActionId() === admin.id
+                                            "
+                                        >
+
+                                            <ion-icon
+                                                name="checkmark-circle-outline"
+                                            ></ion-icon>
+
+                                            Activate
+
+                                        </button>
+
+                                    }
+
+
+                                    <button
+                                        type="button"
+                                        class="action-link action-link--danger"
+                                        (click)="deleteAdmin(admin)"
+                                        [disabled]="
+                                            adminActionId() === admin.id
+                                        "
+                                    >
+                                        <ion-icon
+                                            name="trash-outline"
+                                        ></ion-icon>
+
+                                        Delete
+                                    </button>
+
+                                </div>
+
+                            </article>
+
+                        }
+
+                    </section>
+
+                } @else {
+
+                    <div class="coming-panel">
+
+                        <ion-icon
+                            name="people-outline"
+                        ></ion-icon>
+
+                        <strong>
+                            No company administrators
+                        </strong>
+
+                        <p>
+                            Create the first administrator who will
+                            manage this company's network operations.
+                        </p>
+
+                        <ion-button
+                            size="small"
+                            (click)="openCreateAdminForm()"
+                        >
+                            Create admin
+                        </ion-button>
+
+                    </div>
+
+                }
+
+            </section>
+
+        }
+
+
+        <!-- =================================================
+             PACKAGES SECTION
+             ================================================= -->
+
+        @else if (activeSection() === 'packages') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Internet offers
+                        </span>
+
+                        <h2>
+                            Packages
+                        </h2>
+
+                        <p>
+                            Manage pricing, duration, speed,
+                            availability, and package status for
+                            this company.
+                        </p>
+
+                    </div>
+
+
+                    <ion-button
+                        size="small"
+                        (click)="openCreatePackageForm()"
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            name="add-outline"
+                        ></ion-icon>
+
+                        New package
+
+                    </ion-button>
+
+                </div>
+
+
+                <section class="summary-grid admin-summary-grid">
+
+                    <article class="summary-card">
+
+                        <span>
+                            Total packages
+                        </span>
+
+                        <strong>
+                            {{ packages().length }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Active
+                        </span>
+
+                        <strong>
+                            {{ activePackageCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Inactive
+                        </span>
+
+                        <strong>
+                            {{ inactivePackageCount() }}
+                        </strong>
+
+                    </article>
+
+                </section>
+
+
+                @if (packageErrorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+
+                        <span aria-hidden="true">
+                            !
+                        </span>
+
+                        <p>
+                            {{ packageErrorMessage() }}
+                        </p>
+
+                    </div>
+
+                }
+
+
+                @if (packagesLoading()) {
+
+                    <section class="state-panel">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <div>
+
+                            <strong>
+                                Loading packages
+                            </strong>
+
+                            <span>
+                                Fetching internet packages for this company.
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+                @else if (packages().length > 0) {
+
+                    <section class="package-panel">
+
+                        <div class="package-table__header">
+
+                            <span>
+                                Package
+                            </span>
+
+                            <span>
+                                Price
+                            </span>
+
+                            <span>
+                                Duration
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
+
+                            <span>
+                                Actions
+                            </span>
+
+                        </div>
+
+
+                        @for (
+                            item of packages();
+                            track item.id
+                        ) {
+
+                            <article class="package-row">
+
+                                <div class="package-cell package-cell--identity">
+
+                                    <span class="package-icon">
+
+                                        <ion-icon
+                                            name="cube-outline"
+                                        ></ion-icon>
+
+                                    </span>
+
+
+                                    <div>
+
+                                        <strong>
+                                            {{ item.name }}
+                                        </strong>
+
+                                        <small>
+                                            {{ item.speed }}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="package-cell">
+
+                                    <span class="mobile-label">
+                                        Price
+                                    </span>
+
+                                    <strong class="package-price">
+                                        TZS {{ packagePrice(item) }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="package-cell">
+
+                                    <span class="mobile-label">
+                                        Duration
+                                    </span>
+
+                                    <span>
+                                        {{
+                                            packageDuration(
+                                                item.duration_minutes
+                                            )
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="package-cell">
+
+                                    <span class="mobile-label">
+                                        Status
+                                    </span>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            packageStatusClass(item)
+                                        "
+                                    >
+                                        {{ packageStatusLabel(item) }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="package-cell package-cell--actions">
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="openEditPackageForm(item)"
+                                    >
+                                        Edit
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="openPackageScheduleForm(item)"
+                                    >
+                                        Schedule
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        [class.action-link--danger]="
+                                            item.is_active
+                                        "
+                                        [class.action-link--success]="
+                                            !item.is_active
+                                        "
+                                        (click)="togglePackageStatus(item)"
+                                        [disabled]="
+                                            packageActionId() === item.id
+                                        "
+                                    >
+                                        {{
+                                            item.is_active
+                                                ? 'Deactivate'
+                                                : 'Activate'
+                                        }}
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="action-link action-link--danger"
+                                        (click)="deletePackage(item)"
+                                        [disabled]="
+                                            packageActionId() === item.id
+                                        "
+                                    >
+                                        Delete
+                                    </button>
+
+                                </div>
+
+
+                                @if (
+                                    item.available_from ||
+                                    item.available_until
+                                ) {
+
+                                    <div class="package-schedule">
+
+                                        <span>
+                                            Availability
+                                        </span>
+
+                                        <strong>
+
+                                            @if (item.available_from) {
+
+                                                {{
+                                                    item.available_from
+                                                        | date:'medium'
+                                                }}
+
+                                            } @else {
+
+                                                Anytime
+
+                                            }
+
+                                            &nbsp;→&nbsp;
+
+                                            @if (item.available_until) {
+
+                                                {{
+                                                    item.available_until
+                                                        | date:'medium'
+                                                }}
+
+                                            } @else {
+
+                                                No end date
+
+                                            }
+
+                                        </strong>
+
+                                    </div>
+
+                                }
+
+                            </article>
+
+                        }
+
+                    </section>
+
+                } @else {
+
+                    <div class="coming-panel">
+
+                        <ion-icon
+                            name="cube-outline"
+                        ></ion-icon>
+
+                        <strong>
+                            No internet packages
+                        </strong>
+
+                        <p>
+                            Create the first package customers can
+                            purchase from this company's portal.
+                        </p>
+
+                        <ion-button
+                            size="small"
+                            (click)="openCreatePackageForm()"
+                        >
+                            Create package
+                        </ion-button>
+
+                    </div>
+
+                }
+
+            </section>
+
+        }
+
+
+        <!-- =================================================
+             PAYMENTS SECTION
+             ================================================= -->
+
+        @else if (activeSection() === 'payments') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Transactions
+                        </span>
+
+                        <h2>
+                            Payments
+                        </h2>
+
+                        <p>
+                            Review payment activity, revenue,
+                            transaction references, and related
+                            internet sessions for this company.
+                        </p>
+
+                    </div>
+
+
+                    <ion-button
+                        fill="outline"
+                        size="small"
+                        (click)="loadPayments()"
+                        [disabled]="paymentsLoading()"
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            name="refresh-outline"
+                        ></ion-icon>
+
+                        Refresh
+
+                    </ion-button>
+
+                </div>
+
+
+                <section class="summary-grid payment-summary-grid">
+
+                    <article class="summary-card">
+
+                        <span>
+                            Total payments
+                        </span>
+
+                        <strong>
+                            {{ payments().length }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Successful
+                        </span>
+
+                        <strong>
+                            {{ successfulPaymentCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Pending
+                        </span>
+
+                        <strong>
+                            {{ pendingPaymentCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Revenue
+                        </span>
+
+                        <strong class="summary-card__revenue">
+                            TZS {{ formatMoney(successfulRevenue()) }}
+                        </strong>
+
+                    </article>
+
+                </section>
+
+
+                @if (failedPaymentCount() > 0) {
+
+                    <div class="payment-failure-note">
+
+                        <span>
+                            Failed payments
+                        </span>
+
+                        <strong>
+                            {{ failedPaymentCount() }}
+                        </strong>
+
+                    </div>
+
+                }
+
+
+                @if (paymentErrorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+
+                        <span aria-hidden="true">
+                            !
+                        </span>
+
+                        <p>
+                            {{ paymentErrorMessage() }}
+                        </p>
+
+                    </div>
+
+                }
+
+
+                @if (paymentsLoading()) {
+
+                    <section class="state-panel">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <div>
+
+                            <strong>
+                                Loading payments
+                            </strong>
+
+                            <span>
+                                Fetching transactions for this company.
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+                @else if (payments().length > 0) {
+
+                    <section class="payment-panel">
+
+                        <div class="payment-table__header">
+
+                            <span>
+                                Transaction
+                            </span>
+
+                            <span>
+                                Package
+                            </span>
+
+                            <span>
+                                Amount
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
+
+                            <span>
+                                Date
+                            </span>
+
+                            <span>
+                                Action
+                            </span>
+
+                        </div>
+
+
+                        @for (
+                            payment of payments();
+                            track payment.id
+                        ) {
+
+                            <article class="payment-row">
+
+                                <div class="payment-cell payment-cell--identity">
+
+                                    <span class="payment-icon">
+
+                                        <ion-icon
+                                            name="wallet-outline"
+                                        ></ion-icon>
+
+                                    </span>
+
+
+                                    <div>
+
+                                        <strong>
+                                            {{
+                                                payment.transaction_reference
+                                            }}
+                                        </strong>
+
+                                        <small>
+                                            {{ payment.phone_number }}
+                                            ·
+                                            {{
+                                                paymentMethodLabel(
+                                                    payment.payment_method
+                                                )
+                                            }}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="payment-cell">
+
+                                    <span class="mobile-label">
+                                        Package
+                                    </span>
+
+                                    <strong>
+                                        {{ payment.package_name }}
+                                    </strong>
+
+                                    <small>
+                                        {{ payment.speed }}
+                                    </small>
+
+                                </div>
+
+
+                                <div class="payment-cell">
+
+                                    <span class="mobile-label">
+                                        Amount
+                                    </span>
+
+                                    <strong class="payment-amount">
+                                        TZS {{ paymentAmount(payment) }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="payment-cell">
+
+                                    <span class="mobile-label">
+                                        Status
+                                    </span>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            paymentStatusClass(payment)
+                                        "
+                                    >
+                                        {{
+                                            paymentStatusLabel(
+                                                payment
+                                            )
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="payment-cell">
+
+                                    <span class="mobile-label">
+                                        Date
+                                    </span>
+
+                                    <span>
+                                        {{
+                                            payment.created_at
+                                                | date:'medium'
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="payment-cell payment-cell--actions">
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="
+                                            openPaymentDetails(
+                                                payment
+                                            )
+                                        "
+                                    >
+
+                                        <ion-icon
+                                            name="eye-outline"
+                                        ></ion-icon>
+
+                                        View
+
+                                    </button>
+
+                                </div>
+
+                            </article>
+
+                        }
+
+                    </section>
+
+                } @else {
+
+                    <div class="coming-panel">
+
+                        <ion-icon
+                            name="card-outline"
+                        ></ion-icon>
+
+                        <strong>
+                            No payments yet
+                        </strong>
+
+                        <p>
+                            Payments made through this company's
+                            customer portal will appear here.
+                        </p>
+
+                    </div>
+
+                }
+
+            </section>
+
+        }
+
+
+        <!-- =================================================
+             SESSIONS SECTION
+             ================================================= -->
+
+        @else if (activeSection() === 'sessions') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Network access
+                        </span>
+
+                        <h2>
+                            Sessions
+                        </h2>
+
+                        <p>
+                            Monitor customer internet sessions,
+                            expiry times, package access, and session
+                            status for this company.
+                        </p>
+
+                    </div>
+
+
+                    <ion-button
+                        fill="outline"
+                        size="small"
+                        (click)="loadSessions()"
+                        [disabled]="sessionsLoading()"
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            name="refresh-outline"
+                        ></ion-icon>
+
+                        Refresh
+
+                    </ion-button>
+
+                </div>
+
+
+                <!-- =========================================
+                     SESSION SUMMARY
+                     ========================================= -->
+
+                <section class="summary-grid session-summary-grid">
+
+                    <article class="summary-card">
+
+                        <span>
+                            Total sessions
+                        </span>
+
+                        <strong>
+                            {{ sessions().length }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Active
+                        </span>
+
+                        <strong>
+                            {{ activeSessionCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Suspended
+                        </span>
+
+                        <strong>
+                            {{ suspendedSessionCount() }}
+                        </strong>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <span>
+                            Expired
+                        </span>
+
+                        <strong>
+                            {{ expiredSessionCount() }}
+                        </strong>
+
+                    </article>
+
+                </section>
+
+
+                <div class="session-secondary-summary">
+
+                    <div>
+
+                        <span>
+                            Pending activation
+                        </span>
+
+                        <strong>
+                            {{ pendingActivationSessionCount() }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Failed
+                        </span>
+
+                        <strong>
+                            {{ failedSessionCount() }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                @if (sessionErrorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+
+                        <span aria-hidden="true">
+                            !
+                        </span>
+
+                        <p>
+                            {{ sessionErrorMessage() }}
+                        </p>
+
+                    </div>
+
+                }
+
+
+                <!-- =========================================
+                     SESSION LOADING
+                     ========================================= -->
+
+                @if (sessionsLoading()) {
+
+                    <section class="state-panel">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <div>
+
+                            <strong>
+                                Loading internet sessions
+                            </strong>
+
+                            <span>
+                                Fetching network access sessions
+                                for this company.
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+                <!-- =========================================
+                     SESSION LIST
+                     ========================================= -->
+
+                @else if (sessions().length > 0) {
+
+                    <section class="session-panel">
+
+                        <div class="session-table__header">
+
+                            <span>
+                                Session
+                            </span>
+
+                            <span>
+                                Package
+                            </span>
+
+                            <span>
+                                Remaining
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
+
+                            <span>
+                                Expires
+                            </span>
+
+                            <span>
+                                Actions
+                            </span>
+
+                        </div>
+
+
+                        @for (
+                            session of sessions();
+                            track session.id
+                        ) {
+
+                            <article class="session-row">
+
+                                <div class="session-cell session-cell--identity">
+
+                                    <span class="session-icon">
+
+                                        <ion-icon
+                                            name="wifi-outline"
+                                        ></ion-icon>
+
+                                    </span>
+
+
+                                    <div>
+
+                                        <strong>
+                                            Session #{{ session.id }}
+                                        </strong>
+
+                                        <small>
+                                            {{
+                                                session.phone_number ||
+                                                'No phone number'
+                                            }}
+
+                                            @if (
+                                                session.transaction_reference
+                                            ) {
+
+                                                ·
+                                                {{
+                                                    session.transaction_reference
+                                                }}
+
+                                            }
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="session-cell">
+
+                                    <span class="mobile-label">
+                                        Package
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.package_name ||
+                                            ('Package #' + session.package_id)
+                                        }}
+                                    </strong>
+
+                                    <small>
+                                        {{
+                                            session.speed ||
+                                            sessionDuration(session)
+                                        }}
+                                    </small>
+
+                                </div>
+
+
+                                <div class="session-cell">
+
+                                    <span class="mobile-label">
+                                        Remaining
+                                    </span>
+
+                                    <strong class="session-remaining">
+                                        {{ sessionRemainingLabel(session) }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="session-cell">
+
+                                    <span class="mobile-label">
+                                        Status
+                                    </span>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            internetSessionStatusClass(session)
+                                        "
+                                    >
+                                        {{
+                                            internetSessionStatusLabel(
+                                                session
+                                            )
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="session-cell">
+
+                                    <span class="mobile-label">
+                                        Expires
+                                    </span>
+
+                                    <span>
+
+                                        @if (session.expires_at) {
+
+                                            {{
+                                                session.expires_at
+                                                    | date:'medium'
+                                            }}
+
+                                        } @else {
+
+                                            —
+
+                                        }
+
+                                    </span>
+
+                                </div>
+
+
+                                <div class="session-cell session-cell--actions">
+
+                                    <button
+                                        type="button"
+                                        class="action-link"
+                                        (click)="
+                                            openSessionDetails(
+                                                session
+                                            )
+                                        "
+                                    >
+
+                                        <ion-icon
+                                            name="eye-outline"
+                                        ></ion-icon>
+
+                                        View
+
+                                    </button>
+
+
+                                    @if (
+                                        sessionCanSuspend(
+                                            session
+                                        )
+                                    ) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--danger"
+                                            (click)="
+                                                changeSessionStatus(
+                                                    session,
+                                                    'suspended'
+                                                )
+                                            "
+                                            [disabled]="
+                                                sessionActionId() ===
+                                                session.id
+                                            "
+                                        >
+
+                                            @if (
+                                                sessionActionId() ===
+                                                session.id
+                                            ) {
+
+                                                <ion-spinner
+                                                    name="crescent"
+                                                ></ion-spinner>
+
+                                            } @else {
+
+                                                <ion-icon
+                                                    name="close-circle-outline"
+                                                ></ion-icon>
+
+                                            }
+
+                                            Suspend
+
+                                        </button>
+
+                                    }
+
+
+                                    @if (
+                                        sessionCanActivate(
+                                            session
+                                        )
+                                    ) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--success"
+                                            (click)="
+                                                changeSessionStatus(
+                                                    session,
+                                                    'active'
+                                                )
+                                            "
+                                            [disabled]="
+                                                sessionActionId() ===
+                                                session.id
+                                            "
+                                        >
+
+                                            @if (
+                                                sessionActionId() ===
+                                                session.id
+                                            ) {
+
+                                                <ion-spinner
+                                                    name="crescent"
+                                                ></ion-spinner>
+
+                                            } @else {
+
+                                                <ion-icon
+                                                    name="checkmark-circle-outline"
+                                                ></ion-icon>
+
+                                            }
+
+                                            Activate
+
+                                        </button>
+
+                                    }
+
+                                </div>
+
+                            </article>
+
+                        }
+
+                    </section>
+
+                }
+
+
+                <!-- =========================================
+                     EMPTY SESSION STATE
+                     ========================================= -->
+
+                @else {
+
+                    <div class="coming-panel">
+
+                        <ion-icon
+                            name="wifi-outline"
+                        ></ion-icon>
+
+                        <strong>
+                            No internet sessions
+                        </strong>
+
+                        <p>
+                            Sessions created after successful customer
+                            payments will appear here.
+                        </p>
+
+                    </div>
+
+                }
+
+            </section>
+
+        }
+
+
+        <!-- =================================================
+     REPORTS SECTION
+     ================================================= -->
+
+@else if (activeSection() === 'reports') {
+
+    <section class="workspace-section">
+
+        <!-- =============================================
+             REPORT HEADER
+             ============================================= -->
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="eyebrow">
+                    Company analytics
+                </span>
+
+                <h2>
+                    Reports
+                </h2>
+
+                <p>
+                    Review revenue performance, payment activity,
+                    and internet session statistics for this company.
+                </p>
+
+            </div>
+
+
+            <ion-button
+                fill="outline"
+                size="small"
+                (click)="loadReports()"
+                [disabled]="reportsLoading()"
+            >
+
+                <ion-icon
+                    slot="start"
+                    name="refresh-outline"
+                ></ion-icon>
+
+                Refresh
+
+            </ion-button>
+
+        </div>
+
+
+        <!-- =============================================
+             ERROR
+             ============================================= -->
+
+        @if (reportErrorMessage()) {
+
+            <div
+                class="inline-alert"
+                role="alert"
+            >
+
+                <span aria-hidden="true">
+                    !
+                </span>
+
+                <p>
+                    {{ reportErrorMessage() }}
+                </p>
+
+            </div>
+
+        }
+
+
+        <!-- =============================================
+             LOADING
+             ============================================= -->
+
+        @if (reportsLoading()) {
+
+            <section class="state-panel">
+
+                <ion-spinner
+                    name="crescent"
+                ></ion-spinner>
+
+                <div>
+
+                    <strong>
+                        Loading company reports
+                    </strong>
+
+                    <span>
+                        Preparing revenue, payment, and
+                        session analytics.
+                    </span>
+
+                </div>
+
+            </section>
+
+        }
+
+
+        @else {
+
+            <!-- =========================================
+                 MAIN SUMMARY
+                 ========================================= -->
+
+            <section class="summary-grid report-summary-grid">
+
+                <article class="summary-card">
+
+                    <span>
+                        Total revenue
+                    </span>
+
+                    <strong class="summary-card__revenue">
+                        TZS {{
+                            reportRevenueAmount(
+                                reportTotalRevenue()
+                            )
+                        }}
+                    </strong>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span>
+                        Total payments
+                    </span>
+
+                    <strong>
+                        {{ reportTotalPayments() }}
+                    </strong>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span>
+                        Successful payments
+                    </span>
+
+                    <strong>
+                        {{ reportSuccessfulPayments() }}
+                    </strong>
+
+                </article>
+
+
+                <article class="summary-card">
+
+                    <span>
+                        Total sessions
+                    </span>
+
+                    <strong>
+                        {{ reportTotalSessions() }}
+                    </strong>
+
+                </article>
+
+            </section>
+
+
+            <!-- =========================================
+                 PAYMENT + SESSION QUICK SUMMARY
+                 ========================================= -->
+
+            <section class="report-mini-grid">
+
+                <article class="report-mini-card">
+
+                    <span>
+                        Pending payments
+                    </span>
+
+                    <strong>
+                        {{ reportPendingPayments() }}
+                    </strong>
+
+                </article>
+
+
+                <article class="report-mini-card">
+
+                    <span>
+                        Failed payments
+                    </span>
+
+                    <strong>
+                        {{ reportFailedPayments() }}
+                    </strong>
+
+                </article>
+
+
+                <article class="report-mini-card">
+
+                    <span>
+                        Active sessions
+                    </span>
+
+                    <strong>
+                        {{ reportActiveSessions() }}
+                    </strong>
+
+                </article>
+
+
+                <article class="report-mini-card">
+
+                    <span>
+                        Expired sessions
+                    </span>
+
+                    <strong>
+                        {{ reportExpiredSessions() }}
+                    </strong>
+
+                </article>
+
+            </section>
+
+
+            <!-- =========================================
+                 REVENUE REPORT
+                 ========================================= -->
+
+            <section class="report-card">
+
+                <div class="report-card__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Revenue
+                        </span>
+
+                        <h3>
+                            Revenue by date
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                @if (revenueReport().length > 0) {
+
+                    <div class="report-table">
+
+                        <div class="report-table__header">
+
+                            <span>
+                                Date
+                            </span>
+
+                            <span>
+                                Successful payments
+                            </span>
+
+                            <span>
+                                Revenue
+                            </span>
+
+                        </div>
+
+
+                        @for (
+                            item of revenueReport();
+                            track item.date
+                        ) {
+
+                            <div class="report-table__row">
+
+                                <div>
+
+                                    <span class="mobile-label">
+                                        Date
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            item.date
+                                                | date:'mediumDate'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="mobile-label">
+                                        Successful payments
+                                    </span>
+
+                                    <span>
+                                        {{ item.successful_payments }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="mobile-label">
+                                        Revenue
+                                    </span>
+
+                                    <strong class="report-money">
+                                        TZS {{
+                                            reportRevenueAmount(
+                                                item.revenue
+                                            )
+                                        }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                } @else {
+
+                    <div class="report-empty">
+
+                        <ion-icon
+                            name="wallet-outline"
+                        ></ion-icon>
+
+                        <div>
+
+                            <strong>
+                                No revenue data
+                            </strong>
+
+                            <span>
+                                Successful payments will appear here.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                }
+
+            </section>
+
+
+            <!-- =========================================
+                 PAYMENT REPORT
+                 ========================================= -->
+
+            <section class="report-card">
+
+                <div class="report-card__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Transactions
+                        </span>
+
+                        <h3>
+                            Payments by status
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                @if (paymentReport().length > 0) {
+
+                    <div class="report-status-list">
+
+                        @for (
+                            item of paymentReport();
+                            track item.status
+                        ) {
+
+                            <article class="report-status-row">
+
+                                <div>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            reportStatusClass(
+                                                item.status
+                                            )
+                                        "
+                                    >
+                                        {{
+                                            reportStatusLabel(
+                                                item.status
+                                            )
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Payments
+                                    </span>
+
+                                    <strong>
+                                        {{ item.payment_count }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Amount
+                                    </span>
+
+                                    <strong class="report-money">
+                                        TZS {{
+                                            reportPaymentAmount(
+                                                item
+                                            )
+                                        }}
+                                    </strong>
+
+                                </div>
+
+                            </article>
+
+                        }
+
+                    </div>
+
+                } @else {
+
+                    <div class="report-empty">
+
+                        <ion-icon
+                            name="card-outline"
+                        ></ion-icon>
+
+                        <div>
+
+                            <strong>
+                                No payment report data
+                            </strong>
+
+                            <span>
+                                Payment status totals will appear here.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                }
+
+            </section>
+
+
+            <!-- =========================================
+                 SESSION REPORT
+                 ========================================= -->
+
+            <section class="report-card">
+
+                <div class="report-card__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Network
+                        </span>
+
+                        <h3>
+                            Sessions by status
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                @if (sessionReport().length > 0) {
+
+                    <div class="report-status-list">
+
+                        @for (
+                            item of sessionReport();
+                            track item.status
+                        ) {
+
+                            <article class="report-status-row">
+
+                                <div>
+
+                                    <span
+                                        class="status-badge"
+                                        [class]="
+                                            'status-badge ' +
+                                            reportStatusClass(
+                                                item.status
+                                            )
+                                        "
+                                    >
+                                        {{
+                                            reportStatusLabel(
+                                                item.status
+                                            )
+                                        }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Sessions
+                                    </span>
+
+                                    <strong>
+                                        {{ item.session_count }}
+                                    </strong>
+
+                                </div>
+
+                            </article>
+
+                        }
+
+                    </div>
+
+                } @else {
+
+                    <div class="report-empty">
+
+                        <ion-icon
+                            name="wifi-outline"
+                        ></ion-icon>
+
+                        <div>
+
+                            <strong>
+                                No session report data
+                            </strong>
+
+                            <span>
+                                Internet session statistics
+                                will appear here.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                }
+
+            </section>
+
+        }
+
+    </section>
+
+}
+
+
+        <!-- =================================================
+             BRANDING SECTION
+             ================================================= -->
+
+        @else if (activeSection() === 'branding') {
+
+            <section class="workspace-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Customer experience
+                        </span>
+
+                        <h2>
+                            Branding
+                        </h2>
+
+                        <p>
+                            Manage the logo, colors, and images used
+                            by this company's customer portal.
+                        </p>
+
+                    </div>
+
+
+                    <ion-button
+                        fill="outline"
+                        size="small"
+                        (click)="resetBrandingForm()"
+                        [disabled]="
+                            brandingSaving() ||
+                            brandingUploading() !== null ||
+                            brandingRemoving() !== null
+                        "
+                    >
+
+                        <ion-icon
+                            slot="start"
+                            name="refresh-outline"
+                        ></ion-icon>
+
+                        Reset
+
+                    </ion-button>
+
+                </div>
+
+
+                @if (brandingErrorMessage()) {
+
+                    <div
+                        class="inline-alert"
+                        role="alert"
+                    >
+
+                        <span aria-hidden="true">
+                            !
+                        </span>
+
+                        <p>
+                            {{ brandingErrorMessage() }}
+                        </p>
+
+                    </div>
+
+                }
+
+
+                @if (brandingSuccessMessage()) {
+
+                    <div
+                        class="branding-success"
+                        role="status"
+                    >
+
+                        <ion-icon
+                            name="checkmark-circle-outline"
+                        ></ion-icon>
+
+                        <span>
+                            {{ brandingSuccessMessage() }}
+                        </span>
+
+                    </div>
+
+                }
+
+
+                <!-- =========================================
+                     LOGO
+                     ========================================= -->
+
+                <section class="branding-card">
+
+                    <div class="branding-card__header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                Identity
+                            </span>
+
+                            <h3>
+                                Company logo
+                            </h3>
+
+                            <p>
+                                Used across the customer portal and
+                                company-facing pages.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="branding-logo-layout">
+
+                        <div class="branding-logo-preview">
+
+                            @if (logoUrl()) {
+
+                                <img
+                                    [src]="publicImageUrl(logoUrl())"
+                                    [alt]="selectedCompany.name + ' logo'"
+                                />
+
+                            } @else {
+
+                                <div class="branding-placeholder branding-placeholder--logo">
+
+                                    <ion-icon
+                                        name="image-outline"
+                                    ></ion-icon>
+
+                                    <span>
+                                        No logo uploaded
+                                    </span>
+
+                                </div>
+
+                            }
+
+                        </div>
+
+
+                        <div class="branding-upload-actions">
+
+                            <label
+                                class="branding-file-button"
+                                [class.branding-file-button--disabled]="
+                                    brandingUploading() !== null ||
+                                    brandingRemoving() !== null
+                                "
+                            >
+
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    (change)="onLogoFileSelected($event)"
+                                    [disabled]="
+                                        brandingUploading() !== null ||
+                                        brandingRemoving() !== null
+                                    "
+                                />
+
+                                @if (brandingUploading() === 'logo') {
+
+                                    <ion-spinner
+                                        name="crescent"
+                                    ></ion-spinner>
+
+                                    Uploading...
+
+                                } @else {
+
+                                    <ion-icon
+                                        name="image-outline"
+                                    ></ion-icon>
+
+                                    Upload logo
+
+                                }
+
+                            </label>
+
+
+                            @if (logoUrl()) {
+
+                                <ion-button
+                                    fill="outline"
+                                    color="danger"
+                                    size="small"
+                                    (click)="removeLogo()"
+                                    [disabled]="
+                                        brandingUploading() !== null ||
+                                        brandingRemoving() !== null
+                                    "
+                                >
+
+                                    @if (brandingRemoving() === 'logo') {
+
+                                        <ion-spinner
+                                            slot="start"
+                                            name="crescent"
+                                        ></ion-spinner>
+
+                                    } @else {
+
+                                        <ion-icon
+                                            slot="start"
+                                            name="trash-outline"
+                                        ></ion-icon>
+
+                                    }
+
+                                    Remove logo
+
+                                </ion-button>
+
+                            }
+
+
+                            <small>
+                                JPG, PNG or WEBP. Maximum 5 MB.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================================
+                     COLORS
+                     ========================================= -->
+
+                <section class="branding-card">
+
+                    <div class="branding-card__header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                Theme
+                            </span>
+
+                            <h3>
+                                Brand colors
+                            </h3>
+
+                            <p>
+                                These colors control the visual identity
+                                used by the customer portal.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        class="branding-form"
+                        [formGroup]="brandingForm"
+                        (ngSubmit)="saveBranding()"
+                    >
+
+                        <div class="branding-color-grid">
+
+                            <label class="branding-color-field">
+
+                                <span>
+                                    Primary color
+                                </span>
+
+                                <div class="branding-color-control">
+
+                                    <input
+                                        class="branding-color-picker"
+                                        type="color"
+                                        formControlName="primary_color"
+                                    />
+
+                                    <ion-input
+                                        formControlName="primary_color"
+                                    ></ion-input>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="branding-color-field">
+
+                                <span>
+                                    Secondary color
+                                </span>
+
+                                <div class="branding-color-control">
+
+                                    <input
+                                        class="branding-color-picker"
+                                        type="color"
+                                        formControlName="secondary_color"
+                                    />
+
+                                    <ion-input
+                                        formControlName="secondary_color"
+                                    ></ion-input>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="branding-color-field">
+
+                                <span>
+                                    Accent color
+                                </span>
+
+                                <div class="branding-color-control">
+
+                                    <input
+                                        class="branding-color-picker"
+                                        type="color"
+                                        formControlName="accent_color"
+                                    />
+
+                                    <ion-input
+                                        formControlName="accent_color"
+                                    ></ion-input>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="branding-color-field">
+
+                                <span>
+                                    Background color
+                                </span>
+
+                                <div class="branding-color-control">
+
+                                    <input
+                                        class="branding-color-picker"
+                                        type="color"
+                                        formControlName="background_color"
+                                    />
+
+                                    <ion-input
+                                        formControlName="background_color"
+                                    ></ion-input>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="branding-color-field">
+
+                                <span>
+                                    Navbar color
+                                </span>
+
+                                <div class="branding-color-control">
+
+                                    <input
+                                        class="branding-color-picker"
+                                        type="color"
+                                        formControlName="navbar_color"
+                                    />
+
+                                    <ion-input
+                                        formControlName="navbar_color"
+                                    ></ion-input>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+
+                        @if (brandingForm.invalid) {
+
+                            <small class="field-error">
+                                All brand colors must be valid hex values,
+                                such as #2563EB.
+                            </small>
+
+                        }
+
+
+                        <!-- =================================
+                             LIVE CUSTOMER PORTAL PREVIEW
+                             ================================= -->
+
+                        <section class="branding-preview-panel">
+
+                            <div class="branding-preview-panel__heading">
+
+                                <div>
+
+                                    <span class="eyebrow">
+                                        Live preview
+                                    </span>
+
+                                    <strong>
+                                        Customer portal appearance
+                                    </strong>
+
+                                    <p>
+                                        Preview how {{ selectedCompany.name }}
+                                        will appear to customers.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="portal-preview"
+                                [style.background]="
+                                    brandingForm.controls.background_color.value
+                                "
+                            >
+
+                                <div
+                                    class="portal-preview__navbar"
+                                    [style.background]="
+                                        brandingForm.controls.navbar_color.value
+                                    "
+                                >
+
+                                    <div class="portal-preview__brand">
+
+                                        @if (logoUrl()) {
+
+                                            <img
+                                                [src]="publicImageUrl(logoUrl())"
+                                                [alt]="selectedCompany.name + ' logo'"
+                                            />
+
+                                        } @else {
+
+                                            <span class="portal-preview__logo-placeholder">
+                                                {{
+                                                    selectedCompany.name
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                }}
+                                            </span>
+
+                                        }
+
+                                        <strong>
+                                            {{ selectedCompany.name }}
+                                        </strong>
+
+                                    </div>
+
+                                    <span class="portal-preview__nav-label">
+                                        Customer Portal
+                                    </span>
+
+                                </div>
+
+
+                                <div class="portal-preview__body">
+
+                                    <span
+                                        class="portal-preview__eyebrow"
+                                        [style.color]="
+                                            brandingForm.controls.primary_color.value
+                                        "
+                                    >
+                                        INTERNET ACCESS
+                                    </span>
+
+                                    <h3
+                                        [style.color]="
+                                            brandingForm.controls.secondary_color.value
+                                        "
+                                    >
+                                        Choose your package
+                                    </h3>
+
+                                    <p>
+                                        Connect quickly using
+                                        {{ selectedCompany.name }} Wi-Fi.
+                                        Select an internet package and continue
+                                        securely to payment.
+                                    </p>
+
+                                    <div class="portal-preview__package">
+
+                                        <div>
+
+                                            <small>
+                                                POPULAR PACKAGE
+                                            </small>
+
+                                            <strong
+                                                [style.color]="
+                                                    brandingForm.controls.secondary_color.value
+                                                "
+                                            >
+                                                Daily Unlimited
+                                            </strong>
+
+                                            <span>
+                                                Fast internet access
+                                            </span>
+
+                                        </div>
+
+                                        <div class="portal-preview__price">
+
+                                            <strong
+                                                [style.color]="
+                                                    brandingForm.controls.primary_color.value
+                                                "
+                                            >
+                                                TZS 2,000
+                                            </strong>
+
+                                            <small>
+                                                / day
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="portal-preview__button"
+                                        [style.background]="
+                                            brandingForm.controls.accent_color.value
+                                        "
+                                    >
+                                        Buy package
+                                    </button>
+
+                                    <small
+                                        class="portal-preview__security"
+                                        [style.color]="
+                                            brandingForm.controls.primary_color.value
+                                        "
+                                    >
+                                        Secure network access
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <div class="branding-form-actions">
+
+                            <ion-button
+                                type="button"
+                                fill="outline"
+                                (click)="resetBrandingForm()"
+                                [disabled]="brandingSaving()"
+                            >
+                                Reset
+                            </ion-button>
+
+
+                            <ion-button
+                                type="submit"
+                                [disabled]="
+                                    brandingSaving() ||
+                                    brandingForm.invalid
+                                "
+                            >
+
+                                @if (brandingSaving()) {
+
+                                    <ion-spinner
+                                        slot="start"
+                                        name="crescent"
+                                    ></ion-spinner>
+
+                                    Saving...
+
+                                } @else {
+
+                                    <ion-icon
+                                        slot="start"
+                                        name="save-outline"
+                                    ></ion-icon>
+
+                                    Save branding
+
+                                }
+
+                            </ion-button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+
+                <!-- =========================================
+                     BRANDING IMAGES
+                     ========================================= -->
+
+                <section class="branding-card">
+
+                    <div class="branding-card__header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                Imagery
+                            </span>
+
+                            <h3>
+                                Portal images
+                            </h3>
+
+                            <p>
+                                Configure optional background, login,
+                                and promotional banner images.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="branding-image-grid">
+
+                        <!-- Background image -->
+
+                        <article class="branding-image-card">
+
+                            <div class="branding-image-card__preview">
+
+                                @if (backgroundImageUrl()) {
+
+                                    <img
+                                        [src]="
+                                            publicImageUrl(
+                                                backgroundImageUrl()
+                                            )
+                                        "
+                                        alt="Customer portal background preview"
+                                    />
+
+                                } @else {
+
+                                    <div class="branding-placeholder">
+
+                                        <ion-icon
+                                            name="image-outline"
+                                        ></ion-icon>
+
+                                        <span>
+                                            No background image
+                                        </span>
+
+                                    </div>
+
+                                }
+
+                            </div>
+
+
+                            <div class="branding-image-card__body">
+
+                                <div>
+
+                                    <strong>
+                                        Background image
+                                    </strong>
+
+                                    <span>
+                                        Main customer portal background.
+                                    </span>
+
+                                </div>
+
+
+                                <div class="branding-image-actions">
+
+                                    <label
+                                        class="branding-file-button"
+                                        [class.branding-file-button--disabled]="
+                                            brandingUploading() !== null ||
+                                            brandingRemoving() !== null
+                                        "
+                                    >
+
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            (change)="
+                                                onBrandingFileSelected(
+                                                    $event,
+                                                    'background'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        />
+
+                                        @if (
+                                            brandingUploading() ===
+                                            'background'
+                                        ) {
+
+                                            <ion-spinner
+                                                name="crescent"
+                                            ></ion-spinner>
+
+                                            Uploading...
+
+                                        } @else {
+
+                                            Upload
+
+                                        }
+
+                                    </label>
+
+
+                                    @if (backgroundImageUrl()) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--danger"
+                                            (click)="
+                                                removeBrandingImage(
+                                                    'background'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        >
+                                            Remove
+                                        </button>
+
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Login image -->
+
+                        <article class="branding-image-card">
+
+                            <div class="branding-image-card__preview">
+
+                                @if (loginImageUrl()) {
+
+                                    <img
+                                        [src]="
+                                            publicImageUrl(
+                                                loginImageUrl()
+                                            )
+                                        "
+                                        alt="Customer portal login image preview"
+                                    />
+
+                                } @else {
+
+                                    <div class="branding-placeholder">
+
+                                        <ion-icon
+                                            name="image-outline"
+                                        ></ion-icon>
+
+                                        <span>
+                                            No login image
+                                        </span>
+
+                                    </div>
+
+                                }
+
+                            </div>
+
+
+                            <div class="branding-image-card__body">
+
+                                <div>
+
+                                    <strong>
+                                        Login image
+                                    </strong>
+
+                                    <span>
+                                        Visual used around portal login
+                                        or captive access screens.
+                                    </span>
+
+                                </div>
+
+
+                                <div class="branding-image-actions">
+
+                                    <label
+                                        class="branding-file-button"
+                                        [class.branding-file-button--disabled]="
+                                            brandingUploading() !== null ||
+                                            brandingRemoving() !== null
+                                        "
+                                    >
+
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            (change)="
+                                                onBrandingFileSelected(
+                                                    $event,
+                                                    'login'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        />
+
+                                        @if (
+                                            brandingUploading() ===
+                                            'login'
+                                        ) {
+
+                                            <ion-spinner
+                                                name="crescent"
+                                            ></ion-spinner>
+
+                                            Uploading...
+
+                                        } @else {
+
+                                            Upload
+
+                                        }
+
+                                    </label>
+
+
+                                    @if (loginImageUrl()) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--danger"
+                                            (click)="
+                                                removeBrandingImage(
+                                                    'login'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        >
+                                            Remove
+                                        </button>
+
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Banner image -->
+
+                        <article class="branding-image-card">
+
+                            <div class="branding-image-card__preview">
+
+                                @if (bannerImageUrl()) {
+
+                                    <img
+                                        [src]="
+                                            publicImageUrl(
+                                                bannerImageUrl()
+                                            )
+                                        "
+                                        alt="Customer portal banner preview"
+                                    />
+
+                                } @else {
+
+                                    <div class="branding-placeholder">
+
+                                        <ion-icon
+                                            name="image-outline"
+                                        ></ion-icon>
+
+                                        <span>
+                                            No banner image
+                                        </span>
+
+                                    </div>
+
+                                }
+
+                            </div>
+
+
+                            <div class="branding-image-card__body">
+
+                                <div>
+
+                                    <strong>
+                                        Banner image
+                                    </strong>
+
+                                    <span>
+                                        Promotional or welcome banner
+                                        shown in the customer portal.
+                                    </span>
+
+                                </div>
+
+
+                                <div class="branding-image-actions">
+
+                                    <label
+                                        class="branding-file-button"
+                                        [class.branding-file-button--disabled]="
+                                            brandingUploading() !== null ||
+                                            brandingRemoving() !== null
+                                        "
+                                    >
+
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            (change)="
+                                                onBrandingFileSelected(
+                                                    $event,
+                                                    'banner'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        />
+
+                                        @if (
+                                            brandingUploading() ===
+                                            'banner'
+                                        ) {
+
+                                            <ion-spinner
+                                                name="crescent"
+                                            ></ion-spinner>
+
+                                            Uploading...
+
+                                        } @else {
+
+                                            Upload
+
+                                        }
+
+                                    </label>
+
+
+                                    @if (bannerImageUrl()) {
+
+                                        <button
+                                            type="button"
+                                            class="action-link action-link--danger"
+                                            (click)="
+                                                removeBrandingImage(
+                                                    'banner'
+                                                )
+                                            "
+                                            [disabled]="
+                                                brandingUploading() !== null ||
+                                                brandingRemoving() !== null
+                                            "
+                                        >
+                                            Remove
+                                        </button>
+
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+
+                    <small class="branding-upload-note">
+                        Uploaded images are stored per company. Supported
+                        formats are JPG, PNG and WEBP up to 5 MB.
+                    </small>
+
+                </section>
+
+            </section>
+
+        }
+
+    }
+
+
+    <!-- =====================================================
+         CREATE ADMIN DIALOG
+         ===================================================== -->
+
+    @if (showCreateAdminForm()) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeCreateAdminForm()"
+        >
+
+            <section
+                class="form-panel"
+                role="dialog"
+                aria-modal="true"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Company administrator
+                        </span>
+
+                        <h2>
+                            Create admin
+                        </h2>
+
+                        <p>
+                            This account will be able to manage
+                            {{ company()?.name }}.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closeCreateAdminForm()"
+                        [disabled]="adminSaving()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="createAdminForm"
+                    (ngSubmit)="createAdmin()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            Administrator name
+                        </span>
+
+                        <ion-input
+                            formControlName="name"
+                            placeholder="Full name"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Email address
+                        </span>
+
+                        <ion-input
+                            type="email"
+                            formControlName="email"
+                            placeholder="admin@example.com"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Temporary password
+                        </span>
+
+                        <ion-input
+                            type="password"
+                            formControlName="password"
+                            placeholder="Minimum 8 characters"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closeCreateAdminForm()"
+                            [disabled]="adminSaving()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="adminSaving()"
+                        >
+                            Create admin
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         EDIT ADMIN DIALOG
+         ===================================================== -->
+
+    @if (editingAdmin(); as admin) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeEditAdminForm()"
+        >
+
+            <section
+                class="form-panel"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Administrator account
+                        </span>
+
+                        <h2>
+                            Edit admin
+                        </h2>
+
+                        <p>
+                            Update {{ admin.name }}.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closeEditAdminForm()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="editAdminForm"
+                    (ngSubmit)="updateAdmin()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            Administrator name
+                        </span>
+
+                        <ion-input
+                            formControlName="name"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Email address
+                        </span>
+
+                        <ion-input
+                            type="email"
+                            formControlName="email"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closeEditAdminForm()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="adminSaving()"
+                        >
+                            Save changes
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         CHANGE ADMIN PASSWORD DIALOG
+         ===================================================== -->
+
+    @if (passwordAdmin(); as admin) {
+
+        <div
+            class="form-backdrop"
+            (click)="closePasswordForm()"
+        >
+
+            <section
+                class="form-panel"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Account security
+                        </span>
+
+                        <h2>
+                            Change password
+                        </h2>
+
+                        <p>
+                            Set a new password for {{ admin.name }}.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closePasswordForm()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="passwordForm"
+                    (ngSubmit)="changeAdminPassword()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            New password
+                        </span>
+
+                        <ion-input
+                            type="password"
+                            formControlName="password"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Confirm password
+                        </span>
+
+                        <ion-input
+                            type="password"
+                            formControlName="confirmPassword"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closePasswordForm()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="adminSaving()"
+                        >
+                            Change password
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         CREATE PACKAGE DIALOG
+         ===================================================== -->
+
+    @if (showCreatePackageForm()) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeCreatePackageForm()"
+        >
+
+            <section
+                class="form-panel"
+                role="dialog"
+                aria-modal="true"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Internet package
+                        </span>
+
+                        <h2>
+                            Create package
+                        </h2>
+
+                        <p>
+                            Add a package for
+                            {{ company()?.name }}.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closeCreatePackageForm()"
+                        [disabled]="packageSaving()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="createPackageForm"
+                    (ngSubmit)="createCompanyPackage()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            Package name
+                        </span>
+
+                        <ion-input
+                            formControlName="name"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="form-grid">
+
+                        <label class="form-field">
+
+                            <span>
+                                Price (TZS)
+                            </span>
+
+                            <ion-input
+                                type="number"
+                                formControlName="price"
+                            ></ion-input>
+
+                        </label>
+
+
+                        <label class="form-field">
+
+                            <span>
+                                Duration (minutes)
+                            </span>
+
+                            <ion-input
+                                type="number"
+                                formControlName="duration_minutes"
+                            ></ion-input>
+
+                        </label>
+
+                    </div>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Speed
+                        </span>
+
+                        <ion-input
+                            formControlName="speed"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closeCreatePackageForm()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="packageSaving()"
+                        >
+                            Create package
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         EDIT PACKAGE DIALOG
+         ===================================================== -->
+
+    @if (editingPackage(); as item) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeEditPackageForm()"
+        >
+
+            <section
+                class="form-panel"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Internet package
+                        </span>
+
+                        <h2>
+                            Edit package
+                        </h2>
+
+                        <p>
+                            Update {{ item.name }}.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closeEditPackageForm()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="editPackageForm"
+                    (ngSubmit)="updateCompanyPackage()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            Package name
+                        </span>
+
+                        <ion-input
+                            formControlName="name"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="form-grid">
+
+                        <label class="form-field">
+
+                            <span>
+                                Price (TZS)
+                            </span>
+
+                            <ion-input
+                                type="number"
+                                formControlName="price"
+                            ></ion-input>
+
+                        </label>
+
+
+                        <label class="form-field">
+
+                            <span>
+                                Duration (minutes)
+                            </span>
+
+                            <ion-input
+                                type="number"
+                                formControlName="duration_minutes"
+                            ></ion-input>
+
+                        </label>
+
+                    </div>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Speed
+                        </span>
+
+                        <ion-input
+                            formControlName="speed"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closeEditPackageForm()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="packageSaving()"
+                        >
+                            Save package
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         PACKAGE SCHEDULE DIALOG
+         ===================================================== -->
+
+    @if (schedulePackage(); as item) {
+
+        <div
+            class="form-backdrop"
+            (click)="closePackageScheduleForm()"
+        >
+
+            <section
+                class="form-panel"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Package availability
+                        </span>
+
+                        <h2>
+                            Schedule package
+                        </h2>
+
+                        <p>
+                            Control when {{ item.name }} is available.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closePackageScheduleForm()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <form
+                    class="dialog-form"
+                    [formGroup]="packageScheduleForm"
+                    (ngSubmit)="updatePackageSchedule()"
+                >
+
+                    <label class="form-field">
+
+                        <span>
+                            Available from
+                        </span>
+
+                        <ion-input
+                            type="datetime-local"
+                            formControlName="available_from"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <label class="form-field">
+
+                        <span>
+                            Available until
+                        </span>
+
+                        <ion-input
+                            type="datetime-local"
+                            formControlName="available_until"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <div class="dialog-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closePackageScheduleForm()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="packageSaving()"
+                        >
+                            Save schedule
+                        </ion-button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         PAYMENT DETAILS DIALOG
+         ===================================================== -->
+
+    @if (selectedPayment(); as payment) {
+
+        <div
+            class="form-backdrop"
+            (click)="closePaymentDetails()"
+        >
+
+            <section
+                class="form-panel payment-details-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="payment-details-title"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Transaction details
+                        </span>
+
+                        <h2 id="payment-details-title">
+                            Payment #{{ payment.id }}
+                        </h2>
+
+                        <p>
+                            {{ payment.transaction_reference }}
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closePaymentDetails()"
+                        [disabled]="paymentDetailsLoading()"
+                        aria-label="Close payment details"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                @if (paymentDetailsLoading()) {
+
+                    <section class="payment-details-loading">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <span>
+                            Loading complete payment details...
+                        </span>
+
+                    </section>
+
+                } @else {
+
+                    <div class="payment-details-content">
+
+                        <div class="payment-details-hero">
+
+                            <div>
+
+                                <span>
+                                    Amount
+                                </span>
+
+                                <strong>
+                                    TZS {{ paymentAmount(payment) }}
+                                </strong>
+
+                            </div>
+
+
+                            <span
+                                class="status-badge"
+                                [class]="
+                                    'status-badge ' +
+                                    paymentStatusClass(payment)
+                                "
+                            >
+                                {{ paymentStatusLabel(payment) }}
+                            </span>
+
+                        </div>
+
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Payment
+                                </span>
+
+                                <h3>
+                                    Transaction information
+                                </h3>
+
+                            </div>
+
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Reference
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            payment.transaction_reference
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Phone
+                                    </span>
+
+                                    <strong>
+                                        {{ payment.phone_number }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Method
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            paymentMethodLabel(
+                                                payment.payment_method
+                                            )
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Created
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            payment.created_at
+                                                | date:'medium'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Paid
+                                    </span>
+
+                                    <strong>
+
+                                        @if (payment.paid_at) {
+
+                                            {{
+                                                payment.paid_at
+                                                    | date:'medium'
+                                            }}
+
+                                        } @else {
+
+                                            Not paid
+
+                                        }
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Purchased package
+                                </span>
+
+                                <h3>
+                                    Internet access
+                                </h3>
+
+                            </div>
+
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Package
+                                    </span>
+
+                                    <strong>
+                                        {{ payment.package_name }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Package ID
+                                    </span>
+
+                                    <strong>
+                                        #{{ payment.package_id }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Speed
+                                    </span>
+
+                                    <strong>
+                                        {{ payment.speed }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Duration
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            packageDuration(
+                                                payment.duration_minutes
+                                            )
+                                        }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Internet session
+                                </span>
+
+                                <h3>
+                                    Access session
+                                </h3>
+
+                            </div>
+
+
+                            @if (
+                                selectedPaymentSession();
+                                as session
+                            ) {
+
+                                <div class="detail-grid">
+
+                                    <div class="detail-item">
+
+                                        <span>
+                                            Session ID
+                                        </span>
+
+                                        <strong>
+                                            #{{ session.id }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="detail-item">
+
+                                        <span>
+                                            Status
+                                        </span>
+
+                                        <strong>
+                                            {{
+                                                sessionStatusLabel(
+                                                    session
+                                                )
+                                            }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="detail-item">
+
+                                        <span>
+                                            Started
+                                        </span>
+
+                                        <strong>
+
+                                            @if (session.started_at) {
+
+                                                {{
+                                                    session.started_at
+                                                        | date:'medium'
+                                                }}
+
+                                            } @else {
+
+                                                —
+
+                                            }
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="detail-item">
+
+                                        <span>
+                                            Expires
+                                        </span>
+
+                                        <strong>
+
+                                            @if (session.expires_at) {
+
+                                                {{
+                                                    session.expires_at
+                                                        | date:'medium'
+                                                }}
+
+                                            } @else {
+
+                                                —
+
+                                            }
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="detail-item">
+
+                                        <span>
+                                            Ended
+                                        </span>
+
+                                        <strong>
+
+                                            @if (session.ended_at) {
+
+                                                {{
+                                                    session.ended_at
+                                                        | date:'medium'
+                                                }}
+
+                                            } @else {
+
+                                                —
+
+                                            }
+
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            } @else {
+
+                                <div class="session-empty">
+
+                                    <ion-icon
+                                        name="wifi-outline"
+                                    ></ion-icon>
+
+                                    <div>
+
+                                        <strong>
+                                            No internet session
+                                        </strong>
+
+                                        <span>
+                                            This payment does not currently
+                                            have a related internet session.
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            }
+
+                        </section>
+
+                    </div>
+
+                }
+
+            </section>
+
+        </div>
+
+    }
+
+
+    <!-- =====================================================
+         SESSION DETAILS DIALOG
+         ===================================================== -->
+
+    @if (selectedSession(); as session) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeSessionDetails()"
+        >
+
+            <section
+                class="form-panel session-details-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="session-details-title"
+                (click)="$event.stopPropagation()"
+            >
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Network session
+                        </span>
+
+                        <h2 id="session-details-title">
+                            Session #{{ session.id }}
+                        </h2>
+
+                        <p>
+                            {{
+                                session.transaction_reference ||
+                                'Internet access session'
+                            }}
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        (click)="closeSessionDetails()"
+                        [disabled]="
+                            sessionDetailsLoading() ||
+                            sessionActionId() !== null
+                        "
+                        aria-label="Close session details"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                @if (sessionDetailsLoading()) {
+
+                    <section class="payment-details-loading">
+
+                        <ion-spinner
+                            name="crescent"
+                        ></ion-spinner>
+
+                        <span>
+                            Loading internet session details...
+                        </span>
+
+                    </section>
+
+                } @else {
+
+                    <div class="payment-details-content">
+
+                        <!-- =================================
+                             SESSION HERO
+                             ================================= -->
+
+                        <div class="session-details-hero">
+
+                            <div>
+
+                                <span>
+                                    Remaining access
+                                </span>
+
+                                <strong>
+                                    {{ sessionRemainingLabel(session) }}
+                                </strong>
+
+                            </div>
+
+
+                            <span
+                                class="status-badge"
+                                [class]="
+                                    'status-badge ' +
+                                    internetSessionStatusClass(session)
+                                "
+                            >
+                                {{
+                                    internetSessionStatusLabel(
+                                        session
+                                    )
+                                }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- =================================
+                             SESSION INFORMATION
+                             ================================= -->
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Access
+                                </span>
+
+                                <h3>
+                                    Session information
+                                </h3>
+
+                            </div>
+
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Session ID
+                                    </span>
+
+                                    <strong>
+                                        #{{ session.id }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Company ID
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.company_id
+                                                ? '#' + session.company_id
+                                                : '—'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Started
+                                    </span>
+
+                                    <strong>
+
+                                        @if (session.started_at) {
+
+                                            {{
+                                                session.started_at
+                                                    | date:'medium'
+                                            }}
+
+                                        } @else {
+
+                                            —
+
+                                        }
+
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Expires
+                                    </span>
+
+                                    <strong>
+
+                                        @if (session.expires_at) {
+
+                                            {{
+                                                session.expires_at
+                                                    | date:'medium'
+                                            }}
+
+                                        } @else {
+
+                                            —
+
+                                        }
+
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Created
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.created_at
+                                                | date:'medium'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             PACKAGE INFORMATION
+                             ================================= -->
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Package
+                                </span>
+
+                                <h3>
+                                    Internet package
+                                </h3>
+
+                            </div>
+
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Package
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.package_name ||
+                                            ('Package #' + session.package_id)
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Package ID
+                                    </span>
+
+                                    <strong>
+                                        #{{ session.package_id }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Speed
+                                    </span>
+
+                                    <strong>
+                                        {{ session.speed || '—' }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Duration
+                                    </span>
+
+                                    <strong>
+                                        {{ sessionDuration(session) }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             PAYMENT INFORMATION
+                             ================================= -->
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Payment
+                                </span>
+
+                                <h3>
+                                    Related transaction
+                                </h3>
+
+                            </div>
+
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Payment ID
+                                    </span>
+
+                                    <strong>
+                                        #{{ session.payment_id }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Reference
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.transaction_reference ||
+                                            '—'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Customer phone
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.phone_number ||
+                                            '—'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Payment method
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            session.payment_method
+                                                ? paymentMethodLabel(
+                                                    session.payment_method
+                                                )
+                                                : '—'
+                                        }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="detail-item">
+
+                                    <span>
+                                        Amount
+                                    </span>
+
+                                    <strong>
+
+                                        @if (
+                                            session.amount !==
+                                            undefined
+                                        ) {
+
+                                            TZS {{
+                                                sessionAmount(
+                                                    session
+                                                )
+                                            }}
+
+                                        } @else {
+
+                                            —
+
+                                        }
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+
+                        <!-- =================================
+                             SESSION STATUS CONTROLS
+                             ================================= -->
+
+                        <section class="detail-section">
+
+                            <div class="detail-section__heading">
+
+                                <span class="eyebrow">
+                                    Controls
+                                </span>
+
+                                <h3>
+                                    Session status
+                                </h3>
+
+                            </div>
+
+
+                            <div class="session-status-actions">
+
+                                @if (
+                                    sessionCanActivate(
+                                        session
+                                    )
+                                ) {
+
+                                    <ion-button
+                                        size="small"
+                                        (click)="
+                                            changeSessionStatus(
+                                                session,
+                                                'active'
+                                            )
+                                        "
+                                        [disabled]="
+                                            sessionActionId() ===
+                                            session.id
+                                        "
+                                    >
+
+                                        @if (
+                                            sessionActionId() ===
+                                            session.id
+                                        ) {
+
+                                            <ion-spinner
+                                                slot="start"
+                                                name="crescent"
+                                            ></ion-spinner>
+
+                                        } @else {
+
+                                            <ion-icon
+                                                slot="start"
+                                                name="checkmark-circle-outline"
+                                            ></ion-icon>
+
+                                        }
+
+                                        Activate
+
+                                    </ion-button>
+
+                                }
+
+
+                                @if (
+                                    sessionCanSuspend(
+                                        session
+                                    )
+                                ) {
+
+                                    <ion-button
+                                        size="small"
+                                        fill="outline"
+                                        color="danger"
+                                        (click)="
+                                            changeSessionStatus(
+                                                session,
+                                                'suspended'
+                                            )
+                                        "
+                                        [disabled]="
+                                            sessionActionId() ===
+                                            session.id
+                                        "
+                                    >
+
+                                        <ion-icon
+                                            slot="start"
+                                            name="close-circle-outline"
+                                        ></ion-icon>
+
+                                        Suspend
+
+                                    </ion-button>
+
+                                }
+
+
+                                @if (
+                                    session.status !==
+                                    'expired'
+                                ) {
+
+                                    <ion-button
+                                        size="small"
+                                        fill="outline"
+                                        (click)="
+                                            changeSessionStatus(
+                                                session,
+                                                'expired'
+                                            )
+                                        "
+                                        [disabled]="
+                                            sessionActionId() ===
+                                            session.id
+                                        "
+                                    >
+
+                                        <ion-icon
+                                            slot="start"
+                                            name="time-outline"
+                                        ></ion-icon>
+
+                                        Mark expired
+
+                                    </ion-button>
+
+                                }
+
+                            </div>
+
+
+                            <small class="session-control-note">
+                                Status changes currently update the
+                                platform database. Router enforcement
+                                will be connected through the backend
+                                during MikroTik integration.
+                            </small>
+
+                        </section>
+
+                    </div>
+
+                }
+
+            </section>
+
+        </div>
+
+    }
+
+</section>

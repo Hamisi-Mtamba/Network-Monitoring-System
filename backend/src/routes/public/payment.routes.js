@@ -1,19 +1,38 @@
-// Import Express Router
-import { Router } from "express";
+// Import Express
+import express from "express";
 
-// Import payment controller
-import { initiatePayment, getPaymentStatus, initiateCashPayment } from "../../controllers/public/payment.controller.js";
+// Import public payment controllers
+import {
+    initiatePayment,
+    createCashPaymentRequest,
+    getPaymentStatus
+} from "../../controllers/public/payment.controller.js";
 
-// Create router
-const router = Router();
 
-// Customer starts a payment here
-router.post("/initiate", initiatePayment);
+// Create public payment router
+const router = express.Router();
 
-// Check the current status of a payment
-router.get("/:reference/status", getPaymentStatus);
 
-//Customer requests to pay for a package using cash
-router.post("/cash-request", initiateCashPayment);
+// Initiate mobile payment for one company
+router.post(
+    "/companies/:companySlug/payments/initiate",
+    initiatePayment
+);
 
+
+// Create cash payment request for one company
+router.post(
+    "/companies/:companySlug/payments/cash-request",
+    createCashPaymentRequest
+);
+
+
+// Check payment status inside one company
+router.get(
+    "/companies/:companySlug/payments/:reference/status",
+    getPaymentStatus
+);
+
+
+// Export router
 export default router;

@@ -1,0 +1,620 @@
+<!-- =========================================================
+     SUPERADMIN PLATFORM DASHBOARD
+     ========================================================= -->
+
+<section class="page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <header class="page-header">
+
+        <div>
+
+            <span class="eyebrow">
+                Platform overview
+            </span>
+
+            <h1>
+                Superadmin Dashboard
+            </h1>
+
+            <p>
+                Monitor companies, administrators, payments,
+                packages, and active internet sessions across
+                the entire platform.
+            </p>
+
+        </div>
+
+
+        <ion-button
+            fill="outline"
+            size="small"
+            (click)="load()"
+            [disabled]="loading()"
+        >
+
+            <ion-icon
+                slot="start"
+                name="refresh-outline"
+            ></ion-icon>
+
+            Refresh
+
+        </ion-button>
+
+    </header>
+
+
+    <!-- =====================================================
+         LOADING STATE
+         ===================================================== -->
+
+    @if (loading()) {
+
+        <section class="state-panel">
+
+            <ion-spinner
+                name="crescent"
+            ></ion-spinner>
+
+            <div>
+
+                <strong>
+                    Loading platform overview
+                </strong>
+
+                <span>
+                    Fetching the latest platform statistics.
+                </span>
+
+            </div>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         ERROR STATE
+         ===================================================== -->
+
+    @else if (error()) {
+
+        <section
+            class="state-panel state-panel--error"
+            role="alert"
+        >
+
+            <div class="state-panel__symbol">
+                !
+            </div>
+
+            <div>
+
+                <strong>
+                    Platform dashboard unavailable
+                </strong>
+
+                <span>
+                    The latest statistics could not be loaded.
+                    Check the API connection and try again.
+                </span>
+
+            </div>
+
+
+            <ion-button
+                size="small"
+                (click)="load()"
+            >
+                Try again
+            </ion-button>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         DASHBOARD CONTENT
+         ===================================================== -->
+
+    @else if (stats(); as dashboard) {
+
+        <!-- =================================================
+             SUMMARY CARDS
+             ================================================= -->
+
+        <section class="stat-grid">
+
+            @for (
+                card of cards();
+                track card.label
+            ) {
+
+                <article
+                    class="stat-card"
+                    [class]="'stat-card stat-card--' + card.tone"
+                >
+
+                    <div class="stat-card__top">
+
+                        <span class="stat-card__icon">
+
+                            <ion-icon
+                                [name]="card.icon"
+                            ></ion-icon>
+
+                        </span>
+
+                        <span class="stat-card__note">
+                            {{ card.note }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-card__value">
+                        {{ card.value }}
+                    </div>
+
+
+                    <div class="stat-card__label">
+                        {{ card.label }}
+                    </div>
+
+                </article>
+
+            }
+
+        </section>
+
+
+        <!-- =================================================
+             PLATFORM OVERVIEW
+             ================================================= -->
+
+        <section class="overview-grid">
+
+            <!-- ---------------------------------------------
+                 REVENUE
+                 --------------------------------------------- -->
+
+            <article class="overview-card revenue-card">
+
+                <div class="overview-card__heading">
+
+                    <div>
+
+                        <span>
+                            Revenue
+                        </span>
+
+                        <h2>
+                            Successful payments
+                        </h2>
+
+                    </div>
+
+                    <span class="overview-icon">
+
+                        <ion-icon
+                            name="cash-outline"
+                        ></ion-icon>
+
+                    </span>
+
+                </div>
+
+
+                <strong class="revenue-value">
+                    {{ money(dashboard.total_revenue) }}
+                </strong>
+
+
+                <p>
+                    Total value of successful payments
+                    recorded across all companies.
+                </p>
+
+
+                <div class="metric-row">
+
+                    <span>
+                        Successful payments
+                    </span>
+
+                    <strong>
+                        {{
+                            dashboard.successful_payments
+                        }}
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-row">
+
+                    <span>
+                        Pending payments
+                    </span>
+
+                    <strong>
+                        {{
+                            dashboard.pending_payments
+                        }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+            <!-- ---------------------------------------------
+                 COMPANY HEALTH
+                 --------------------------------------------- -->
+
+            <article class="overview-card">
+
+                <div class="overview-card__heading">
+
+                    <div>
+
+                        <span>
+                            Company health
+                        </span>
+
+                        <h2>
+                            Tenant status
+                        </h2>
+
+                    </div>
+
+                    <span class="overview-icon">
+
+                        <ion-icon
+                            name="business-outline"
+                        ></ion-icon>
+
+                    </span>
+
+                </div>
+
+
+                <div class="company-health">
+
+                    <div>
+
+                        <strong>
+                            {{
+                                dashboard.active_companies
+                            }}
+                        </strong>
+
+                        <span>
+                            Active
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{
+                                dashboard.suspended_companies
+                            }}
+                        </strong>
+
+                        <span>
+                            Suspended
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{
+                                dashboard.total_company_admins
+                            }}
+                        </strong>
+
+                        <span>
+                            Company admins
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric-row metric-row--footer">
+
+                    <span>
+                        Platform Superadmins
+                    </span>
+
+                    <strong>
+                        {{
+                            dashboard.total_superadmins
+                        }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+            <!-- ---------------------------------------------
+                 SESSION ACTIVITY
+                 --------------------------------------------- -->
+
+            <article class="overview-card">
+
+                <div class="overview-card__heading">
+
+                    <div>
+
+                        <span>
+                            Network activity
+                        </span>
+
+                        <h2>
+                            Internet sessions
+                        </h2>
+
+                    </div>
+
+                    <span class="overview-icon">
+
+                        <ion-icon
+                            name="wifi-outline"
+                        ></ion-icon>
+
+                    </span>
+
+                </div>
+
+
+                <strong class="session-value">
+                    {{
+                        dashboard.active_sessions
+                    }}
+                </strong>
+
+                <span class="session-value__label">
+                    active right now
+                </span>
+
+
+                <div class="metric-row">
+
+                    <span>
+                        Total sessions
+                    </span>
+
+                    <strong>
+                        {{
+                            dashboard.total_sessions
+                        }}
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-row">
+
+                    <span>
+                        Expired sessions
+                    </span>
+
+                    <strong>
+                        {{
+                            dashboard.expired_sessions
+                        }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             RECENT COMPANIES
+             ================================================= -->
+
+        <section class="companies-panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Latest tenants
+                    </span>
+
+                    <h2>
+                        Recent companies
+                    </h2>
+
+                    <p>
+                        The most recently created companies
+                        registered on the platform.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            @if (
+                recentCompanies().length > 0
+            ) {
+
+                <div class="company-table">
+
+                    <div class="company-table__header">
+
+                        <span>
+                            Company
+                        </span>
+
+                        <span>
+                            Status
+                        </span>
+
+                        <span>
+                            Admins
+                        </span>
+
+                        <span>
+                            Packages
+                        </span>
+
+                        <span>
+                            Created
+                        </span>
+
+                    </div>
+
+
+                    @for (
+                        company of recentCompanies();
+                        track company.id
+                    ) {
+
+                        <article class="company-row">
+
+                            <div class="company-cell company-cell--identity">
+
+                                <span class="company-avatar">
+
+                                    {{
+                                        company.name
+                                            .charAt(0)
+                                            .toUpperCase()
+                                    }}
+
+                                </span>
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ company.name }}
+                                    </strong>
+
+                                    <small>
+                                        /{{ company.slug }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="company-cell">
+
+                                <span
+                                    class="status-badge"
+                                    [class]="
+                                        'status-badge ' +
+                                        companyStatusClass(
+                                            company
+                                        )
+                                    "
+                                >
+                                    {{
+                                        companyStatusLabel(
+                                            company
+                                        )
+                                    }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="company-cell">
+
+                                <span class="mobile-label">
+                                    Admins
+                                </span>
+
+                                <strong>
+                                    {{ company.admin_count }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="company-cell">
+
+                                <span class="mobile-label">
+                                    Packages
+                                </span>
+
+                                <strong>
+                                    {{ company.package_count }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="company-cell">
+
+                                <span class="mobile-label">
+                                    Created
+                                </span>
+
+                                <span>
+                                    {{
+                                        company.created_at
+                                            | date:'mediumDate'
+                                    }}
+                                </span>
+
+                            </div>
+
+                        </article>
+
+                    }
+
+                </div>
+
+            } @else {
+
+                <div class="empty-state">
+
+                    <span class="empty-state__icon">
+
+                        <ion-icon
+                            name="business-outline"
+                        ></ion-icon>
+
+                    </span>
+
+                    <strong>
+                        No companies yet
+                    </strong>
+
+                    <p>
+                        Companies created on the platform
+                        will appear here.
+                    </p>
+
+                </div>
+
+            }
+
+        </section>
+
+    }
+
+</section>

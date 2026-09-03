@@ -1,319 +1,842 @@
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
-// Import crypto to generate unique transaction references
-import crypto from "crypto";
 
-// Initiate a new payment
-const initiatePayment = async (req, res) => {
+// =========================================================
+// COMPANY LOOKUP
+// =========================================================
+
+// Find an active company using its public slug
+const findCompanyBySlug = async (companySlug) => {
+
+    const result = await pool.query(
+        `
+        SELECT
+            id,
+            name,
+            slug,
+            status
+        FROM companies
+        WHERE slug = $1
+          AND status = 'active'
+        LIMIT 1
+        `,
+        [
+            companySlug
+        ]
+    );
+
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
+
+    return result.rows[0];
+};
+
+
+// =========================================================
+// ROUTER LOOKUP
+// =========================================================
+
+// Resolve one active MikroTik router belonging to the company
+const findCompanyRouter = async (
+    routerPublicId,
+    companyId
+) => {
+
+    const result = await pool.query(
+        `
+        SELECT
+            id,
+            company_id,
+            name,
+            public_id,
+            host,
+            api_port,
+            status
+        FROM mikrotik_routers
+        WHERE public_id = $1
+          AND company_id = $2
+          AND status = 'active'
+        LIMIT 1
+        `,
+        [
+            routerPublicId,
+            companyId
+        ]
+    );
+
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
+
+    return result.rows[0];
+};
+
+
+// =========================================================
+// PAYMENT REFERENCES
+// =========================================================
+
+// Generate a mobile payment transaction reference
+const generateMobilePaymentReference = () => {
+
+    return `MOBILEPAYMENT-${Date.now()}-${Math.floor(
+        Math.random() * 1000000
+    )}`;
+};
+
+
+// Generate a cash payment transaction reference
+const generateCashPaymentReference = () => {
+
+    return `CASHPAYMENT-${Date.now()}-${Math.floor(
+        Math.random() * 1000000
+    )}`;
+};
+
+
+// =========================================================
+// MIKROTIK CONTEXT VALIDATION
+// =========================================================
+
+// Validate captive portal information
+const hasValidMikrotikContext = ({
+    mac,
+    ip,
+    router,
+    login_url
+}) => {
+
+    return Boolean(
+        mac &&
+        ip &&
+        router &&
+        login_url
+    );
+};
+
+
+// =========================================================
+// INITIATE MOBILE PAYMENT
+// =========================================================
+
+const initiatePayment = async (
+    req,
+    res
+) => {
+
     try {
-        // Get only the information the customer is allowed to send
+
+        // Get company slug from public URL
+        const companySlug =
+            req.params.companySlug
+                ?.trim()
+                .toLowerCase();
+
+
+        // Read payment and MikroTik context
         const {
             package_id,
             payment_method,
-            phone_number
+            phone_number,
+            mac,
+            ip,
+            router,
+            login_url
         } = req.body;
 
-        // Validate required fields
-        if (!package_id || !payment_method || !phone_number) {
+
+        // Validate company
+        if (!companySlug) {
+
             return res.status(400).json({
                 success: false,
-                message: "Package, payment method and phone number are required"
+                message: "Company is required"
             });
         }
 
-        // Find the selected package from PostgreSQL
-        const packageResult = await pool.query(
-            `
-            SELECT *
-            FROM packages
-            WHERE id = $1
-            AND is_active = TRUE
-            `,
-            [package_id]
-        );
 
-        // Stop if the package does not exist or is inactive
-        if (packageResult.rows.length === 0) {
+        // Validate payment fields
+        if (
+            !package_id ||
+            !payment_method ||
+            !phone_number
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Package, payment method and phone number are required"
+            });
+        }
+
+
+        // Validate captive portal context
+        if (
+            !hasValidMikrotikContext({
+                mac,
+                ip,
+                router,
+                login_url
+            })
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "MikroTik connection information is missing"
+            });
+        }
+
+
+        // Normalize package ID
+        const packageId =
+            Number(
+                package_id
+            );
+
+
+        if (
+            !Number.isInteger(packageId) ||
+            packageId <= 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Invalid package ID"
+            });
+        }
+
+
+        // Resolve company
+        const company =
+            await findCompanyBySlug(
+                companySlug
+            );
+
+
+        if (!company) {
+
             return res.status(404).json({
                 success: false,
-                message: "Selected package is not available"
+                message: "Company not found"
             });
         }
 
-        // Get the package returned from PostgreSQL
-        const selectedPackage = packageResult.rows[0];
 
-        // Generate our own unique transaction reference
+        // Resolve MikroTik router
+        const selectedRouter =
+            await findCompanyRouter(
+                router,
+                company.id
+            );
+
+
+        if (!selectedRouter) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Router not found or unavailable"
+            });
+        }
+
+
+        // Load trusted package
+        const packageResult =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    company_id,
+                    name,
+                    price,
+                    duration_minutes,
+                    speed
+                FROM packages
+                WHERE id = $1
+                  AND company_id = $2
+                  AND is_active = TRUE
+                  AND (
+                        available_from IS NULL
+                        OR available_from <= CURRENT_TIMESTAMP
+                      )
+                  AND (
+                        available_until IS NULL
+                        OR available_until >= CURRENT_TIMESTAMP
+                      )
+                LIMIT 1
+                `,
+                [
+                    packageId,
+                    company.id
+                ]
+            );
+
+
+        if (
+            packageResult.rows.length === 0
+        ) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Package not found or unavailable"
+            });
+        }
+
+
+        const selectedPackage =
+            packageResult.rows[0];
+
+
+        // Generate transaction reference
         const transactionReference =
-            "MOBILEPAYMENT-" + crypto.randomUUID();
+            generateMobilePaymentReference();
 
-        // Create a pending payment record
-        const paymentResult = await pool.query(
-            `
-            INSERT INTO payments (
-                package_id,
-                phone_number,
-                payment_method,
-                amount,
-                transaction_reference,
-                status
-            )
-            VALUES ($1, $2, $3, $4, $5, 'pending')
-            RETURNING *
-            `,
-            [
-                package_id,
-                phone_number,
-                payment_method,
-                selectedPackage.price,
-                transactionReference
-            ]
-        );
 
-        // Get the newly created payment
-        const payment = paymentResult.rows[0];
+        // Create payment with captive/router context
+        const result =
+            await pool.query(
+                `
+                INSERT INTO payments (
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+                    created_at
+                )
 
-        // For now, we only create the payment record.
-        // Later this is where we will call the real mobile-money provider API.
-        res.status(201).json({
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    'pending',
+                    $7,
+                    $8,
+                    $9,
+                    $10,
+                    CURRENT_TIMESTAMP
+                )
+
+                RETURNING
+                    id,
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+                    created_at
+                `,
+                [
+                    company.id,
+                    selectedPackage.id,
+                    phone_number.trim(),
+                    payment_method.trim(),
+                    selectedPackage.price,
+                    transactionReference,
+                    selectedRouter.id,
+                    mac.trim(),
+                    ip.trim(),
+                    login_url.trim()
+                ]
+            );
+
+
+        // TODO:
+        // Connect the real mobile-money provider here later.
+
+
+        return res.status(201).json({
+
             success: true,
-            message: "Payment initiated successfully",
-            payment: {
-                id: payment.id,
-                transaction_reference: payment.transaction_reference,
-                status: payment.status,
-                amount: payment.amount,
-                phone_number: payment.phone_number,
-                payment_method: payment.payment_method,
-                package: {
-                    id: selectedPackage.id,
-                    name: selectedPackage.name,
-                    duration_minutes: selectedPackage.duration_minutes
-                }
-            }
+
+            message:
+                "Payment initiated successfully",
+
+            payment:
+                result.rows[0]
         });
 
     } catch (error) {
-        // Log actual backend error
-        console.error("Error initiating payment:", error.message);
 
-        res.status(500).json({
+        console.error(
+            "Initiate payment error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to initiate payment"
+            message:
+                "Failed to initiate payment"
         });
     }
 };
 
-// Get the current payment status and related internet session
-const getPaymentStatus = async (req, res) => {
+
+// =========================================================
+// CREATE CASH PAYMENT REQUEST
+// =========================================================
+
+const createCashPaymentRequest = async (
+    req,
+    res
+) => {
+
     try {
-        // Get transaction reference from the URL
-        const { reference } = req.params;
 
-        // Fetch payment details
-        const paymentResult = await pool.query(
-            `
-            SELECT
-                id,
-                package_id,
-                transaction_reference,
-                status,
-                amount,
-                payment_method,
-                phone_number,
-                paid_at
-            FROM payments
-            WHERE transaction_reference = $1
-            `,
-            [reference]
-        );
+        // Get company slug
+        const companySlug =
+            req.params.companySlug
+                ?.trim()
+                .toLowerCase();
 
-        // Stop if payment does not exist
-        if (paymentResult.rows.length === 0) {
-            return res.status(404).json({
+
+        // Read payment and MikroTik information
+        const {
+            package_id,
+            phone_number,
+            mac,
+            ip,
+            router,
+            login_url
+        } = req.body;
+
+
+        // Validate required payment fields
+        if (
+            !companySlug ||
+            !package_id ||
+            !phone_number
+        ) {
+
+            return res.status(400).json({
                 success: false,
-                message: "Payment not found"
+                message:
+                    "Company, package and phone number are required"
             });
         }
 
-        // Get the payment record
-        const payment = paymentResult.rows[0];
 
-        // Prepare session value.
-        // It stays null while payment is still pending.
-        let session = null;
+        // Validate captive portal information
+        if (
+            !hasValidMikrotikContext({
+                mac,
+                ip,
+                router,
+                login_url
+            })
+        ) {
 
-        // Only look for a session after successful payment
-        if (payment.status === "successful") {
-            const sessionResult = await pool.query(
+            return res.status(400).json({
+                success: false,
+                message:
+                    "MikroTik connection information is missing"
+            });
+        }
+
+
+        // Normalize package ID
+        const packageId =
+            Number(
+                package_id
+            );
+
+
+        if (
+            !Number.isInteger(packageId) ||
+            packageId <= 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid package ID"
+            });
+        }
+
+
+        // Resolve company
+        const company =
+            await findCompanyBySlug(
+                companySlug
+            );
+
+
+        if (!company) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Company not found"
+            });
+        }
+
+
+        // Resolve company's MikroTik router
+        const selectedRouter =
+            await findCompanyRouter(
+                router,
+                company.id
+            );
+
+
+        if (!selectedRouter) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Router not found or unavailable"
+            });
+        }
+
+
+        // Load trusted package
+        const packageResult =
+            await pool.query(
                 `
                 SELECT
-                    internet_sessions.id,
-                    internet_sessions.started_at,
-                    internet_sessions.expires_at,
-                    internet_sessions.status,
+                    id,
+                    company_id,
+                    name,
+                    price,
+                    duration_minutes,
+                    speed
+                FROM packages
+                WHERE id = $1
+                  AND company_id = $2
+                  AND is_active = TRUE
+                  AND (
+                        available_from IS NULL
+                        OR available_from <= CURRENT_TIMESTAMP
+                      )
+                  AND (
+                        available_until IS NULL
+                        OR available_until >= CURRENT_TIMESTAMP
+                      )
+                LIMIT 1
+                `,
+                [
+                    packageId,
+                    company.id
+                ]
+            );
 
-                    packages.name AS package_name,
-                    packages.duration_minutes,
-                    packages.speed,
 
-                    payments.amount AS amount_paid,
-                    payments.payment_method,
-                    payments.phone_number
+        if (
+            packageResult.rows.length === 0
+        ) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Package not found or unavailable"
+            });
+        }
+
+
+        const selectedPackage =
+            packageResult.rows[0];
+
+
+        // Generate cash transaction reference
+        const transactionReference =
+            generateCashPaymentReference();
+
+
+        // Create cash payment request with MikroTik context
+        const result =
+            await pool.query(
+                `
+                INSERT INTO payments (
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+                    created_at
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    'cash',
+                    $4,
+                    $5,
+                    'awaiting_cash_confirmation',
+                    $6,
+                    $7,
+                    $8,
+                    $9,
+                    CURRENT_TIMESTAMP
+                )
+
+                RETURNING
+                    id,
+                    company_id,
+                    package_id,
+                    phone_number,
+                    payment_method,
+                    amount,
+                    transaction_reference,
+                    status,
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+                    created_at
+                `,
+                [
+                    company.id,
+                    selectedPackage.id,
+                    phone_number.trim(),
+                    selectedPackage.price,
+                    transactionReference,
+                    selectedRouter.id,
+                    mac.trim(),
+                    ip.trim(),
+                    login_url.trim()
+                ]
+            );
+
+
+        return res.status(201).json({
+
+            success: true,
+
+            message:
+                "Cash payment request created successfully",
+
+            payment:
+                result.rows[0]
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Cash payment request error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Failed to create cash payment request"
+        });
+    }
+};
+
+
+// =========================================================
+// GET PUBLIC PAYMENT STATUS
+// =========================================================
+
+const getPaymentStatus = async (
+    req,
+    res
+) => {
+
+    try {
+
+        // Get company and transaction reference
+        const companySlug =
+            req.params.companySlug
+                ?.trim()
+                .toLowerCase();
+
+
+        const transactionReference =
+            req.params.reference
+                ?.trim();
+
+
+        if (
+            !companySlug ||
+            !transactionReference
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Company and payment reference are required"
+            });
+        }
+
+
+        // Resolve company
+        const company =
+            await findCompanyBySlug(
+                companySlug
+            );
+
+
+        if (!company) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Company not found"
+            });
+        }
+
+
+        // Load payment
+        const paymentResult =
+            await pool.query(
+                `
+                SELECT
+                    pay.id,
+                    pay.company_id,
+                    pay.package_id,
+                    pay.phone_number,
+                    pay.payment_method,
+                    pay.amount,
+                    pay.transaction_reference,
+                    pay.status,
+                    pay.router_id,
+                    pay.device_mac,
+                    pay.device_ip,
+                    pay.mikrotik_login_url,
+                    pay.created_at,
+                    pay.paid_at,
+
+                    p.name AS package_name,
+                    p.duration_minutes,
+                    p.speed
+
+                FROM payments pay
+
+                JOIN packages p
+                    ON p.id = pay.package_id
+                   AND p.company_id = pay.company_id
+
+                WHERE pay.company_id = $1
+                  AND pay.transaction_reference = $2
+
+                LIMIT 1
+                `,
+                [
+                    company.id,
+                    transactionReference
+                ]
+            );
+
+
+        if (
+            paymentResult.rows.length === 0
+        ) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Payment not found"
+            });
+        }
+
+
+        const payment =
+            paymentResult.rows[0];
+
+
+        // Load session created from payment
+        const sessionResult =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    company_id,
+                    payment_id,
+                    package_id,
+                    router_id,
+                    device_mac,
+                    device_ip,
+                    mikrotik_login_url,
+                    started_at,
+                    expires_at,
+                    status,
+                    created_at
 
                 FROM internet_sessions
 
-                JOIN packages
-                    ON internet_sessions.package_id = packages.id
+                WHERE payment_id = $1
+                  AND company_id = $2
 
-                JOIN payments
-                    ON internet_sessions.payment_id = payments.id
+                ORDER BY id DESC
 
-                WHERE internet_sessions.payment_id = $1
-
-                ORDER BY internet_sessions.id DESC
                 LIMIT 1
                 `,
-                [payment.id]
+                [
+                    payment.id,
+                    company.id
+                ]
             );
 
-            // If a session exists, return it
-            if (sessionResult.rows.length > 0) {
-                session = sessionResult.rows[0];
-            }
-        }
 
-        // Send both payment and session information
-        res.status(200).json({
+        return res.status(200).json({
+
             success: true,
+
             payment,
-            session
+
+            session:
+                sessionResult.rows.length > 0
+                    ? sessionResult.rows[0]
+                    : null
         });
 
     } catch (error) {
-        // Log the actual backend error for debugging
+
         console.error(
-            "Error checking payment status:",
+            "Get payment status error:",
             error.message
         );
 
-        res.status(500).json({
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to check payment status"
+            message:
+                "Failed to fetch payment status"
         });
     }
 };
 
-// Create a new cash payment request
-const initiateCashPayment = async (req, res) => {
-    try {
-        // Customer only sends package ID and phone number.
-        // The package price is always determined by the backend.
-        const {
-            package_id,
-            phone_number
-        } = req.body;
 
-        // Validate required fields
-        if (!package_id || !phone_number) {
-            return res.status(400).json({
-                success: false,
-                message: "Package and phone number are required"
-            });
-        }
+// =========================================================
+// EXPORTS
+// =========================================================
 
-        // Find the selected active package
-        const packageResult = await pool.query(
-            `
-            SELECT *
-            FROM packages
-            WHERE id = $1
-            AND is_active = TRUE
-            `,
-            [package_id]
-        );
-
-        // Stop if package is unavailable
-        if (packageResult.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Selected package is not available"
-            });
-        }
-
-        const selectedPackage = packageResult.rows[0];
-
-        // Generate a recognizable cash-payment reference
-        const transactionReference =
-            "CASHPAYMENT-" + crypto.randomUUID();
-
-        // Store the request in the same payments table
-        const paymentResult = await pool.query(
-            `
-            INSERT INTO payments (
-                package_id,
-                phone_number,
-                payment_method,
-                amount,
-                transaction_reference,
-                status
-            )
-            VALUES (
-                $1,
-                $2,
-                'cash',
-                $3,
-                $4,
-                'awaiting_cash_confirmation'
-            )
-            RETURNING *
-            `,
-            [
-                package_id,
-                phone_number,
-                selectedPackage.price,
-                transactionReference
-            ]
-        );
-
-        const payment = paymentResult.rows[0];
-
-        // Return information needed by the cash-instructions page
-        res.status(201).json({
-            success: true,
-            message: "Cash payment request submitted",
-            payment: {
-                id: payment.id,
-                transaction_reference:
-                    payment.transaction_reference,
-                status: payment.status,
-                amount: payment.amount,
-                phone_number: payment.phone_number,
-                payment_method: payment.payment_method,
-
-                package: {
-                    id: selectedPackage.id,
-                    name: selectedPackage.name,
-                    duration_minutes:
-                        selectedPackage.duration_minutes,
-                    speed: selectedPackage.speed
-                }
-            }
-        });
-
-    } catch (error) {
-        // Log the real backend error
-        console.error(
-            "Error creating cash payment request:",
-            error.message
-        );
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to create cash payment request"
-        });
-    }
+export {
+    initiatePayment,
+    createCashPaymentRequest,
+    getPaymentStatus
 };
-
-export { initiatePayment, getPaymentStatus, initiateCashPayment };

@@ -1,34 +1,110 @@
 <article
-  class="package-card"
-  [attr.data-accent]="packageItem().accent || 'blue'"
-  (click)="choosePackage()"
+    class="package-card"
+    [attr.data-accent]="packageItem().accent || 'blue'"
+    tabindex="0"
+    role="button"
+    (click)="choosePackage()"
+    (keydown.enter)="choosePackage()"
+    (keydown.space)="$event.preventDefault(); choosePackage()"
 >
-  <div class="package-card__topline"></div>
-  <div class="package-card__heading">
-    <span class="package-card__signal" aria-hidden="true">⌁</span>
-    <span class="package-card__duration">
-      {{ packageService.formatDuration(packageItem().duration_minutes) }}
-    </span>
-  </div>
 
-  <h2>{{ packageItem().name }}</h2>
-  <p class="package-card__price">
-    <span>TZS</span> {{ packageItem().price.toLocaleString() }}
-  </p>
+    <!-- Decorative accent line -->
+    <div class="package-card__topline"></div>
 
-  <dl>
-    <div>
-      <dt>Duration</dt>
-      <dd>{{ packageService.formatDuration(packageItem().duration_minutes) }}</dd>
+
+    <!-- Package meta -->
+    <div class="package-card__heading">
+
+        <span
+            class="package-card__signal"
+            aria-hidden="true"
+        >
+            ⌁
+        </span>
+
+        <span class="package-card__duration">
+            {{
+                packageService.formatDuration(
+                    packageItem().duration_minutes
+                )
+            }}
+        </span>
+
     </div>
-    <div>
-      <dt>Speed</dt>
-      <dd>{{ packageItem().speed || 'Placeholder Mbps' }}</dd>
-    </div>
-  </dl>
 
-  <button type="button" class="package-card__button" (click)="$event.stopPropagation(); choosePackage()">
-    Buy Package <span aria-hidden="true">→</span>
-  </button>
+
+    <!-- Package name -->
+    <h2>
+        {{ packageItem().name }}
+    </h2>
+
+
+    <!-- Package price -->
+    <p class="package-card__price">
+
+        <span>
+            TZS
+        </span>
+
+        {{
+            packageItem().price.toLocaleString()
+        }}
+
+    </p>
+
+
+    <!-- Package details -->
+    <dl>
+
+        <div>
+
+            <dt>
+                Duration
+            </dt>
+
+            <dd>
+                {{
+                    packageService.formatDuration(
+                        packageItem().duration_minutes
+                    )
+                }}
+            </dd>
+
+        </div>
+
+
+        <div>
+
+            <dt>
+                Speed
+            </dt>
+
+            <dd>
+                {{
+                    packageItem().speed ||
+                    'Not specified'
+                }}
+            </dd>
+
+        </div>
+
+    </dl>
+
+
+    <!-- Buy action -->
+    <button
+        type="button"
+        class="package-card__button"
+        (click)="
+            $event.stopPropagation();
+            choosePackage()
+        "
+    >
+        Buy package
+
+        <span aria-hidden="true">
+            →
+        </span>
+    </button>
+
 </article>
-

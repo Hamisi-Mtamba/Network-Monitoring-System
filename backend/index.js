@@ -11,6 +11,9 @@ import packageRoutes from './src/routes/public/package.routes.js';
 // Import customer payment routes
 import publicPaymentRoutes from "./src/routes/public/payment.routes.js";
 
+// Import path utilities
+import path from "path";
+
 // Import public package routes
 import publicPackageRoutes from './src/routes/public/package.routes.js';
 
@@ -35,6 +38,22 @@ import adminDashboardRoutes from "./src/routes/admin/dashboard.route.js";
 // Import administrator reports routes
 import adminReportRoutes from "./src/routes/admin/report.route.js";
 
+// Import Super Admin routes
+import superAdminRoutes from "./src/routes/super-admin/superAdmin.routes.js";
+
+// Import platform-level Superadmin routes
+import platformCompanyRoutes from "./src/routes/platform/company.routes.js";
+
+// Import company profile routes
+import companyProfileRoutes from "./src/routes/admin/companyProfile.route.js";
+
+// Import public company routes
+import publicCompanyRoutes from "./src/routes/public/company.route.js";
+
+// Import company upload error handler
+import uploadErrorHandler from "./src/middlewares/uploadError.middleware.js";
+
+
 const app = express();
 
 //middlewares
@@ -42,19 +61,19 @@ app.use(cors());
 app.use(express.json());
 
 //Customer-facing package API
-app.use('/api/public/packages', publicPackageRoutes);
+app.use('/api/public', publicPackageRoutes);
 
 //Admin package API
 app.use('/api/admin/packages', adminPackagesRoutes);
 
 // Public payment APIs used by the captive portal
-app.use("/api/public/payments", publicPaymentRoutes);
+app.use("/api/public", publicPaymentRoutes);
 
 // Admin payment routes
 app.use("/api/admin/payments", adminPaymentRoutes);
 
 // Public session API
-app.use("/api/public/sessions", publicSessionRoutes);
+app.use("/api/public", publicSessionRoutes);
 
 // Admin authentication API
 app.use("/api/admin/auth", adminAuthRoutes);
@@ -67,6 +86,32 @@ app.use("/api/admin/dashboard", adminDashboardRoutes);
 
 // Register administrator reports API
 app.use("/api/admin/reports", adminReportRoutes);
+
+// Mount Super Admin management routes
+app.use("/api/super-admin", superAdminRoutes);
+
+// Mount platform-level Superadmin routes
+app.use("/api/platform", platformCompanyRoutes);
+
+// Mount company profile routes
+app.use("/api/admin/company", companyProfileRoutes);
+
+// Mount public company routes
+app.use("/api/public", publicCompanyRoutes);
+
+// Handle Multer/file upload errors
+app.use(uploadErrorHandler);
+
+// Serve uploaded company images as public static files
+app.use(
+    "/uploads",
+    express.static(
+        path.join(
+            process.cwd(),
+            "uploads"
+        )
+    )
+);
 
 // Routes
 app.get('/', (req, res) => {

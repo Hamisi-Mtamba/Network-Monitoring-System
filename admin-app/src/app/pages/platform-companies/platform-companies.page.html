@@ -1,0 +1,878 @@
+<!-- =========================================================
+     SUPERADMIN COMPANY MANAGEMENT
+     ========================================================= -->
+
+<section class="page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <header class="page-header">
+
+        <div>
+
+            <span class="eyebrow">
+                Tenant management
+            </span>
+
+            <h1>
+                Companies
+            </h1>
+
+            <p>
+                Create, review, activate, suspend, and manage
+                tenant companies registered on the platform.
+            </p>
+
+        </div>
+
+
+        <div class="page-actions">
+
+            <ion-button
+                fill="outline"
+                size="small"
+                (click)="loadCompanies()"
+                [disabled]="loading()"
+            >
+
+                <ion-icon
+                    slot="start"
+                    name="refresh-outline"
+                ></ion-icon>
+
+                Refresh
+
+            </ion-button>
+
+
+            <ion-button
+                size="small"
+                (click)="openCreateForm()"
+            >
+
+                <ion-icon
+                    slot="start"
+                    name="add-outline"
+                ></ion-icon>
+
+                New company
+
+            </ion-button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         PAGE SUMMARY
+         ===================================================== -->
+
+    <section class="summary-grid">
+
+        <article class="summary-card">
+
+            <span class="summary-card__label">
+                Total companies
+            </span>
+
+            <strong>
+                {{ companies().length }}
+            </strong>
+
+            <span class="summary-card__note">
+                All registered tenants
+            </span>
+
+        </article>
+
+
+        <article class="summary-card">
+
+            <span class="summary-card__label">
+                Active
+            </span>
+
+            <strong>
+                {{ activeCount() }}
+            </strong>
+
+            <span class="summary-card__note">
+                Currently operating
+            </span>
+
+        </article>
+
+
+        <article class="summary-card">
+
+            <span class="summary-card__label">
+                Suspended
+            </span>
+
+            <strong>
+                {{ suspendedCount() }}
+            </strong>
+
+            <span class="summary-card__note">
+                Temporarily disabled
+            </span>
+
+        </article>
+
+
+        <article class="summary-card">
+
+            <span class="summary-card__label">
+                Company admins
+            </span>
+
+            <strong>
+                {{ totalAdmins() }}
+            </strong>
+
+            <span class="summary-card__note">
+                Across all tenants
+            </span>
+
+        </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         ERROR MESSAGE
+         ===================================================== -->
+
+    @if (errorMessage()) {
+
+        <section
+            class="inline-alert"
+            role="alert"
+        >
+
+            <span aria-hidden="true">
+                !
+            </span>
+
+            <p>
+                {{ errorMessage() }}
+            </p>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         SEARCH / TOOLBAR
+         ===================================================== -->
+
+    <section class="toolbar-card">
+
+        <div class="search-box">
+
+            <ion-icon
+                name="search-outline"
+            ></ion-icon>
+
+            <ion-input
+                type="search"
+                placeholder="Search by company, slug, email, or phone"
+                [value]="searchTerm()"
+                (ionInput)="updateSearch($event.detail.value)"
+            ></ion-input>
+
+        </div>
+
+
+        <span class="result-count">
+
+            {{
+                filteredCompanies().length
+            }}
+
+            {{
+                filteredCompanies().length === 1
+                    ? 'company'
+                    : 'companies'
+            }}
+
+        </span>
+
+    </section>
+
+
+    <!-- =====================================================
+         LOADING STATE
+         ===================================================== -->
+
+    @if (loading()) {
+
+        <section class="state-panel">
+
+            <ion-spinner
+                name="crescent"
+            ></ion-spinner>
+
+            <div>
+
+                <strong>
+                    Loading companies
+                </strong>
+
+                <span>
+                    Fetching tenant information from the platform.
+                </span>
+
+            </div>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         LOAD ERROR STATE
+         ===================================================== -->
+
+    @else if (error()) {
+
+        <section class="state-panel state-panel--error">
+
+            <div class="state-panel__symbol">
+                !
+            </div>
+
+            <div>
+
+                <strong>
+                    Companies unavailable
+                </strong>
+
+                <span>
+                    The company list could not be loaded.
+                </span>
+
+            </div>
+
+
+            <ion-button
+                size="small"
+                (click)="loadCompanies()"
+            >
+                Try again
+            </ion-button>
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         COMPANY LIST
+         ===================================================== -->
+
+    @else {
+
+        <section class="companies-panel">
+
+            @if (
+                filteredCompanies().length > 0
+            ) {
+
+                <!-- Desktop table headings -->
+                <div class="company-table__header">
+
+                    <span>
+                        Company
+                    </span>
+
+                    <span>
+                        Status
+                    </span>
+
+                    <span>
+                        Admins
+                    </span>
+
+                    <span>
+                        Packages
+                    </span>
+
+                    <span>
+                        Payments
+                    </span>
+
+                    <span>
+                        Created
+                    </span>
+
+                    <span>
+                        Actions
+                    </span>
+
+                </div>
+
+
+                @for (
+                    company of filteredCompanies();
+                    track company.id
+                ) {
+
+                    <article class="company-row">
+
+                        <!-- =================================
+                             COMPANY IDENTITY
+                             ================================= -->
+
+                        <div class="company-cell company-cell--identity">
+
+                            <span class="company-avatar">
+
+                                {{
+                                    company.name
+                                        .charAt(0)
+                                        .toUpperCase()
+                                }}
+
+                            </span>
+
+
+                            <div>
+
+                                <strong>
+                                    {{ company.name }}
+                                </strong>
+
+                                <small>
+                                    /{{ company.slug }}
+                                </small>
+
+                                @if (company.email) {
+
+                                    <span>
+                                        {{ company.email }}
+                                    </span>
+
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================
+                             STATUS
+                             ================================= -->
+
+                        <div class="company-cell">
+
+                            <span class="mobile-label">
+                                Status
+                            </span>
+
+                            <span
+                                class="status-badge"
+                                [class]="
+                                    'status-badge ' +
+                                    statusClass(company)
+                                "
+                            >
+                                {{ statusLabel(company) }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- =================================
+                             ADMIN COUNT
+                             ================================= -->
+
+                        <div class="company-cell">
+
+                            <span class="mobile-label">
+                                Admins
+                            </span>
+
+                            <strong>
+                                {{
+                                    company.admin_count ?? 0
+                                }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- =================================
+                             PACKAGE COUNT
+                             ================================= -->
+
+                        <div class="company-cell">
+
+                            <span class="mobile-label">
+                                Packages
+                            </span>
+
+                            <strong>
+                                {{
+                                    company.package_count ?? 0
+                                }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- =================================
+                             PAYMENT COUNT
+                             ================================= -->
+
+                        <div class="company-cell">
+
+                            <span class="mobile-label">
+                                Payments
+                            </span>
+
+                            <strong>
+                                {{
+                                    company.payment_count ?? 0
+                                }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- =================================
+                             CREATED
+                             ================================= -->
+
+                        <div class="company-cell">
+
+                            <span class="mobile-label">
+                                Created
+                            </span>
+
+                            <span>
+                                {{
+                                    company.created_at
+                                        | date:'mediumDate'
+                                }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- =================================
+                             ACTIONS
+                             ================================= -->
+
+                        <div class="company-cell company-cell--actions">
+
+                            <a
+                                class="action-link"
+                                [routerLink]="[
+                                    '/platform',
+                                    'companies',
+                                    company.id
+                                ]"
+                            >
+
+                                <ion-icon
+                                    name="create-outline"
+                                ></ion-icon>
+
+                                Manage
+
+                            </a>
+
+
+                            @if (
+                                company.status ===
+                                'active'
+                            ) {
+
+                                <button
+                                    type="button"
+                                    class="action-link action-link--danger"
+                                    (click)="suspendCompany(company)"
+                                    [disabled]="
+                                        actionCompanyId() ===
+                                        company.id
+                                    "
+                                >
+
+                                    @if (
+                                        actionCompanyId() ===
+                                        company.id
+                                    ) {
+
+                                        <ion-spinner
+                                            name="crescent"
+                                        ></ion-spinner>
+
+                                    } @else {
+
+                                        <ion-icon
+                                            name="close-circle-outline"
+                                        ></ion-icon>
+
+                                    }
+
+                                    Suspend
+
+                                </button>
+
+                            } @else {
+
+                                <button
+                                    type="button"
+                                    class="action-link action-link--success"
+                                    (click)="activateCompany(company)"
+                                    [disabled]="
+                                        actionCompanyId() ===
+                                        company.id
+                                    "
+                                >
+
+                                    @if (
+                                        actionCompanyId() ===
+                                        company.id
+                                    ) {
+
+                                        <ion-spinner
+                                            name="crescent"
+                                        ></ion-spinner>
+
+                                    } @else {
+
+                                        <ion-icon
+                                            name="checkmark-circle-outline"
+                                        ></ion-icon>
+
+                                    }
+
+                                    Activate
+
+                                </button>
+
+                            }
+
+                        </div>
+
+                    </article>
+
+                }
+
+            } @else {
+
+                <div class="empty-state">
+
+                    <span class="empty-state__icon">
+
+                        <ion-icon
+                            name="business-outline"
+                        ></ion-icon>
+
+                    </span>
+
+
+                    <strong>
+
+                        {{
+                            searchTerm()
+                                ? 'No companies found'
+                                : 'No companies yet'
+                        }}
+
+                    </strong>
+
+
+                    <p>
+
+                        @if (searchTerm()) {
+
+                            No companies match your current search.
+
+                        } @else {
+
+                            Create the first tenant company to
+                            start using the platform.
+
+                        }
+
+                    </p>
+
+
+                    @if (!searchTerm()) {
+
+                        <ion-button
+                            size="small"
+                            (click)="openCreateForm()"
+                        >
+
+                            <ion-icon
+                                slot="start"
+                                name="add-outline"
+                            ></ion-icon>
+
+                            Create company
+
+                        </ion-button>
+
+                    }
+
+                </div>
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- =====================================================
+         CREATE COMPANY PANEL
+         ===================================================== -->
+
+    @if (showCreateForm()) {
+
+        <div
+            class="form-backdrop"
+            (click)="closeCreateForm()"
+        >
+
+            <section
+                class="form-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="create-company-title"
+                (click)="$event.stopPropagation()"
+            >
+
+                <!-- =========================================
+                     FORM HEADER
+                     ========================================= -->
+
+                <header class="form-panel__header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            New tenant
+                        </span>
+
+                        <h2 id="create-company-title">
+                            Create company
+                        </h2>
+
+                        <p>
+                            Register a new company on the platform.
+                            Administrators, packages, branding,
+                            and other settings can be configured
+                            after creation.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="close-button"
+                        aria-label="Close company form"
+                        (click)="closeCreateForm()"
+                        [disabled]="saving()"
+                    >
+                        ×
+                    </button>
+
+                </header>
+
+
+                <!-- =========================================
+                     CREATE FORM
+                     ========================================= -->
+
+                <form
+                    class="company-form"
+                    [formGroup]="createForm"
+                    (ngSubmit)="createCompany()"
+                >
+
+                    <!-- Company name -->
+                    <label class="form-field">
+
+                        <span>
+                            Company name
+                        </span>
+
+                        <ion-input
+                            formControlName="name"
+                            placeholder="Example Networks Ltd"
+                        ></ion-input>
+
+                        @if (
+                            createForm.controls.name.touched &&
+                            createForm.controls.name.invalid
+                        ) {
+
+                            <small class="field-error">
+                                Enter a company name between
+                                2 and 200 characters.
+                            </small>
+
+                        }
+
+                    </label>
+
+
+                    <!-- Slug -->
+                    <label class="form-field">
+
+                        <span>
+                            Company slug
+                        </span>
+
+                        <ion-input
+                            formControlName="slug"
+                            placeholder="example-networks"
+                        ></ion-input>
+
+                        <small class="field-help">
+                            Used in the customer portal URL.
+                            Use lowercase letters, numbers,
+                            and hyphens only.
+                        </small>
+
+                        @if (
+                            createForm.controls.slug.touched &&
+                            createForm.controls.slug.invalid
+                        ) {
+
+                            <small class="field-error">
+                                Enter a valid slug such as
+                                example-networks.
+                            </small>
+
+                        }
+
+                    </label>
+
+
+                    <div class="form-grid">
+
+                        <!-- Email -->
+                        <label class="form-field">
+
+                            <span>
+                                Email
+                            </span>
+
+                            <ion-input
+                                type="email"
+                                formControlName="email"
+                                placeholder="support@example.com"
+                            ></ion-input>
+
+                            @if (
+                                createForm.controls.email.touched &&
+                                createForm.controls.email.invalid
+                            ) {
+
+                                <small class="field-error">
+                                    Enter a valid email address.
+                                </small>
+
+                            }
+
+                        </label>
+
+
+                        <!-- Phone -->
+                        <label class="form-field">
+
+                            <span>
+                                Phone
+                            </span>
+
+                            <ion-input
+                                type="tel"
+                                formControlName="phone"
+                                placeholder="+255..."
+                            ></ion-input>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- Address -->
+                    <label class="form-field">
+
+                        <span>
+                            Address
+                        </span>
+
+                        <ion-input
+                            formControlName="address"
+                            placeholder="Company address"
+                        ></ion-input>
+
+                    </label>
+
+
+                    <!-- =====================================
+                         FORM ACTIONS
+                         ===================================== -->
+
+                    <footer class="form-actions">
+
+                        <ion-button
+                            type="button"
+                            fill="outline"
+                            (click)="closeCreateForm()"
+                            [disabled]="saving()"
+                        >
+                            Cancel
+                        </ion-button>
+
+
+                        <ion-button
+                            type="submit"
+                            [disabled]="saving()"
+                        >
+
+                            @if (saving()) {
+
+                                <ion-spinner
+                                    slot="start"
+                                    name="crescent"
+                                ></ion-spinner>
+
+                                Creating...
+
+                            } @else {
+
+                                <ion-icon
+                                    slot="start"
+                                    name="add-outline"
+                                ></ion-icon>
+
+                                Create company
+
+                            }
+
+                        </ion-button>
+
+                    </footer>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    }
+
+</section>

@@ -1,14 +1,22 @@
-//import Express Router
-import { Router } from 'express';
+// Import Express
+import express from "express";
 
-//import public package controller
-import { getPackages } from '../../controllers/public/package.controller.js';
+// Import public package controller
+import {
+    getPublicPackages
+} from "../../controllers/public/package.controller.js";
 
-//create a new router instance
-const router = Router();
 
-//Customer captive portal can only view packages
+// Create public package router
+const router = express.Router();
 
-router.get('/', getPackages);
 
+// Get public packages belonging to one company
+router.get(
+    "/companies/:companySlug/packages",
+    getPublicPackages
+);
+
+
+// Export router
 export default router;

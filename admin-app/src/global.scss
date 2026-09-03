@@ -4,6 +4,16 @@
 @import '@ionic/angular/css/typography.css';
 @import '@ionic/angular/css/display.css';
 
+// Default company branding values
+:root {
+    --company-primary: #2563EB;
+    --company-secondary: #111827;
+    --company-accent: #22C55E;
+    --company-background: #F8FAFC;
+    --company-navbar: #FFFFFF;
+}
+
+
 * { box-sizing: border-box; }
 html, body { background: #f4f7fb; }
 body { margin: 0; color: #173451; }

@@ -1,12 +1,183 @@
-.expired-page { max-width: 620px; }
-.expired-card { padding: clamp(24px, 7vw, 46px); border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-md); text-align: center; }
-.expired-icon { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto 18px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); font-size: 1.8rem; }
-.expired-kicker { color: var(--danger); font-size: 0.74rem; font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase; }
-.expired-card h1 { max-width: 480px; margin: 8px auto; font-size: clamp(1.7rem, 5vw, 2.25rem); letter-spacing: -0.04em; }
-.expired-card > p { margin: 0 auto 22px; color: var(--text-muted); }
-.expired-card dl { display: grid; margin: 8px 0 24px; padding: 8px 18px; border-radius: var(--radius-md); background: var(--surface-soft); text-align: left; }
-.expired-card dl div { display: grid; grid-template-columns: 0.8fr 1fr; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 0.84rem; }
-.expired-card dl div:last-child { border-bottom: 0; }
-.expired-card dt { color: var(--text-muted); }
-.expired-card dd { margin: 0; font-weight: 750; text-align: right; }
-.support-copy { margin-top: 16px !important; font-size: 0.76rem; }
+/* =========================================================
+   EXPIRED SESSION PAGE
+   ========================================================= */
+
+.expired-page {
+    max-width: 620px;
+}
+
+
+/* =========================================================
+   EXPIRED CARD
+   ========================================================= */
+
+.expired-card {
+    padding: clamp(
+        26px,
+        7vw,
+        46px
+    );
+
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 16px;
+
+    background: var(
+        --surface,
+        #ffffff
+    );
+
+    box-shadow:
+        0 12px 34px
+        rgba(
+            15,
+            23,
+            42,
+            0.06
+        );
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   EXPIRED ICON
+   ========================================================= */
+
+.expired-icon {
+    display: grid;
+    place-items: center;
+
+    width: 72px;
+    height: 72px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+
+    background: #fff7ed;
+
+    color: #c2410c;
+
+    font-size: 1.8rem;
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.expired-kicker {
+    color: #c2410c;
+
+    font-size: 0.74rem;
+    font-weight: 740;
+
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+
+.expired-card h1 {
+    max-width: 480px;
+
+    margin: 8px auto 10px;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+
+    font-size: clamp(
+        1.7rem,
+        5vw,
+        2.25rem
+    );
+
+    font-weight: 760;
+
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+}
+
+
+.expired-card > p {
+    max-width: 470px;
+
+    margin: 0 auto 24px;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   PRIMARY ACTION
+   ========================================================= */
+
+.button--primary {
+    border: 1px solid var(
+        --company-primary,
+        #2563eb
+    );
+
+    background: var(
+        --company-primary,
+        #2563eb
+    );
+
+    color: #ffffff;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.button--primary:hover {
+    opacity: 0.92;
+}
+
+
+.button--primary:active {
+    transform: translateY(1px);
+}
+
+
+/* =========================================================
+   SUPPORT NOTE
+   ========================================================= */
+
+.support-copy {
+    margin-top: 16px !important;
+
+    color: var(
+        --text-muted,
+        #64748b
+    ) !important;
+
+    font-size: 0.76rem;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+    .expired-card {
+        padding: 24px 18px;
+
+        border-radius: 14px;
+    }
+}

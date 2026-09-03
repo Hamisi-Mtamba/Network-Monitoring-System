@@ -1,32 +1,89 @@
-// Import Express Router
-import { Router } from "express";
+import express from "express";
 
-// Import admin payment controller
-import { markPaymentSuccessful, getAllPayments, getPaymentById, getCashRequests, confirmCashPayment } from "../../controllers/admin/payment.controller.js";
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
 
-// Import admin authentication middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
+import requireCompanyAdmin from "../../middlewares/requireCompanyAdmin.middleware.js";
 
-// Create router
-const router = Router();
+import {
+    getPayments,
+    getPaymentById,
+    getCashRequests,
+    confirmCashPayment,
+    markPaymentSuccessful
+} from "../../controllers/admin/payment.controller.js";
 
-// Every payment admin route below requires authentication
-router.use(adminAuth);
 
-// Get every payment
-router.get("/", getAllPayments);
+const router =
+    express.Router();
 
-// TEMPORARY test route:
-// Mark a payment as successful using its transaction reference
-router.patch("/:reference/success", markPaymentSuccessful);
 
-//Admin views cash payment requests
-router.get("/cash-requests", getCashRequests);
+// =========================================================
+// AUTHENTICATION + COMPANY ADMIN SCOPE
+// =========================================================
 
-//Administrator confirms that cash was physically received
-router.patch("/cash-requests/:reference/confirm", confirmCashPayment)
+router.use(
+    adminAuth
+);
 
-// Get one payment by ID
-router.get("/:id", getPaymentById);
+router.use(
+    requireCompanyAdmin
+);
+
+
+// =========================================================
+// PAYMENT LIST
+// =========================================================
+
+router.get(
+    "/",
+    getPayments
+);
+
+
+// =========================================================
+// CASH PAYMENT REQUESTS
+// =========================================================
+
+// Keep this route before "/:id".
+router.get(
+    "/cash-requests",
+    getCashRequests
+);
+
+
+// Company admin confirms that physical cash was received.
+router.patch(
+    "/cash-requests/:reference/confirm",
+    confirmCashPayment
+);
+
+
+// =========================================================
+// DEVELOPMENT PAYMENT SIMULATION
+// =========================================================
+
+/*
+ * Development-only endpoint for simulating successful
+ * non-cash payments.
+ *
+ * The controller must reject cash payments here so cash
+ * confirmation cannot bypass the admin approval flow.
+ */
+router.patch(
+    "/:reference/success",
+    markPaymentSuccessful
+);
+
+
+// =========================================================
+// PAYMENT DETAILS
+// =========================================================
+
+// Keep this after all named routes.
+router.get(
+    "/:id",
+    getPaymentById
+);
+
 
 export default router;

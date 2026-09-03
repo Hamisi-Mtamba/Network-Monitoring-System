@@ -1,101 +1,169 @@
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
-// Get summary statistics for the admin dashboard
-const getDashboardSummary = async (req, res) => {
+
+// Resolve the company that the current request is allowed to manage
+const getRequestCompanyId = (req) => {
+
+    // Superadmin manages the company explicitly selected in the platform URL
+    if (
+        req.admin.role === "superadmin" &&
+        req.platformCompany
+    ) {
+        return req.platformCompany.id;
+    }
+
+    // Normal admin always manages their authenticated company
+    return req.admin.companyId;
+};
+
+
+// Get dashboard statistics for one company
+const getDashboard = async (req, res) => {
     try {
-        // Run all dashboard queries together for better efficiency
-        const [
-            packagesResult,
-            paymentsResult,
-            successfulPaymentsResult,
-            pendingPaymentsResult,
-            activeSessionsResult,
-            expiredSessionsResult,
-            revenueResult
-        ] = await Promise.all([
-            // Count all packages
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM packages
-            `),
+        // Get the trusted company ID
+        const companyId = getRequestCompanyId(req);
 
-            // Count all payment records
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM payments
-            `),
+        // Stop if company context is missing
+        if (!companyId) {
+            return res.status(403).json({
+                success: false,
+                message: "Company context is required"
+            });
+        }
 
-            // Count successful payments
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM payments
-                WHERE status = 'successful'
-            `),
+        // Count all packages belonging to this company
+        const packagesResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM packages
+            WHERE company_id = $1
+            `,
+            [companyId]
+        );
 
-            // Count pending payments
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM payments
-                WHERE status = 'pending'
-            `),
+        // Count all payments belonging to this company
+        const paymentsResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM payments
+            WHERE company_id = $1
+            `,
+            [companyId]
+        );
 
-            // Count sessions that are currently active
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM internet_sessions
-                WHERE status = 'active'
-                AND expires_at > CURRENT_TIMESTAMP
-            `),
+        // Count successful payments belonging to this company
+        const successfulPaymentsResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM payments
+            WHERE company_id = $1
+            AND status = 'successful'
+            `,
+            [companyId]
+        );
 
-            // Count sessions whose expiry time has passed
-            pool.query(`
-                SELECT COUNT(*) AS total
-                FROM internet_sessions
-                WHERE expires_at <= CURRENT_TIMESTAMP
-            `),
+        // Count pending payment requests belonging to this company
+        const pendingPaymentsResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM payments
+            WHERE company_id = $1
+            AND status IN (
+                'pending',
+                'awaiting_cash_confirmation'
+            )
+            `,
+            [companyId]
+        );
 
-            // Sum revenue only from successful payments
-            pool.query(`
-                SELECT COALESCE(SUM(amount), 0) AS total
-                FROM payments
-                WHERE status = 'successful'
-            `)
-        ]);
+        // Count currently active sessions
+        // A session is only considered active when it has not expired
+        const activeSessionsResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM internet_sessions
+            WHERE company_id = $1
+            AND status = 'active'
+            AND expires_at > CURRENT_TIMESTAMP
+            `,
+            [companyId]
+        );
 
-        // Build a clean dashboard response
+        // Count expired sessions
+        // This includes sessions whose stored status is expired
+        // and active sessions whose expiry time has already passed
+        const expiredSessionsResult = await pool.query(
+            `
+            SELECT COUNT(*) AS total
+            FROM internet_sessions
+            WHERE company_id = $1
+            AND (
+                status = 'expired'
+                OR (
+                    status = 'active'
+                    AND expires_at <= CURRENT_TIMESTAMP
+                )
+            )
+            `,
+            [companyId]
+        );
+
+        // Calculate revenue only from successful payments
+        const revenueResult = await pool.query(
+            `
+            SELECT
+                COALESCE(SUM(amount), 0) AS total
+            FROM payments
+            WHERE company_id = $1
+            AND status = 'successful'
+            `,
+            [companyId]
+        );
+
+        // Convert PostgreSQL count values to normal JavaScript numbers
+        const dashboard = {
+            total_packages:
+                Number(packagesResult.rows[0].total),
+
+            total_payments:
+                Number(paymentsResult.rows[0].total),
+
+            successful_payments:
+                Number(successfulPaymentsResult.rows[0].total),
+
+            pending_payments:
+                Number(pendingPaymentsResult.rows[0].total),
+
+            active_sessions:
+                Number(activeSessionsResult.rows[0].total),
+
+            expired_sessions:
+                Number(expiredSessionsResult.rows[0].total),
+
+            total_revenue:
+                Number(revenueResult.rows[0].total)
+        };
+
+        // Return company-specific dashboard statistics
         res.status(200).json({
             success: true,
-            dashboard: {
-                total_packages: Number(packagesResult.rows[0].total),
-                total_payments: Number(paymentsResult.rows[0].total),
-                successful_payments: Number(
-                    successfulPaymentsResult.rows[0].total
-                ),
-                pending_payments: Number(
-                    pendingPaymentsResult.rows[0].total
-                ),
-                active_sessions: Number(
-                    activeSessionsResult.rows[0].total
-                ),
-                expired_sessions: Number(
-                    expiredSessionsResult.rows[0].total
-                ),
-                total_revenue: Number(
-                    revenueResult.rows[0].total
-                )
-            }
+            dashboard
         });
 
     } catch (error) {
-        // Log the real backend error
-        console.error("Error fetching dashboard summary:", error.message);
+        // Log the actual backend error
+        console.error("Get dashboard error:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Failed to fetch dashboard summary"
+            message: "Failed to fetch dashboard statistics"
         });
     }
 };
 
-export { getDashboardSummary };
+
+// Export dashboard controller
+export {
+    getDashboard
+};

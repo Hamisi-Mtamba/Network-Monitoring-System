@@ -1,61 +1,644 @@
-.filter-panel{margin-bottom:15px;padding:13px;display:grid;grid-template-columns:minmax(240px,1fr) 180px 190px auto;align-items:center;gap:11px;border:1px solid #e5eaf1;border-radius:14px;background:#fff}.filter-panel ion-select{min-height:48px;--padding-start:12px;--padding-end:12px;border:1px solid #e3e8ef;border-radius:9px;background:#fafbfd;font-size:11px}.result-count{color:#7e8fa2;font-size:10px;text-align:right}.data-panel td:first-child strong,.data-panel td:first-child small{display:block}.data-panel td:first-child small{margin-top:3px;color:#9ba8b6;font-size:9px}.method-badge{padding:5px 8px;border-radius:7px;color:#31526f;background:#edf4f8;font-size:9px;font-weight:750}.data-panel a{color:#75879a;font-size:18px}.mobile-cards{display:none}
-@media(max-width:900px){.filter-panel{grid-template-columns:1fr 1fr}.result-count{text-align:left}.desktop-table{display:none}.mobile-cards{display:grid;gap:10px}.record-card{padding:16px;display:block;border:1px solid #e4eaf1;border-radius:13px;color:inherit;background:#fff;text-decoration:none}.record-card>div,.record-card footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.record-card>div>strong{color:#173451;font-size:11px}.record-card p{margin:12px 0;color:#75879b;font-size:10px}.record-card footer{padding-top:11px;border-top:1px solid #edf1f5}.record-card footer b{color:#173451;font-size:12px}.record-card footer span{color:#96a3b1;font-size:9px}}@media(max-width:560px){.filter-panel{grid-template-columns:1fr}.filter-panel .search-control{grid-column:auto}}
-    .payment-view-switch {
+/* =========================================================
+   PAYMENT FILTERS
+   ========================================================= */
+
+.filter-panel {
+    margin-bottom: 15px;
+    padding: 13px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(240px, 1fr)
+        180px
+        190px
+        auto;
+
+    align-items: center;
+
+    gap: 11px;
+
+    border: 1px solid #e5eaf1;
+
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+
+.filter-panel ion-select {
+    min-height: 48px;
+
+    --padding-start: 12px;
+    --padding-end: 12px;
+
+    border: 1px solid #e3e8ef;
+
+    border-radius: 9px;
+
+    background: #fafbfd;
+
+    font-size: 11px;
+}
+
+
+.result-count {
+    color: #7e8fa2;
+
+    font-size: 10px;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   PAYMENT TABLE
+   ========================================================= */
+
+.data-panel td:first-child strong,
+.data-panel td:first-child small {
+    display: block;
+}
+
+
+.data-panel td:first-child small {
+    margin-top: 3px;
+
+    color: #9ba8b6;
+
+    font-size: 9px;
+}
+
+
+.data-panel a {
+    color: #75879a;
+
+    font-size: 18px;
+
+    text-decoration: none;
+
+    transition:
+        color 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+.data-panel a:hover {
+    color: var(--ion-color-primary);
+
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   PAYMENT METHOD BADGE
+   ========================================================= */
+
+.method-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 8px;
+
+    border-radius: 7px;
+
+    color: #31526f;
+
+    background: #edf4f8;
+
+    font-size: 9px;
+
+    font-weight: 750;
+
+    text-transform: capitalize;
+}
+
+
+/* =========================================================
+   PAYMENT VIEW SWITCH
+   ========================================================= */
+
+.payment-view-switch {
     display: flex;
-    gap: 10px;
+
+    align-items: center;
+
+    gap: 8px;
+
     margin-bottom: 20px;
 
-    button {
-        padding: 10px 16px;
-        border: 1px solid var(--ion-color-medium);
-        border-radius: 10px;
-        background: transparent;
-        cursor: pointer;
-        font-weight: 700;
+    padding: 4px;
+
+    width: fit-content;
+
+    border: 1px solid #e4eaf1;
+
+    border-radius: 11px;
+
+    background: #ffffff;
+}
+
+
+.payment-view-switch button {
+    position: relative;
+
+    min-height: 38px;
+
+    padding: 8px 14px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    border: 1px solid transparent;
+
+    border-radius: 8px;
+
+    color: #62768a;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.payment-view-switch button:hover {
+    background: #f4f7fa;
+
+    color: #173451;
+}
+
+
+.payment-view-switch button.active {
+    border-color: var(--ion-color-primary);
+
+    color: #ffffff;
+
+    background: var(--ion-color-primary);
+}
+
+
+/* =========================================================
+   CASH REQUEST COUNT BADGE
+   ========================================================= */
+
+.view-count-badge {
+    min-width: 20px;
+
+    height: 20px;
+
+    padding: 0 6px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    color: #7a4b00;
+
+    background: #fff3cd;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    line-height: 1;
+}
+
+
+.payment-view-switch button.active .view-count-badge {
+    color: var(--ion-color-primary);
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   CASH HEADER
+   ========================================================= */
+
+.cash-header {
+    margin-bottom: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.cash-header p {
+    margin: 0;
+
+    color: var(--ion-color-primary);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+}
+
+
+.cash-header h2 {
+    margin: 4px 0 5px;
+
+    color: #173451;
+
+    font-size: 20px;
+}
+
+
+.cash-header span {
+    color: #75879b;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   CASH SUMMARY
+   ========================================================= */
+
+.cash-summary-grid {
+    margin-bottom: 18px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.cash-summary-card {
+    padding: 16px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    border: 1px solid #e4eaf1;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+}
+
+
+.cash-summary-card span {
+    color: #7e8fa2;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.cash-summary-card strong {
+    color: #173451;
+
+    font-size: 17px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   CASH STATUS
+   ========================================================= */
+
+.cash-pending {
+    color: #8a5a00;
+
+    background: #fff7dd;
+}
+
+
+.confirmed-label {
+    font-size: 10px;
+
+    font-weight: 700;
+
+    color: var(--ion-color-success);
+}
+
+
+/* =========================================================
+   CASH CONFIRM BUTTON
+   ========================================================= */
+
+.cash-confirm-button {
+    margin-top: 14px;
+}
+
+
+.cash-confirm-button ion-spinner {
+    width: 16px;
+
+    height: 16px;
+}
+
+
+/* =========================================================
+   CASH RECORD DETAILS
+   ========================================================= */
+
+.cash-record {
+    border-color: #e3e9ef;
+}
+
+
+.cash-record__speed {
+    margin-top: -5px !important;
+
+    color: #92a0ae !important;
+
+    font-size: 9px !important;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 24px;
+
+    padding: 4px 8px;
+
+    border-radius: 7px;
+
+    color: #7b5b00;
+
+    background: #fff4cf;
+
+    font-size: 9px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+}
+
+
+.status-badge.status--successful,
+.status-badge.success {
+    color: #17643a;
+
+    background: #e8f7ee;
+}
+
+
+.status-badge.status--pending {
+    color: #805700;
+
+    background: #fff3cd;
+}
+
+
+.status-badge.status--failed,
+.status-badge.failed {
+    color: #9f2f36;
+
+    background: #fdecef;
+}
+
+
+/* =========================================================
+   MOBILE CARDS
+   ========================================================= */
+
+.mobile-cards {
+    display: none;
+}
+
+
+.record-card {
+    color: inherit;
+
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (
+    max-width: 900px
+) {
+
+    .filter-panel {
+        grid-template-columns:
+            1fr
+            1fr;
     }
 
-    button.active {
-        background: var(--ion-color-primary);
-        border-color: var(--ion-color-primary);
-        color: #ffffff;
+
+    .result-count {
+        text-align: left;
     }
+
+
+    .desktop-table {
+        display: none;
     }
+
+
+    .mobile-cards {
+        display: grid;
+
+        gap: 10px;
+    }
+
+
+    .record-card {
+        padding: 16px;
+
+        display: block;
+
+        border: 1px solid #e4eaf1;
+
+        border-radius: 13px;
+
+        color: inherit;
+
+        background: #ffffff;
+
+        text-decoration: none;
+    }
+
+
+    .record-card > div,
+    .record-card footer {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 10px;
+    }
+
+
+    .record-card > div > strong {
+        min-width: 0;
+
+        overflow: hidden;
+
+        color: #173451;
+
+        font-size: 11px;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+    }
+
+
+    .record-card p {
+        margin: 12px 0;
+
+        color: #75879b;
+
+        font-size: 10px;
+
+        line-height: 1.5;
+    }
+
+
+    .record-card footer {
+        padding-top: 11px;
+
+        border-top: 1px solid #edf1f5;
+    }
+
+
+    .record-card footer b {
+        color: #173451;
+
+        font-size: 12px;
+    }
+
+
+    .record-card footer span {
+        color: #96a3b1;
+
+        font-size: 9px;
+    }
+
+
+    .cash-summary-grid {
+        grid-template-columns:
+            1fr
+            1fr;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (
+    max-width: 560px
+) {
+
+    .filter-panel {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .filter-panel .search-control {
+        grid-column: auto;
+    }
+
+
+    .payment-view-switch {
+        width: 100%;
+    }
+
+
+    .payment-view-switch button {
+        flex: 1;
+
+        padding-left: 10px;
+
+        padding-right: 10px;
+    }
+
 
     .cash-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 18px;
+        align-items: flex-start;
+
+        flex-direction: column;
     }
 
-    .cash-header p {
-    margin: 0;
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--ion-color-primary);
+
+    .cash-summary-grid {
+        grid-template-columns:
+            1fr;
     }
 
-    .cash-header h2 {
-    margin: 4px 0;
+
+    .cash-summary-card {
+        padding: 14px;
     }
 
-    .cash-header span {
-    color: var(--ion-color-medium);
+
+    .record-card {
+        padding: 14px;
     }
 
-    .cash-pending {
-    background: #ffffff;
-    color: #8a5a00;
+
+    .record-card > div {
+        align-items: flex-start;
     }
 
-    .confirmed-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--ion-color-success);
+
+    .record-card > div > strong {
+        max-width: 60%;
     }
+
+
+    .record-card footer {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
 
     .cash-confirm-button {
-    margin-top: 14px;
+        margin-top: 12px;
     }
+}

@@ -1,75 +1,182 @@
+/* =========================================================
+   STATUS CARD
+   ========================================================= */
+
 .status-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-soft);
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border: 1px solid var(
+        --border,
+        #e2e8f0
+    );
+
+    border-radius: 12px;
+
+    background: var(
+        --surface-soft,
+        #f8fafc
+    );
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
 }
 
+
+/* =========================================================
+   STATUS INDICATOR
+   ========================================================= */
+
 .status-card__icon {
-  flex: 0 0 12px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #718096;
-  box-shadow: 0 0 0 5px #e7ecf2;
+    flex: 0 0 12px;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #64748b;
+
+    box-shadow:
+        0 0 0 5px
+        #e2e8f0;
 }
+
+
+/* =========================================================
+   TEXT
+   ========================================================= */
 
 .status-card__label,
 .status-card__value,
-.status-card__description { margin: 0; }
+.status-card__description {
+    margin: 0;
+}
+
 
 .status-card__label {
-  color: var(--text-muted);
-  font-size: 0.77rem;
-  font-weight: 700;
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.76rem;
+    font-weight: 650;
 }
+
 
 .status-card__value {
-  margin-top: 2px;
-  font-size: 0.94rem;
-  font-weight: 850;
-  letter-spacing: 0.045em;
+    margin-top: 2px;
+
+    font-size: 0.93rem;
+    font-weight: 740;
+
+    letter-spacing: 0.045em;
 }
+
 
 .status-card__description {
-  margin-top: 3px;
-  color: var(--text-muted);
-  font-size: 0.82rem;
+    margin-top: 4px;
+
+    color: var(
+        --text-muted,
+        #64748b
+    );
+
+    font-size: 0.82rem;
+    line-height: 1.45;
 }
+
+
+/* =========================================================
+   SUCCESS STATE
+   ========================================================= */
 
 .status-card[data-tone='success'] {
-  background: var(--success-soft);
-  border-color: #b7e3ca;
-  color: var(--success);
+    border-color: #bbf7d0;
+
+    background: #ecfdf3;
+
+    color: #15803d;
 }
 
-.status-card[data-tone='success'] .status-card__icon {
-  background: var(--success);
-  box-shadow: 0 0 0 5px #cfefdc;
+
+.status-card[data-tone='success']
+.status-card__icon {
+    background: #16a34a;
+
+    box-shadow:
+        0 0 0 5px
+        #dcfce7;
 }
+
+
+/* =========================================================
+   PENDING STATE
+   ========================================================= */
 
 .status-card[data-tone='pending'] {
-  background: var(--warning-soft);
-  border-color: #f5d69f;
-  color: #94510a;
+    border-color: #fed7aa;
+
+    background: #fff7ed;
+
+    color: #c2410c;
 }
 
-.status-card[data-tone='pending'] .status-card__icon {
-  background: var(--warning);
-  box-shadow: 0 0 0 5px #ffebc6;
+
+.status-card[data-tone='pending']
+.status-card__icon {
+    background: #f97316;
+
+    box-shadow:
+        0 0 0 5px
+        #ffedd5;
 }
+
+
+/* =========================================================
+   DANGER STATE
+   ========================================================= */
 
 .status-card[data-tone='danger'] {
-  background: var(--danger-soft);
-  border-color: #f0b9bc;
-  color: var(--danger);
+    border-color: #fecaca;
+
+    background: #fef2f2;
+
+    color: #b42318;
 }
 
-.status-card[data-tone='danger'] .status-card__icon {
-  background: var(--danger);
-  box-shadow: 0 0 0 5px #f7d5d7;
+
+.status-card[data-tone='danger']
+.status-card__icon {
+    background: #dc2626;
+
+    box-shadow:
+        0 0 0 5px
+        #fee2e2;
 }
 
+
+/* =========================================================
+   NEUTRAL STATE
+   ========================================================= */
+
+.status-card[data-tone='neutral'] {
+    border-color: var(
+        --border,
+        #e2e8f0
+    );
+
+    background: #f8fafc;
+
+    color: var(
+        --company-secondary,
+        #0f172a
+    );
+}

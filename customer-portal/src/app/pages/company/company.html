@@ -1,0 +1,359 @@
+<main class="page-shell company-page">
+
+    <!-- ======================================================
+         LOADING STATE
+         ====================================================== -->
+
+    @if (loading()) {
+
+        <section class="company-state">
+            <div class="company-state__loader"></div>
+
+            <h1>
+                Loading company information...
+            </h1>
+
+            <p>
+                Please wait while we prepare this provider profile.
+            </p>
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         ERROR STATE
+         ====================================================== -->
+
+    @else if (!company()) {
+
+        <section
+            class="company-state company-state--error"
+            role="alert"
+        >
+
+            <div
+                class="company-state__icon"
+                aria-hidden="true"
+            >
+                !
+            </div>
+
+            <h1>
+                Company information unavailable
+            </h1>
+
+            <p>
+                {{ errorMessage() }}
+            </p>
+
+            @if (tenantService.companySlug()) {
+
+                <a
+                    class="button button--primary"
+                    [routerLink]="[
+                        '/',
+                        tenantService.companySlug(),
+                        'packages'
+                    ]"
+                >
+                    View packages
+                </a>
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- ======================================================
+         COMPANY PROFILE
+         ====================================================== -->
+
+    @else {
+
+        <section class="company-hero">
+
+            <div class="company-hero__identity">
+
+                <!-- Company logo -->
+                @if (
+                    getPublicFileUrl(
+                        company()!.logo_url
+                    );
+                    as logoUrl
+                ) {
+
+                    <div class="company-logo">
+
+                        <img
+                            [src]="logoUrl"
+                            [alt]="company()!.name + ' logo'"
+                        />
+
+                    </div>
+
+                } @else {
+
+                    <div
+                        class="company-logo company-logo--fallback"
+                        aria-hidden="true"
+                    >
+                        {{
+                            company()!
+                                .name
+                                .charAt(0)
+                                .toUpperCase()
+                        }}
+                    </div>
+
+                }
+
+
+                <!-- Company identity -->
+                <div class="company-hero__content">
+
+                    <span class="company-eyebrow">
+                        Wi-Fi Provider
+                    </span>
+
+                    <h1>
+                        {{ company()!.name }}
+                    </h1>
+
+                    <p>
+                        View provider details, contact information,
+                        and available internet packages.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Packages action -->
+            <a
+                class="button button--primary company-hero__action"
+                [routerLink]="[
+                    '/',
+                    company()!.slug,
+                    'packages'
+                ]"
+            >
+                View internet packages
+            </a>
+
+        </section>
+
+
+        <!-- ==================================================
+             COMPANY INFORMATION
+             ================================================== -->
+
+        <section class="company-content">
+
+            <div class="company-details-card">
+
+                <div class="section-heading">
+
+                    <span>
+                        Provider information
+                    </span>
+
+                    <h2>
+                        Company details
+                    </h2>
+
+                </div>
+
+
+                <dl class="company-details">
+
+                    <!-- Company name -->
+                    <div>
+
+                        <dt>
+                            Company
+                        </dt>
+
+                        <dd>
+                            {{ company()!.name }}
+                        </dd>
+
+                    </div>
+
+
+                    <!-- Phone -->
+                    @if (company()!.phone) {
+
+                        <div>
+
+                            <dt>
+                                Phone
+                            </dt>
+
+                            <dd>
+
+                                <a
+                                    [href]="'tel:' + company()!.phone"
+                                >
+                                    {{ company()!.phone }}
+                                </a>
+
+                            </dd>
+
+                        </div>
+
+                    }
+
+
+                    <!-- Email -->
+                    @if (company()!.email) {
+
+                        <div>
+
+                            <dt>
+                                Email
+                            </dt>
+
+                            <dd>
+
+                                <a
+                                    [href]="'mailto:' + company()!.email"
+                                >
+                                    {{ company()!.email }}
+                                </a>
+
+                            </dd>
+
+                        </div>
+
+                    }
+
+
+                    <!-- Address -->
+                    @if (company()!.address) {
+
+                        <div>
+
+                            <dt>
+                                Address
+                            </dt>
+
+                            <dd>
+                                {{ company()!.address }}
+                            </dd>
+
+                        </div>
+
+                    }
+
+                </dl>
+
+            </div>
+
+
+            <!-- ==================================================
+                 SUPPORT / CONTACT CARD
+                 ================================================== -->
+
+            <aside class="support-card">
+
+                <span class="support-card__label">
+                    Need assistance?
+                </span>
+
+                <h2>
+                    Contact this provider
+                </h2>
+
+                <p>
+                    For payment questions, connection problems,
+                    or package support, contact the provider directly.
+                </p>
+
+
+                <div class="support-actions">
+
+                    @if (company()!.phone) {
+
+                        <a
+                            class="support-action"
+                            [href]="'tel:' + company()!.phone"
+                        >
+
+                            <span aria-hidden="true">
+                                ☎
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    Call
+                                </small>
+
+                                <strong>
+                                    {{ company()!.phone }}
+                                </strong>
+
+                            </div>
+
+                        </a>
+
+                    }
+
+
+                    @if (company()!.email) {
+
+                        <a
+                            class="support-action"
+                            [href]="'mailto:' + company()!.email"
+                        >
+
+                            <span aria-hidden="true">
+                                @
+                            </span>
+
+                            <div>
+
+                                <small>
+                                    Email
+                                </small>
+
+                                <strong>
+                                    {{ company()!.email }}
+                                </strong>
+
+                            </div>
+
+                        </a>
+
+                    }
+
+                </div>
+
+
+                @if (
+                    !company()!.phone &&
+                    !company()!.email
+                ) {
+
+                    <div class="support-empty">
+
+                        <p>
+                            Contact information has not yet been
+                            provided by this company.
+                        </p>
+
+                    </div>
+
+                }
+
+            </aside>
+
+        </section>
+
+    }
+
+</main>

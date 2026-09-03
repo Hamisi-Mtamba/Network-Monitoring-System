@@ -5,7 +5,7 @@ import { Router } from "express";
 import { loginAdmin, getCurrentAdmin } from "../../controllers/admin/auth.controller.js";
 
 // Import JWT protection middleware
-import { adminAuth } from "../../middlewares/adminAuth.middleware.js";
+import adminAuth from "../../middlewares/adminAuth.middleware.js";
 
 
 const router = Router();

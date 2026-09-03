@@ -1,14 +1,40 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+// Import Angular application configuration utilities
+import {
+    ApplicationConfig,
+    provideBrowserGlobalErrorListeners
+} from '@angular/core';
 
-// Enables HTTP requests to our Express backend
-import { provideHttpClient } from '@angular/common/http';
 
-import { routes } from './app.routes';
+// Import Angular router provider
+import {
+    provideRouter
+} from '@angular/router';
 
+
+// Import Angular HTTP provider so services can call the backend
+import {
+    provideHttpClient
+} from '@angular/common/http';
+
+
+// Import application routes
+import {
+    routes
+} from './app.routes';
+
+
+// Configure the Angular application
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
-  ]
+
+    providers: [
+
+        // Enable Angular global error handling
+        provideBrowserGlobalErrorListeners(),
+
+        // Register application routes
+        provideRouter(routes),
+
+        // Enable HttpClient throughout the customer portal
+        provideHttpClient()
+    ]
 };
