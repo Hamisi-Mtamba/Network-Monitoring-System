@@ -1,1 +1,252 @@
-.report-summary{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:14px;margin-bottom:14px}.report-summary article{min-height:130px;padding:21px;display:flex;flex-direction:column;justify-content:center;border:1px solid #e5eaf1;border-radius:15px;background:#fff}.report-summary article.primary{flex-direction:row;align-items:center;gap:17px;color:#fff;border:0;background:#0d2b4e}.primary>span{width:51px;height:51px;display:grid;place-items:center;border-radius:14px;color:#5eead4;background:rgba(45,212,191,.13);font-size:24px}.report-summary small{color:#8292a4;font-size:9px;font-weight:800;letter-spacing:.12em}.report-summary strong{display:block;margin-top:5px;color:#173451;font-size:25px}.primary strong{color:#fff;font-size:28px}.primary p{margin:4px 0 0;color:#93a9bf;font-size:9px}.icon{width:37px;height:37px;display:grid;place-items:center;margin-bottom:13px;border-radius:10px}.icon.green{color:#16a34a;background:#e9f9ef}.icon.slate{color:#64748b;background:#eef2f6}.report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.report-card{min-height:280px;padding:22px;border:1px solid #e5eaf1;border-radius:15px;background:#fff}.report-card.wide{grid-column:1/-1}.report-card header p{margin:0 0 6px;color:#76899e;font-size:9px;font-weight:800;letter-spacing:.13em}.report-card header h2{margin:0;color:#173451;font-size:16px}.revenue-chart{height:220px;margin-top:28px;padding:10px 5px 0;display:flex;align-items:flex-end;gap:12px;border-bottom:1px solid #e8edf3}.bar-column{height:100%;min-width:40px;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}.bar-column i{width:min(40px,75%);min-height:5px;border-radius:6px 6px 0 0;background:#2563eb}.bar-value{color:#708399;font-size:8px;white-space:nowrap}.bar-column small{height:17px;color:#8c9aab;font-size:8px}.progress-list{margin-top:24px}.progress-list>div{margin:17px 0}.progress-list p{margin:0 0 7px;display:flex;justify-content:space-between;color:#66798e;font-size:10px}.progress-list p strong{color:#1c3855}.progress-list i{height:6px;display:block;overflow:hidden;border-radius:99px;background:#edf1f5}.progress-list i b{height:100%;display:block;border-radius:99px;background:#2563eb}.progress-list.purple i b{background:#7c3aed}.progress-list.green i b{background:#16a34a}.progress-list.orange i b{background:#ea580c}.inline-empty{margin-top:30px;color:#96a4b3;font-size:11px}@media(max-width:760px){.report-summary{grid-template-columns:1fr 1fr}.report-summary .primary{grid-column:1/-1}.report-grid{grid-template-columns:1fr}.bar-value{display:none}.revenue-chart{gap:5px}}
+/* =========================================================
+   REPORT SUMMARY CARDS
+   ========================================================= */
+
+.report-summary {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.report-summary article {
+    min-height: 130px;
+    padding: 21px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid #e5eaf1;
+    border-radius: 15px;
+    background: #fff;
+}
+
+.report-summary article.primary {
+    flex-direction: row;
+    align-items: center;
+    gap: 17px;
+    color: #fff;
+    border: 0;
+    background: #0d2b4e;
+}
+
+.primary > span {
+    width: 51px;
+    height: 51px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: #5eead4;
+    background: rgba(45, 212, 191, .13);
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.report-summary small {
+    color: #8292a4;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+.report-summary strong {
+    display: block;
+    margin-top: 5px;
+    color: #173451;
+    font-size: 25px;
+}
+
+.primary strong {
+    color: #fff;
+    font-size: 28px;
+}
+
+.primary p {
+    margin: 4px 0 0;
+    color: #93a9bf;
+    font-size: 9px;
+}
+
+.icon {
+    width: 37px;
+    height: 37px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 13px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.icon.green { color: #16a34a; background: #e9f9ef; }
+.icon.slate { color: #64748b; background: #eef2f6; }
+
+/* =========================================================
+   REPORT GRID
+   ========================================================= */
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.report-card {
+    min-height: 280px;
+    padding: 22px;
+    border: 1px solid #e5eaf1;
+    border-radius: 15px;
+    background: #fff;
+}
+
+.report-card.wide {
+    grid-column: 1 / -1;
+}
+
+.report-card header p {
+    margin: 0 0 6px;
+    color: #76899e;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .13em;
+}
+
+.report-card header h2 {
+    margin: 0;
+    color: #173451;
+    font-size: 16px;
+}
+
+/* =========================================================
+   REVENUE TREND CHART
+   ========================================================= */
+
+.revenue-chart {
+    height: 220px;
+    margin-top: 28px;
+    padding: 10px 5px 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    border-bottom: 1px solid #e8edf3;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.bar-column {
+    height: 100%;
+    min-width: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+}
+
+.bar-column i {
+    width: min(40px, 75%);
+    min-height: 5px;
+    border-radius: 6px 6px 0 0;
+    background: #2563eb;
+}
+
+.bar-value {
+    color: #708399;
+    font-size: 8px;
+    white-space: nowrap;
+}
+
+.bar-column small {
+    height: 17px;
+    color: #8c9aab;
+    font-size: 8px;
+}
+
+/* =========================================================
+   PROGRESS BREAKDOWN LISTS
+   ========================================================= */
+
+.progress-list {
+    margin-top: 24px;
+}
+
+.progress-list > div {
+    margin: 17px 0;
+}
+
+.progress-list p {
+    margin: 0 0 7px;
+    display: flex;
+    justify-content: space-between;
+    color: #66798e;
+    font-size: 10px;
+}
+
+.progress-list p strong {
+    color: #1c3855;
+}
+
+.progress-list i {
+    height: 6px;
+    display: block;
+    overflow: hidden;
+    border-radius: 99px;
+    background: #edf1f5;
+}
+
+.progress-list i b {
+    height: 100%;
+    display: block;
+    border-radius: 99px;
+    background: #2563eb;
+}
+
+.progress-list.purple i b { background: #7c3aed; }
+.progress-list.green i b { background: #16a34a; }
+.progress-list.orange i b { background: #ea580c; }
+
+.inline-empty {
+    margin-top: 30px;
+    color: #96a4b3;
+    font-size: 11px;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+
+@media (max-width: 760px) {
+    .report-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .report-summary .primary {
+        grid-column: 1 / -1;
+    }
+
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bar-value {
+        display: none;
+    }
+
+    .revenue-chart {
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .report-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .report-summary article {
+        padding: 16px;
+    }
+
+    .report-card {
+        padding: 18px;
+    }
+}
+

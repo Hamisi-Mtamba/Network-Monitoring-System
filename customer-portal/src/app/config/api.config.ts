@@ -2,10 +2,10 @@
 export const API_CONFIG = {
 
     // Main backend server
-    backendUrl: 'http://192.168.88.254:4000',
+    backendUrl: 'http://localhost:4000',
 
     // Public API root
-    publicApiUrl: 'http://192.168.88.254:4000/api/public'
+    publicApiUrl: 'http://localhost:4000/api/public'
 
 } as const;
 

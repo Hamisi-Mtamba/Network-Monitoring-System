@@ -26,7 +26,7 @@
     <ion-button
       fill="outline"
       (click)="refreshCurrentView()"
-      [disabled]="loading() || cashLoading()"
+      [disabled]="loading() || cashLoading() || smsLoading()"
     >
 
       <ion-icon
@@ -74,8 +74,88 @@
 
     </button>
 
+    <button
+      type="button"
+      [class.active]="activeView() === 'sms'"
+      (click)="changeView('sms')"
+    >
+      SMS Review
+      @if (smsReviews().length > 0) {
+        <span class="view-count-badge">{{ smsReviews().length }}</span>
+      }
+    </button>
+
   </div>
 
+
+  <!-- =====================================================
+       SMS PAYMENT REVIEW
+       ===================================================== -->
+
+  @if (activeView() === 'sms') {
+    @if (smsLoading()) {
+      <div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading payment SMS…</p></div>
+    }
+    @else if (smsError()) {
+      <div class="state-card error-state"><h2>SMS review unavailable</h2><p>Could not load automatic payment exceptions.</p><ion-button (click)="loadSmsReview()">Try again</ion-button></div>
+    }
+    @else if (smsReviews().length === 0) {
+      <div class="state-card"><h2>No payment SMS needs review</h2><p>Automatic verification is clear.</p></div>
+    }
+    @else {
+      <section class="sms-review-list">
+        @for (sms of smsReviews(); track sms.id) {
+          <article class="sms-review-card">
+            <div class="sms-review-card__top">
+              <div>
+                <strong>{{ sms.provider || sms.sender || 'Mobile money SMS' }}</strong>
+                <small>{{ sms.received_at | date:'medium' }}</small>
+              </div>
+              <span class="status-badge status-pending">Needs review</span>
+            </div>
+
+            <p class="sms-raw">{{ sms.raw_message }}</p>
+
+            <div class="sms-facts">
+              <div><span>Phone</span><strong>{{ sms.payer_phone || 'Not detected' }}</strong></div>
+              <div><span>Amount</span><strong>{{ sms.amount ? money(sms.amount) : 'Not detected' }}</strong></div>
+              <div><span>Transaction</span><strong>{{ sms.provider_transaction_id || 'Not detected' }}</strong></div>
+            </div>
+
+            @if (sms.processing_error) {
+              <p class="sms-review-error">{{ sms.processing_error }}</p>
+            }
+
+            <div class="sms-review-actions">
+              <ion-select
+                label="Match to pending payment"
+                labelPlacement="stacked"
+                placeholder="Choose payment"
+                (ionChange)="selectSmsPayment(sms.id, $event.detail.value)"
+              >
+                @for (payment of smsPendingPayments(); track payment.id) {
+                  <ion-select-option [value]="payment.id">
+                    {{ payment.phone_number }} · {{ money(payment.amount) }} · {{ payment.package_name }}
+                  </ion-select-option>
+                }
+              </ion-select>
+
+              <ion-button
+                fill="outline"
+                (click)="retrySms(sms)"
+                [disabled]="resolvingSmsId() !== null"
+              >Retry parser</ion-button>
+
+              <ion-button
+                (click)="matchSms(sms)"
+                [disabled]="!selectedSmsPayment()[sms.id] || resolvingSmsId() !== null"
+              >Confirm match</ion-button>
+            </div>
+          </article>
+        }
+      </section>
+    }
+  }
 
   <!-- =====================================================
        ALL PAYMENTS VIEW

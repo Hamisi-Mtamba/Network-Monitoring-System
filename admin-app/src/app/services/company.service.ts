@@ -33,6 +33,7 @@ import {
     CompanyResponse,
     CreateCompanyRequest,
     UpdateCompanyBrandingRequest,
+    UpdateCompanyPaymentSettingsRequest,
     UpdateCompanyLogoRequest,
     UpdateCompanyRequest
 } from '../models/company.model';
@@ -114,6 +115,32 @@ export class CompanyService {
                     this.setCompany(
                         response.company
                     );
+                })
+            );
+    }
+
+
+    // =====================================================
+    // COMPANY ADMIN PAYMENT SETTINGS
+    // =====================================================
+
+    /**
+     * Update authenticated company's Lipa/mobile-money settings.
+     *
+     * PATCH /api/admin/company/payment-settings
+     */
+    updateCurrentCompanyPaymentSettings(
+        payload: UpdateCompanyPaymentSettingsRequest
+    ): Observable<CompanyResponse> {
+
+        return this.http
+            .patch<CompanyResponse>(
+                `${API_CONFIG.baseUrl}/company/payment-settings`,
+                payload
+            )
+            .pipe(
+                tap((response) => {
+                    this.setCompany(response.company);
                 })
             );
     }
@@ -246,7 +273,8 @@ export class CompanyService {
     uploadCurrentCompanyBrandingImage(
         imageType:
             CompanyBrandingImageType,
-        file: File
+        file: File,
+        append = false
     ): Observable<CompanyImageUploadResponse> {
 
         const formData =
@@ -254,6 +282,8 @@ export class CompanyService {
                 file
             );
 
+
+        if (append) formData.append('append', 'true');
 
         return this.http
             .post<CompanyImageUploadResponse>(
@@ -282,12 +312,14 @@ export class CompanyService {
      */
     removeCurrentCompanyBrandingImage(
         imageType:
-            CompanyBrandingImageType
+            CompanyBrandingImageType,
+        imageUrl?: string
     ): Observable<CompanyResponse> {
 
         return this.http
             .delete<CompanyResponse>(
-                `${API_CONFIG.baseUrl}/company/branding/${imageType}`
+                `${API_CONFIG.baseUrl}/company/branding/${imageType}`,
+                { params: imageUrl ? { image_url: imageUrl } : {} }
             )
             .pipe(
 
@@ -412,6 +444,28 @@ export class CompanyService {
         return this.http
             .patch<CompanyResponse>(
                 `${API_CONFIG.platformUrl}/companies/${companyId}/profile`,
+                payload
+            );
+    }
+
+
+    // =====================================================
+    // SUPERADMIN COMPANY PAYMENT SETTINGS
+    // =====================================================
+
+    /**
+     * Update payment settings for a selected tenant company.
+     *
+     * PATCH /api/platform/companies/:companyId/payment-settings
+     */
+    updateCompanyPaymentSettings(
+        companyId: number,
+        payload: UpdateCompanyPaymentSettingsRequest
+    ): Observable<CompanyResponse> {
+
+        return this.http
+            .patch<CompanyResponse>(
+                `${API_CONFIG.platformUrl}/companies/${companyId}/payment-settings`,
                 payload
             );
     }
@@ -570,7 +624,8 @@ export class CompanyService {
         companyId: number,
         imageType:
             CompanyBrandingImageType,
-        file: File
+        file: File,
+        append = false
     ): Observable<CompanyImageUploadResponse> {
 
         const formData =
@@ -578,6 +633,8 @@ export class CompanyService {
                 file
             );
 
+
+        if (append) formData.append('append', 'true');
 
         return this.http
             .post<CompanyImageUploadResponse>(
@@ -596,12 +653,14 @@ export class CompanyService {
     removeCompanyBrandingImage(
         companyId: number,
         imageType:
-            CompanyBrandingImageType
+            CompanyBrandingImageType,
+        imageUrl?: string
     ): Observable<CompanyResponse> {
 
         return this.http
             .delete<CompanyResponse>(
-                `${API_CONFIG.platformUrl}/companies/${companyId}/profile/branding/${imageType}`
+                `${API_CONFIG.platformUrl}/companies/${companyId}/profile/branding/${imageType}`,
+                { params: imageUrl ? { image_url: imageUrl } : {} }
             );
     }
 
@@ -611,8 +670,17 @@ export class CompanyService {
     // =====================================================
 
     /**
-     * Store company in application state.
+     * Change the role of an image already stored on the managed company.
      */
+    updateBrandingImageRole(imageType: 'banner' | 'background', imageUrl: string,
+        role: 'banner' | 'background', companyId?: number): Observable<CompanyResponse> {
+        const base = companyId === undefined
+            ? `${API_CONFIG.baseUrl}/company`
+            : `${API_CONFIG.platformUrl}/companies/${companyId}/profile`;
+        return this.http.patch<CompanyResponse>(`${base}/branding/${imageType}`, { image_url: imageUrl, role });
+    }
+
+    // Store company in application state.
     setCompany(
         company: Company
     ): void {

@@ -1,340 +1,157 @@
-/* =========================================================
-   PACKAGES PAGE
-   ========================================================= */
-
 .packages-page {
-    max-width: 1180px;
+    max-width: 1080px;
 }
 
+.portal-promotion {
+    margin: 12px 0 0;
+    overflow: hidden;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 10px;
+    background: #ffffff;
+}
 
-/* =========================================================
-   PAGE HEADING
-   ========================================================= */
+.banner-slides {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 8 / 3;
+    max-height: 360px;
+}
+
+.portal-promotion img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+.portal-promotion ~ .packages-content .page-heading {
+    margin: 22px auto 26px;
+}
+
+.packages-content { position: relative; isolation: isolate; }
+.packages-content.has-background {
+    padding: clamp(16px, 3vw, 28px);
+    overflow: hidden;
+    border-radius: 10px;
+}
+.packages-content.has-background .page-heading { margin-top: 0; }
+.package-backdrop { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.package-backdrop img {
+    position: absolute;
+    inset: -12px;
+    width: calc(100% + 24px);
+    height: calc(100% + 24px);
+    object-fit: cover;
+    filter: blur(6px);
+}
+.package-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--company-background, #f8fafc);
+    opacity: .9;
+}
+.portal-promotion img, .package-backdrop img { opacity: 0; transition: opacity 900ms ease; }
+.portal-promotion img.is-active, .package-backdrop img.is-active { opacity: 1; }
+.banner-controls { display: flex; justify-content: center; align-items: center; gap: 16px; padding: 8px; border-top: 1px solid var(--border, #e2e8f0); }
+.banner-controls span { font-size: 12px; color: #64748b; }
+.rotation-control { display: flex; justify-content: flex-end; margin: 8px 0; }
+.banner-controls button, .rotation-control button { padding: 8px 10px; border: 1px solid var(--border, #e2e8f0); border-radius: 5px; background: #fff; color: #334155; font: inherit; font-size: 12px; cursor: pointer; }
+.banner-controls button:focus-visible, .rotation-control button:focus-visible { outline: 2px solid var(--company-primary, #2563eb); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .portal-promotion img, .package-backdrop img { transition: none; }
+}
 
 .page-heading {
-    max-width: 640px;
-
-    margin:
-        28px auto 36px;
-
+    max-width: 620px;
+    margin: 30px auto 34px;
     text-align: center;
 }
 
-
 .page-heading h1 {
-    margin:
-        8px 0 10px;
-
-    color: var(
-        --company-secondary,
-        #0f172a
-    );
-
-    font-size: clamp(
-        1.9rem,
-        5vw,
-        2.85rem
-    );
-
+    margin: 0 0 10px;
+    color: var(--company-secondary, #0f172a);
+    font-size: clamp(1.9rem, 5vw, 2.5rem);
     font-weight: 760;
-
-    line-height: 1.1;
     letter-spacing: -0.04em;
 }
 
-
-.page-heading p {
+.page-heading p,
+.packages-help {
     margin: 0;
-
-    color: var(
-        --text-muted,
-        #64748b
-    );
-
-    font-size: 1rem;
+    color: var(--text-muted, #64748b);
+    font-size: 0.94rem;
     line-height: 1.6;
 }
 
-
-.eyebrow {
-    color: var(
-        --company-primary,
-        #2563eb
-    );
-
-    font-size: 0.74rem;
-    font-weight: 740;
-
-    letter-spacing: 0.11em;
-    text-transform: uppercase;
-}
-
-
-/* =========================================================
-   DEMO NOTICE
-   ========================================================= */
-
-.demo-note {
-    max-width: 680px;
-
-    margin:
-        -14px auto 24px;
-
-    padding:
-        10px 14px;
-
-    border: 1px solid var(
-        --border,
-        #e2e8f0
-    );
-
-    border-radius: 10px;
-
-    background:
-        color-mix(
-            in srgb,
-            var(
-                --company-primary,
-                #2563eb
-            )
-            6%,
-            white
-        );
-
-    color: var(
-        --company-secondary,
-        #0f172a
-    );
-
-    font-size: 0.8rem;
-    line-height: 1.45;
-
-    text-align: center;
-}
-
-
-/* =========================================================
-   PACKAGE GRID
-   ========================================================= */
-
 .package-grid {
     display: grid;
-
-    grid-template-columns:
-        1fr;
-
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
 }
 
+.packages-help {
+    max-width: 620px;
+    margin: 26px auto 0;
+    text-align: center;
+}
 
-/* =========================================================
-   STATE PANELS
-   ========================================================= */
+.demo-note {
+    margin: 0 auto 22px;
+    padding: 10px 14px;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--text-muted, #64748b);
+    font-size: 0.84rem;
+    text-align: center;
+}
 
 .state-panel {
     max-width: 560px;
-
-    margin:
-        32px auto;
-
-    padding:
-        30px;
-
-    border: 1px solid var(
-        --border,
-        #e2e8f0
-    );
-
-    border-radius: 16px;
-
-    background: var(
-        --surface,
-        #ffffff
-    );
-
+    margin: 42px auto;
+    padding: 28px;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 18px;
+    background: #ffffff;
     text-align: center;
-
-    box-shadow:
-        0 10px 30px
-        rgba(
-            15,
-            23,
-            42,
-            0.05
-        );
 }
-
-
-.state-panel__icon {
-    display: grid;
-    place-items: center;
-
-    width: 52px;
-    height: 52px;
-
-    margin:
-        0 auto 16px;
-
-    border-radius: 50%;
-
-    background:
-        color-mix(
-            in srgb,
-            var(
-                --company-primary,
-                #2563eb
-            )
-            9%,
-            white
-        );
-
-    color: var(
-        --company-primary,
-        #2563eb
-    );
-
-    font-size: 1.35rem;
-    font-weight: 780;
-}
-
-
-.state-panel--error
-.state-panel__icon {
-    background: #fef2f2;
-
-    color: #b42318;
-}
-
 
 .state-panel h2 {
-    margin:
-        0 0 8px;
-
-    color: var(
-        --company-secondary,
-        #0f172a
-    );
-
-    font-size: 1.35rem;
-    font-weight: 740;
+    margin: 8px 0;
+    color: var(--company-secondary, #0f172a);
 }
-
 
 .state-panel p {
-    margin: 0;
-
-    color: var(
-        --text-muted,
-        #64748b
-    );
-
-    line-height: 1.55;
+    color: var(--text-muted, #64748b);
 }
 
-
-.state-panel__hint {
-    margin-top: 8px !important;
-
-    font-size: 0.8rem;
+.state-panel__icon {
+    display: inline-grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff1f2;
+    color: #be123c;
+    font-weight: 800;
 }
 
-
-/* =========================================================
-   TRUST ROW
-   ========================================================= */
-
-.trust-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    gap:
-        14px 30px;
-
-    margin:
-        36px auto 8px;
-
-    color: var(
-        --text-muted,
-        #64748b
-    );
-
-    font-size: 0.82rem;
-}
-
-
-.trust-row div {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-}
-
-
-.trust-row span {
-    color: var(
-        --company-primary,
-        #2563eb
-    );
-}
-
-
-.trust-row strong {
-    font-weight: 650;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (min-width: 620px) {
-
+@media (max-width: 860px) {
     .package-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(
-                    0,
-                    1fr
-                )
-            );
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-
-@media (min-width: 1020px) {
-
-    .package-grid {
-        grid-template-columns:
-            repeat(
-                4,
-                minmax(
-                    0,
-                    1fr
-                )
-            );
-    }
-}
-
-
-@media (max-width: 560px) {
-
+@media (max-width: 620px) {
     .page-heading {
-        margin-top: 20px;
-
-        text-align: left;
+        margin-top: 18px;
     }
 
-
-    .trust-row {
-        justify-content: flex-start;
-    }
-
-
-    .state-panel {
-        padding: 24px 18px;
-
-        border-radius: 14px;
+    .package-grid {
+        grid-template-columns: 1fr;
     }
 }

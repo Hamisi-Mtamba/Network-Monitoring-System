@@ -1,0 +1,36 @@
+<div class="image-editor" [attr.aria-busy]="busy()">
+    <div class="upload-row">
+        <label>
+            <span>Display new image as</span>
+            <select #uploadRole [disabled]="busy()">
+                <option value="banner">Banner</option>
+                <option value="background">Background</option>
+            </select>
+        </label>
+        <label class="upload-action">
+            <span>{{ busy() ? 'Saving...' : 'Upload image' }}</span>
+            <input type="file" aria-label="Upload company image" accept="image/jpeg,image/png,image/webp"
+                [disabled]="busy()" (change)="upload($event, uploadRole.value)" />
+        </label>
+    </div>
+    <p class="hint">JPG, PNG or WebP. Banners: up to 2 MB, 1200–3840 px wide and 400–1920 px high, with a 2:1 to 3:1 width-to-height ratio. Recommended: 1600 × 600 px. Keep text large and clear for phone screens.</p>
+    <p class="hint">Backgrounds: up to 5 MB. Banners appear above packages; backgrounds sit softly behind them.</p>
+    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+    @if (message()) { <p class="success" role="status">{{ message() }}</p> }
+    <div class="image-list">
+        @for (image of images(); track image.url; let index = $index) {
+            <div class="image-row">
+                <img [src]="imageUrl(image.url)" [alt]="'Company image ' + (index + 1)" />
+                <label>
+                    <span>Image {{ index + 1 }} role</span>
+                    <select [value]="image.role" [disabled]="busy()" (change)="changeRole(image, $event)">
+                        <option value="banner">Banner</option>
+                        <option value="background">Background</option>
+                    </select>
+                </label>
+                <button type="button" class="remove" [disabled]="busy()" (click)="remove(image)"
+                    [attr.aria-label]="'Remove image ' + (index + 1)">Remove</button>
+            </div>
+        }
+    </div>
+</div>

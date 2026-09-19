@@ -161,18 +161,6 @@
                 </div>
 
 
-                <div>
-
-                    <dt>
-                        Speed
-                    </dt>
-
-                    <dd>
-                        {{ packageItem()!.speed }}
-                    </dd>
-
-                </div>
-
             </dl>
 
         </aside>
@@ -236,12 +224,12 @@
                         <input
                             id="cashPhone"
                             type="tel"
-                            inputmode="tel"
-                            autocomplete="tel"
+                            inputmode="numeric"
+                            autocomplete="tel-national"
                             [formControl]="phoneNumber"
-                            placeholder="07XXXXXXXX"
-                            maxlength="13"
-                            (blur)="sanitizePhoneInput()"
+                            placeholder="712345678"
+                            maxlength="9"
+                            nmsSubscriberPhone
                             aria-describedby="cashPhoneHint cashPhoneError"
                         />
 
@@ -252,7 +240,7 @@
                         id="cashPhoneHint"
                         class="field-hint"
                     >
-                        Use a Tanzanian mobile number that
+                        Enter 9 digits starting with 6 or 7. +255 is added automatically. Use a mobile number that
                         the administrator can use to identify
                         your cash payment request.
                     </p>
@@ -268,8 +256,8 @@
                             class="field-error"
                             role="alert"
                         >
-                            Enter a valid Tanzanian phone number,
-                            for example 0712345678.
+                            Enter a valid Tanzanian mobile number,
+                            for example 712345678.
                         </p>
 
                     }

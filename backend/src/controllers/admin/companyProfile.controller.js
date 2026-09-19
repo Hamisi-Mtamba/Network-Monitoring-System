@@ -923,6 +923,259 @@ const updateCompanyBranding = async (
 };
 
 
+
+
+/* =========================================================
+   UPDATE COMPANY PAYMENT SETTINGS
+   ========================================================= */
+
+const updateCompanyPaymentSettings = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const companyId =
+            getValidCompanyId(req);
+
+
+        if (!companyId) {
+
+            return res.status(403).json({
+                success: false,
+                message:
+                    "Company context is required"
+            });
+        }
+
+
+        const payment =
+            req.body?.payment;
+
+
+        if (
+            !payment ||
+            typeof payment !== "object" ||
+            Array.isArray(payment)
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment settings are required"
+            });
+        }
+
+
+        const enabled =
+            payment.enabled !== false;
+
+
+        const lipaNumber =
+            typeof payment.lipa_number === "string"
+                ? payment.lipa_number.trim()
+                : "";
+
+
+        const accountName =
+            typeof payment.account_name === "string"
+                ? payment.account_name.trim()
+                : "";
+
+
+        const instructions =
+            typeof payment.instructions === "string"
+                ? payment.instructions.trim()
+                : "";
+
+
+        const httpSmsOwner =
+            typeof payment.httpsms_owner === "string"
+                ? payment.httpsms_owner.trim()
+                : "";
+
+
+        const paymentPhone =
+            typeof payment.payment_phone === "string"
+                ? payment.payment_phone.trim()
+                : "";
+
+
+        const deviceName =
+            typeof payment.device_name === "string"
+                ? payment.device_name.trim()
+                : "";
+
+
+        if (
+            lipaNumber.length < 2 ||
+            lipaNumber.length > 50
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Enter a valid Lipa number"
+            });
+        }
+
+
+        if (
+            accountName.length > 120
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Merchant/account name is too long"
+            });
+        }
+
+
+        if (
+            instructions.length > 500
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Payment instructions are too long"
+            });
+        }
+
+
+        const paymentSettings = {
+            enabled,
+            lipa_number:
+                lipaNumber,
+            account_name:
+                accountName || null,
+            instructions:
+                instructions || null,
+            httpsms_owner:
+                httpSmsOwner || null,
+            payment_phone:
+                paymentPhone || null,
+            device_name:
+                deviceName || null
+        };
+
+
+        const result =
+            await pool.query(
+                `
+                UPDATE companies
+
+                SET
+                    settings =
+                        jsonb_set(
+                            COALESCE(
+                                settings,
+                                '{}'::jsonb
+                            ),
+                            '{payment}',
+                            $1::jsonb,
+                            true
+                        ),
+
+                    updated_at =
+                        CURRENT_TIMESTAMP
+
+                WHERE id = $2
+
+                RETURNING
+                    id,
+                    name,
+                    slug,
+                    logo_url,
+                    email,
+                    phone,
+                    address,
+                    settings,
+                    status,
+                    created_at,
+                    updated_at
+                `,
+                [
+                    JSON.stringify(
+                        paymentSettings
+                    ),
+                    companyId
+                ]
+            );
+
+
+        if (
+            result.rows.length === 0
+        ) {
+
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Company not found"
+            });
+        }
+
+
+        // Keep the httpSMS gateway mapping synchronized with company settings.
+        // The webhook uses this table to determine which tenant owns the SMS.
+        if (httpSmsOwner) {
+            await pool.query(
+                `
+                INSERT INTO payment_devices (
+                    company_id,
+                    gateway,
+                    device_name,
+                    gateway_owner,
+                    phone_number,
+                    is_active,
+                    updated_at
+                )
+                VALUES ($1, 'httpsms', $2, $3, $4, TRUE, CURRENT_TIMESTAMP)
+                ON CONFLICT (gateway, gateway_owner)
+                DO UPDATE SET
+                    company_id = EXCLUDED.company_id,
+                    device_name = EXCLUDED.device_name,
+                    phone_number = EXCLUDED.phone_number,
+                    is_active = TRUE,
+                    updated_at = CURRENT_TIMESTAMP
+                `,
+                [
+                    companyId,
+                    deviceName || 'Payment phone',
+                    httpSmsOwner,
+                    paymentPhone || null
+                ]
+            );
+        }
+
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "Payment settings updated successfully",
+            company:
+                result.rows[0]
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Update company payment settings error:",
+            error.message
+        );
+
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Failed to update payment settings"
+        });
+    }
+};
+
+
 /* =========================================================
    EXPORT PROFILE CONTROLLERS
    ========================================================= */
@@ -931,5 +1184,6 @@ export {
     getCompanyProfile,
     updateCompanyProfile,
     updateCompanyLogo,
-    updateCompanyBranding
+    updateCompanyBranding,
+    updateCompanyPaymentSettings
 };

@@ -494,13 +494,19 @@
 
                             <div class="company-cell company-cell--identity">
 
-                                <span class="company-avatar">
+                                <span class="company-avatar" aria-hidden="true">
 
-                                    {{
-                                        company.name
-                                            .charAt(0)
-                                            .toUpperCase()
-                                    }}
+                                    @if (hasLogo(company)) {
+                                        <img
+                                            [src]="publicImageUrl(company.logo_url)"
+                                            alt=""
+                                            (error)="onLogoError(company)"
+                                        />
+                                    } @else {
+                                        <span class="company-avatar__initial">
+                                            {{ companyInitial(company) }}
+                                        </span>
+                                    }
 
                                 </span>
 

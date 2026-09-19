@@ -1,3 +1,5 @@
+import { API_CONFIG } from '../../config/api.config';
+
 // Import Angular component utilities
 import {
     ChangeDetectionStrategy,
@@ -374,6 +376,44 @@ export class PlatformDashboardPage {
     /* =====================================================
        COMPANY STATUS HELPERS
        ===================================================== */
+
+    // Set of company IDs whose logos failed to load
+    private readonly failedLogoIds = signal<Set<number | string>>(new Set<number | string>());
+
+    hasLogo(company: PlatformRecentCompany): boolean {
+        const url = company.logo_url?.trim();
+        return Boolean(
+            url &&
+            url !== 'null' &&
+            url !== 'undefined' &&
+            !this.failedLogoIds().has(company.id)
+        );
+    }
+
+    onLogoError(company: PlatformRecentCompany): void {
+        this.failedLogoIds.update((set) => {
+            const next = new Set(set);
+            next.add(company.id);
+            return next;
+        });
+    }
+
+    companyInitial(company: PlatformRecentCompany): string {
+        const name = (company.name || '').trim();
+        return name ? name.charAt(0).toUpperCase() : 'C';
+    }
+
+    publicImageUrl(path: string | null | undefined): string {
+        if (!path) {
+            return '';
+        }
+
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+
+        return `${API_CONFIG.backendUrl.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+    }
 
     companyStatusLabel(
         company:

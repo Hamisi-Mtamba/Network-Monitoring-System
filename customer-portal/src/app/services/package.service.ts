@@ -125,10 +125,6 @@ export class PackageService {
                                             item.duration_minutes
                                         ),
 
-                                    // Keep backend speed value
-                                    speed:
-                                        item.speed ||
-                                        'Not specified',
 
                                     // Use existing accent or assign one
                                     accent:

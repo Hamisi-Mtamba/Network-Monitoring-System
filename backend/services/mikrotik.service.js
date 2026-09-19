@@ -55,6 +55,7 @@ const getAuthorizationHeader = () => {
     return `Basic ${credentials}`;
 };
 
+// Send one authenticated request to the RouterOS REST API and parse its response.
 
 // =========================================================
 // GENERIC MIKROTIK REST REQUEST
@@ -214,6 +215,10 @@ const mikrotikRequest = (
                 }
             );
 
+            request.setTimeout(10_000, () => {
+                request.destroy(new Error('MikroTik REST request timed out'));
+            });
+
 
             if (payload) {
 
@@ -241,7 +246,6 @@ const formatDuration = (
         Number(
             durationMinutes
         );
-
 
     if (
         !Number.isInteger(
@@ -354,6 +358,7 @@ export const getActiveHotspotUsers =
             : [];
     };
 
+// Return active RouterOS sessions so stale access can be removed before renewal.
 
 // =========================================================
 // GET HOTSPOT USERS
@@ -375,6 +380,7 @@ export const getHotspotUsers =
             : [];
     };
 
+// Return hotspot host entries used to verify and refresh a device connection.
 
 // =========================================================
 // GET HOTSPOT HOSTS
@@ -396,6 +402,7 @@ export const getHotspotHosts =
             : [];
     };
 
+// Remove user records matching the device so RouterOS starts a fresh uptime limit.
 
 // =========================================================
 // DELETE EXISTING HOTSPOT USER FOR MAC
@@ -434,7 +441,7 @@ const deleteExistingHotspotUser =
                     const userMac =
                         String(
                             user[
-                                'mac-address'
+                            'mac-address'
                             ] ||
                             ''
                         )
@@ -444,9 +451,9 @@ const deleteExistingHotspotUser =
 
                     return (
                         username ===
-                            normalizedMac ||
+                        normalizedMac ||
                         userMac ===
-                            normalizedMac
+                        normalizedMac
                     );
                 }
             );
@@ -459,7 +466,7 @@ const deleteExistingHotspotUser =
 
             const id =
                 user[
-                    '.id'
+                '.id'
                 ];
 
 
@@ -476,6 +483,7 @@ const deleteExistingHotspotUser =
         }
     };
 
+// Disconnect an existing active session before provisioning replacement access.
 
 // =========================================================
 // REMOVE ACTIVE HOTSPOT SESSION FOR MAC
@@ -505,7 +513,7 @@ const removeExistingActiveHotspotSession =
                     const activeMac =
                         String(
                             activeUser[
-                                'mac-address'
+                            'mac-address'
                             ] ||
                             ''
                         )
@@ -528,7 +536,7 @@ const removeExistingActiveHotspotSession =
 
             const id =
                 activeUser[
-                    '.id'
+                '.id'
                 ];
 
 
@@ -545,6 +553,7 @@ const removeExistingActiveHotspotSession =
         }
     };
 
+// Remove the unauthenticated host entry so RouterOS retries MAC authentication.
 
 // =========================================================
 // REMOVE EXISTING HOTSPOT HOST
@@ -574,7 +583,7 @@ export const removeExistingHotspotHost =
                     const hostMac =
                         String(
                             host[
-                                'mac-address'
+                            'mac-address'
                             ] ||
                             ''
                         )
@@ -597,7 +606,7 @@ export const removeExistingHotspotHost =
 
             const id =
                 host[
-                    '.id'
+                '.id'
                 ];
 
 
@@ -614,6 +623,7 @@ export const removeExistingHotspotHost =
         }
     };
 
+// Replace the device's RouterOS user with access for the purchased duration.
 
 // =========================================================
 // PROVISION HOTSPOT ACCESS
@@ -622,7 +632,9 @@ export const removeExistingHotspotHost =
 export const provisionHotspotAccess =
     async ({
         macAddress,
-        durationMinutes
+        durationMinutes,
+        remainingSeconds,
+        getRemainingSeconds
     }) => {
 
         if (!macAddress) {
@@ -639,10 +651,9 @@ export const provisionHotspotAccess =
                 .toUpperCase();
 
 
-        const limitUptime =
-            formatDuration(
-                durationMinutes
-            );
+        let limitUptime = remainingSeconds === undefined
+            ? formatDuration(durationMinutes)
+            : formatRemainingDuration(remainingSeconds);
 
 
         // =================================================
@@ -673,6 +684,10 @@ export const provisionHotspotAccess =
         await deleteExistingHotspotUser(
             normalizedMac
         );
+
+        if (getRemainingSeconds) {
+            limitUptime = formatRemainingDuration(await getRemainingSeconds());
+        }
 
 
         // =================================================
@@ -735,7 +750,7 @@ export const provisionHotspotAccess =
 
                 durationMinutes:
                     Number(
-                        durationMinutes
+                        durationMinutes ?? remainingSeconds / 60
                     ),
 
                 limitUptime
@@ -745,3 +760,49 @@ export const provisionHotspotAccess =
 
         return newUser;
     };
+
+export const formatRemainingDuration = seconds => {
+    if (!Number.isSafeInteger(seconds) || seconds <= 0) {
+        throw new Error('Remaining duration must be a positive number of seconds');
+    }
+    return `${seconds}s`;
+};
+
+// Confirm that a router mapping is allowed to use the configured credentials.
+// Verify the device is connected to the configured router before restoring access.
+// The existing deployment has one server-side credential pair and REST target.
+// Reject other mappings rather than sending another tenant's MAC to that router.
+export const assertConfiguredRouter = router => {
+    if (router.host !== MIKROTIK_HOST || router.public_id !==
+        (process.env.MIKROTIK_ROUTER_PUBLIC_ID || 'NMS-LOCAL-ROUTER-001')) {
+        throw new Error('REST credentials are not configured for this router');
+    }
+};
+
+export const restoreHotspotAccess = async ({ router, macAddress, ipAddress, getRemainingSeconds }) => {
+    assertConfiguredRouter(router);
+    const mac = macAddress.trim().toUpperCase();
+    const hosts = await getHotspotHosts();
+    if (!hosts.some(host => String(host['mac-address']).toUpperCase() === mac &&
+        (host.address === ipAddress || host['to-address'] === ipAddress))) {
+        throw new Error('Device connection could not be verified on the router');
+    }
+    const active = await getActiveHotspotUsers();
+    const remainingSeconds = await getRemainingSeconds();
+    formatRemainingDuration(remainingSeconds);
+    const connection = active.find(user => String(user['mac-address']).toUpperCase() === mac && user.user === mac);
+    // Repeated checks must not interrupt an already correctly timed connection.
+    const timeLeft = parseRouterDuration(connection?.['session-time-left']);
+    if (timeLeft !== null && timeLeft > 0 && timeLeft <= remainingSeconds) {
+        return { restored: false, remainingSeconds };
+    }
+    await provisionHotspotAccess({ macAddress: mac, remainingSeconds, getRemainingSeconds });
+    return { restored: true, remainingSeconds };
+};
+
+// Convert RouterOS duration strings into seconds for renewal comparisons.
+export const parseRouterDuration = value => {
+    if (typeof value !== 'string' || !/^(?:\d+w)?(?:\d+d)?(?:\d+h)?(?:\d+m)?(?:\d+s)?$/.test(value) || !value) return null;
+    const units = { w: 604800, d: 86400, h: 3600, m: 60, s: 1 };
+    return [...value.matchAll(/(\d+)([wdhms])/g)].reduce((sum, match) => sum + Number(match[1]) * units[match[2]], 0);
+};

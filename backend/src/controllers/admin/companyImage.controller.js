@@ -1,3 +1,6 @@
+import { imageRoles, saveBrandingImages } from '../../../services/company-branding-images.service.js';
+import { validateBannerFile } from '../../../services/banner-validation.service.js';
+import { unlink } from 'node:fs/promises';
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
@@ -283,6 +286,21 @@ const uploadBrandingImage = async (
             );
 
 
+        if (imageRoles.includes(imageType)) {
+            if (imageType === 'banner') {
+                try {
+                    await validateBannerFile(req.file.path);
+                } catch (error) {
+                    await unlink(req.file.path).catch(() => {});
+                    throw error;
+                }
+            }
+            const company = await saveBrandingImages(pool, companyId, {
+                type: 'upload', role: imageType, url: imageUrl, append: req.body?.append === 'true'
+            });
+            return res.status(200).json({ success: true, message: 'Branding image uploaded successfully', image_type: imageType, image_url: imageUrl, company });
+        }
+
         const settingKey =
             `${imageType}_image_url`;
 
@@ -376,10 +394,10 @@ const uploadBrandingImage = async (
         );
 
 
-        return res.status(500).json({
+        return res.status(error.status || 500).json({
             success: false,
             message:
-                "Failed to upload branding image"
+                error.status ? error.message : "Failed to upload branding image"
         });
     }
 };
@@ -532,6 +550,13 @@ const removeBrandingImage = async (
         }
 
 
+        if (imageRoles.includes(imageType)) {
+            const company = await saveBrandingImages(pool, companyId, {
+                type: 'remove', role: imageType, url: req.query.image_url
+            });
+            return res.status(200).json({ success: true, message: 'Branding image removed successfully', image_type: imageType, company });
+        }
+
         const settingKey =
             `${imageType}_image_url`;
 
@@ -616,7 +641,7 @@ const removeBrandingImage = async (
         );
 
 
-        return res.status(500).json({
+        return res.status(error.status || 500).json({
             success: false,
             message:
                 "Failed to remove branding image"
@@ -629,7 +654,21 @@ const removeBrandingImage = async (
    EXPORT COMPANY IMAGE CONTROLLERS
    ========================================================= */
 
+const updateBrandingImageRole = async (req, res) => {
+    const companyId = getValidCompanyId(req);
+    if (!companyId) return res.status(403).json({ success: false, message: 'Company context is required' });
+    try {
+        const company = await saveBrandingImages(pool, companyId, {
+            type: 'role', role: req.params.imageType, url: req.body?.image_url, newRole: req.body?.role
+        });
+        return res.json({ success: true, message: 'Image role updated', company });
+    } catch (error) {
+        return res.status(error.status || 500).json({ success: false, message: error.status ? error.message : 'Unable to update image role' });
+    }
+};
+
 export {
+    updateBrandingImageRole,
     uploadCompanyLogo,
     uploadBrandingImage,
     removeCompanyLogo,

@@ -21,7 +21,8 @@ import {
     Payment,
     PaymentInternetSession,
     PaymentListResponse,
-    PaymentResponse
+    PaymentResponse,
+    PaymentSmsReviewResponse
 } from '../models/payment.model';
 
 
@@ -168,6 +169,32 @@ export class PaymentService {
         );
     }
 
+
+
+
+    // =====================================================
+    // AUTOMATIC PAYMENT SMS REVIEW
+    // =====================================================
+
+    getPaymentSmsReview(): Observable<PaymentSmsReviewResponse> {
+        return this.http.get<PaymentSmsReviewResponse>(
+            `${this.url}/sms-review`
+        );
+    }
+
+    retryPaymentSms(id: number): Observable<{ success: boolean; result: unknown }> {
+        return this.http.patch<{ success: boolean; result: unknown }>(
+            `${this.url}/sms-review/${id}/retry`,
+            {}
+        );
+    }
+
+    matchPaymentSms(id: number, paymentId: number): Observable<{ success: boolean; message: string }> {
+        return this.http.patch<{ success: boolean; message: string }>(
+            `${this.url}/sms-review/${id}/match`,
+            { payment_id: paymentId }
+        );
+    }
 
     // =====================================================
     // DEVELOPMENT PAYMENT SIMULATION

@@ -1,6 +1,9 @@
 // Import Angular component utilities
 import {
     Component,
+    computed,
+    effect,
+    DestroyRef,
     OnInit,
     inject,
     signal
@@ -42,6 +45,9 @@ import {
 import {
     TenantService
 } from '../../services/tenant.service';
+
+import { getBrandingImages } from '../../models/company.model';
+import { getPublicFileUrl } from '../../config/api.config';
 
 
 @Component({
@@ -94,6 +100,53 @@ export class PackagesPageComponent
     // Access current company/tenant state
     readonly tenantService =
         inject(TenantService);
+
+    readonly failedImageUrls = signal<string[]>([]);
+    readonly frame = signal(0);
+    readonly paused = signal(false);
+    readonly reducedMotion = signal(false);
+    readonly portalImages = computed(() => {
+        const company = this.tenantService.company();
+        if (this.loading() || this.errorMessage() ||
+            company?.slug !== this.tenantService.companySlug()) return [];
+        return getBrandingImages(company?.settings?.branding)
+            .map(image => ({ ...image, url: getPublicFileUrl(image.url.trim())! }))
+            .filter(image => image.url && !this.failedImageUrls().includes(image.url));
+    });
+    readonly banners = computed(() => this.portalImages().filter(image => image.role === 'banner'));
+    readonly backgrounds = computed(() => this.portalImages().filter(image => image.role === 'background'));
+    readonly bannerIndex = computed(() => this.frame() % Math.max(1, this.banners().length));
+    readonly backgroundIndex = computed(() => this.frame() % Math.max(1, this.backgrounds().length));
+    readonly rotating = computed(() => this.banners().length > 1 || this.backgrounds().length > 1);
+
+    constructor() {
+        const media = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+        this.reducedMotion.set(media?.matches ?? false);
+        const onMotion = () => this.reducedMotion.set(media?.matches ?? false);
+        media?.addEventListener('change', onMotion);
+        inject(DestroyRef).onDestroy(() => media?.removeEventListener('change', onMotion));
+        effect(onCleanup => {
+            const rotate = this.rotating();
+            // Restart the timer when the tenant image collection changes.
+            this.portalImages();
+            const stopped = this.paused() || this.reducedMotion();
+            if (!rotate || stopped) return;
+            const timer = setInterval(() => {
+                if (!document.hidden) this.frame.update(value => value + 1);
+            }, 8000);
+            onCleanup(() => clearInterval(timer));
+        });
+    }
+
+    imageFailed(url: string): void {
+        this.failedImageUrls.update(urls => [...urls, url]);
+    }
+
+    showBanner(direction: number): void {
+        this.paused.set(true);
+        // Manual navigation uses the same counter, with a positive modulo.
+        this.frame.update(value => (value + direction + this.banners().length) % this.banners().length);
+    }
 
 
     // Load company and packages when page opens

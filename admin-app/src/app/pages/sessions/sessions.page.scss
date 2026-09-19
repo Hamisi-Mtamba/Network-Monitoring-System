@@ -1,1 +1,136 @@
-.filter-panel{margin-bottom:15px;padding:13px;display:grid;grid-template-columns:minmax(280px,1fr) 200px auto;align-items:center;gap:11px;border:1px solid #e5eaf1;border-radius:14px;background:#fff}.filter-panel ion-select{min-height:48px;--padding-start:12px;--padding-end:12px;border:1px solid #e3e8ef;border-radius:9px;background:#fafbfd;font-size:11px}.result-count{color:#7e8fa2;font-size:10px;text-align:right}.data-panel ion-button{font-size:9px;text-transform:none}.data-panel a{color:#75879a;font-size:18px}.mobile-cards{display:none}@media(max-width:1000px){.desktop-table{display:none}.mobile-cards{display:grid;gap:10px}.record-card{padding:16px;border:1px solid #e4eaf1;border-radius:13px;background:#fff}.record-card>a{display:block;color:inherit;text-decoration:none}.record-card>a>div,.record-card footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.record-card p{margin:12px 0;color:#75879b;font-size:10px}.record-card footer{padding-top:11px;border-top:1px solid #edf1f5}.record-card footer b{font-size:11px}.record-card footer span{color:#8c9bac;font-size:9px}.record-card>ion-button{margin-top:12px;font-size:9px}.filter-panel{grid-template-columns:1fr 190px}}@media(max-width:560px){.filter-panel{grid-template-columns:1fr}.filter-panel .search-control{grid-column:auto}.result-count{text-align:left}}
+/* =========================================================
+   SESSIONS FILTER PANEL
+   ========================================================= */
+
+.filter-panel {
+    margin-bottom: 15px;
+    padding: 13px;
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 200px auto;
+    align-items: center;
+    gap: 11px;
+    border: 1px solid #e5eaf1;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.filter-panel ion-select {
+    min-height: 48px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    border: 1px solid #e3e8ef;
+    border-radius: 9px;
+    background: #fafbfd;
+    font-size: 11px;
+}
+
+.result-count {
+    color: #7e8fa2;
+    font-size: 10px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   TABLE & BUTTON ACTIONS
+   ========================================================= */
+
+.data-panel ion-button {
+    font-size: 9px;
+    text-transform: none;
+}
+
+.data-panel a {
+    color: #75879a;
+    font-size: 18px;
+}
+
+.mobile-cards {
+    display: none;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .desktop-table {
+        display: none;
+    }
+
+    .mobile-cards {
+        display: grid;
+        gap: 10px;
+    }
+
+    .record-card {
+        padding: 16px;
+        border: 1px solid #e4eaf1;
+        border-radius: 13px;
+        background: #fff;
+    }
+
+    .record-card > a {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .record-card > a > div,
+    .record-card footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .record-card p {
+        margin: 12px 0;
+        color: #75879b;
+        font-size: 10px;
+    }
+
+    .record-card footer {
+        padding-top: 11px;
+        border-top: 1px solid #edf1f5;
+    }
+
+    .record-card footer b {
+        font-size: 11px;
+    }
+
+    .record-card footer span {
+        color: #8c9bac;
+        font-size: 9px;
+    }
+
+    .record-card > ion-button {
+        margin-top: 12px;
+        font-size: 9px;
+        width: 100%;
+        min-height: 36px;
+    }
+
+    .filter-panel {
+        grid-template-columns: 1fr 190px;
+    }
+}
+
+@media (max-width: 560px) {
+    .filter-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-panel .search-control {
+        grid-column: auto;
+    }
+
+    .result-count {
+        text-align: left;
+    }
+
+    .record-card > a > div {
+        flex-wrap: wrap;
+    }
+}
+

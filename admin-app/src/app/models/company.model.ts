@@ -1,8 +1,15 @@
+export interface CompanyBrandingImage {
+    url: string;
+    role: 'banner' | 'background';
+}
+
 // =========================================================
 // COMPANY BRANDING
 // =========================================================
 
 export interface CompanyBranding {
+
+    images?: CompanyBrandingImage[];
 
     primary_color?: string | null;
 
@@ -23,12 +30,36 @@ export interface CompanyBranding {
 
 
 // =========================================================
+// COMPANY PAYMENT SETTINGS
+// =========================================================
+
+export interface CompanyPaymentSettings {
+
+    enabled?: boolean;
+
+    lipa_number?: string | null;
+
+    account_name?: string | null;
+
+    instructions?: string | null;
+
+    httpsms_owner?: string | null;
+
+    payment_phone?: string | null;
+
+    device_name?: string | null;
+}
+
+
+// =========================================================
 // COMPANY SETTINGS
 // =========================================================
 
 export interface CompanySettings {
 
     branding?: CompanyBranding;
+
+    payment?: CompanyPaymentSettings;
 }
 
 
@@ -153,6 +184,16 @@ export interface UpdateCompanyBrandingRequest {
 
 
 // =========================================================
+// UPDATE COMPANY PAYMENT SETTINGS REQUEST
+// =========================================================
+
+export interface UpdateCompanyPaymentSettingsRequest {
+
+    payment: CompanyPaymentSettings;
+}
+
+
+// =========================================================
 // UPDATE COMPANY LOGO REQUEST
 // =========================================================
 
@@ -189,4 +230,13 @@ export interface CompanyImageUploadResponse {
     image_url?: string;
 
     logo_url?: string;
+}
+// Legacy uploads remain visible until the first image edit saves the collection.
+export function getBrandingImages(branding?: CompanyBranding): CompanyBrandingImage[] {
+    if (Array.isArray(branding?.images)) return branding.images.filter(image =>
+        image && (image.role === 'banner' || image.role === 'background') && typeof image.url === 'string' && image.url.trim());
+    return (['banner', 'background'] as const).flatMap(role => {
+        const url = branding?.[`${role}_image_url`]?.trim();
+        return url ? [{ url, role }] : [];
+    });
 }

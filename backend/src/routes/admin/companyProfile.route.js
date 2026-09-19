@@ -12,7 +12,8 @@ import {
     getCompanyProfile,
     updateCompanyProfile,
     updateCompanyLogo,
-    updateCompanyBranding
+    updateCompanyBranding,
+    updateCompanyPaymentSettings
 } from "../../controllers/admin/companyProfile.controller.js";
 
 // Import company image upload middleware
@@ -22,6 +23,7 @@ import companyImageUpload from "../../middlewares/companyImageUpload.middleware.
 import {
     uploadCompanyLogo,
     uploadBrandingImage,
+    updateBrandingImageRole,
     removeCompanyLogo,
     removeBrandingImage
 } from "../../controllers/admin/companyImage.controller.js";
@@ -66,6 +68,17 @@ router.get(
 router.patch(
     "/",
     updateCompanyProfile
+);
+
+
+// =========================================================
+// COMPANY PAYMENT SETTINGS
+// =========================================================
+
+// Update authenticated company's Lipa/mobile-money settings
+router.patch(
+    "/payment-settings",
+    updateCompanyPaymentSettings
 );
 
 
@@ -149,5 +162,7 @@ router.delete(
 // =========================================================
 // EXPORT ROUTER
 // =========================================================
+
+router.patch('/branding/:imageType', updateBrandingImageRole);
 
 export default router;

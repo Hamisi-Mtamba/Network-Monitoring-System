@@ -45,7 +45,9 @@ import {
 
 import {
     Payment,
-    PaymentStatus
+    PaymentStatus,
+    PaymentSmsReview,
+    PendingPaymentMatchOption
 } from '../../models/payment.model';
 
 import {
@@ -148,9 +150,17 @@ export class PaymentsPage {
     // =====================================================
 
     readonly activeView =
-        signal<'all' | 'cash'>(
+        signal<'all' | 'cash' | 'sms'>(
             'all'
         );
+
+    readonly smsReviews = signal<PaymentSmsReview[]>([]);
+    readonly smsPendingPayments = signal<PendingPaymentMatchOption[]>([]);
+    readonly smsLoading = signal(false);
+    readonly smsError = signal(false);
+    readonly smsLoaded = signal(false);
+    readonly selectedSmsPayment = signal<Record<number, number>>({});
+    readonly resolvingSmsId = signal<number | null>(null);
 
 
     // =====================================================
@@ -423,17 +433,14 @@ export class PaymentsPage {
 
     refreshCurrentView(): void {
 
-        if (
-            this.activeView() ===
-            'cash'
-        ) {
-
+        if (this.activeView() === 'cash') {
             this.loadCashRequests();
-
             return;
         }
-
-
+        if (this.activeView() === 'sms') {
+            this.loadSmsReview();
+            return;
+        }
         this.load();
     }
 
@@ -445,7 +452,8 @@ export class PaymentsPage {
     changeView(
         view:
             'all' |
-            'cash'
+            'cash' |
+            'sms'
     ): void {
 
         this.activeView.set(
@@ -453,12 +461,11 @@ export class PaymentsPage {
         );
 
 
-        if (
-            view === 'cash' &&
-            !this.cashLoaded()
-        ) {
-
+        if (view === 'cash' && !this.cashLoaded()) {
             this.loadCashRequests();
+        }
+        if (view === 'sms' && !this.smsLoaded()) {
+            this.loadSmsReview();
         }
     }
 
@@ -517,6 +524,68 @@ export class PaymentsPage {
             });
     }
 
+
+    // =====================================================
+    // AUTOMATIC PAYMENT SMS REVIEW
+    // =====================================================
+
+    loadSmsReview(): void {
+        this.smsLoading.set(true);
+        this.smsError.set(false);
+        this.service.getPaymentSmsReview()
+            .pipe(finalize(() => this.smsLoading.set(false)))
+            .subscribe({
+                next: response => {
+                    this.smsReviews.set(response.sms_reviews ?? []);
+                    this.smsPendingPayments.set(response.pending_payments ?? []);
+                    this.smsLoaded.set(true);
+                },
+                error: error => {
+                    console.error('Failed to load payment SMS review:', error);
+                    this.smsError.set(true);
+                }
+            });
+    }
+
+    selectSmsPayment(smsId: number, value: unknown): void {
+        const paymentId = Number(value);
+        this.selectedSmsPayment.update(current => ({ ...current, [smsId]: paymentId }));
+    }
+
+    retrySms(sms: PaymentSmsReview): void {
+        if (this.resolvingSmsId() !== null) return;
+        this.resolvingSmsId.set(sms.id);
+        this.service.retryPaymentSms(sms.id)
+            .pipe(finalize(() => this.resolvingSmsId.set(null)))
+            .subscribe({
+                next: async () => {
+                    await this.showToast('SMS checked again.', 'success');
+                    this.loadSmsReview();
+                    this.load();
+                },
+                error: async error => {
+                    await this.showToast(error?.error?.message || 'Could not retry this SMS.', 'danger');
+                }
+            });
+    }
+
+    matchSms(sms: PaymentSmsReview): void {
+        const paymentId = this.selectedSmsPayment()[sms.id];
+        if (!Number.isInteger(paymentId) || paymentId <= 0 || this.resolvingSmsId() !== null) return;
+        this.resolvingSmsId.set(sms.id);
+        this.service.matchPaymentSms(sms.id, paymentId)
+            .pipe(finalize(() => this.resolvingSmsId.set(null)))
+            .subscribe({
+                next: async response => {
+                    await this.showToast(response.message || 'Payment matched.', 'success');
+                    this.loadSmsReview();
+                    this.load();
+                },
+                error: async error => {
+                    await this.showToast(error?.error?.message || 'Could not match this payment.', 'danger');
+                }
+            });
+    }
 
     // =====================================================
     // CONFIRM CASH PAYMENT

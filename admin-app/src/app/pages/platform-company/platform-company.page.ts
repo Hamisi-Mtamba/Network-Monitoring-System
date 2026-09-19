@@ -1,3 +1,4 @@
+import { BrandingImagesComponent } from '../../components/branding-images/branding-images.component';
 // Import Angular component utilities
 import {
     ChangeDetectionStrategy,
@@ -79,7 +80,8 @@ import {
 import {
     Company,
     CompanyBrandingImageType,
-    UpdateCompanyBrandingRequest
+    UpdateCompanyBrandingRequest,
+    UpdateCompanyPaymentSettingsRequest
 } from '../../models/company.model';
 
 
@@ -175,7 +177,8 @@ interface CompanyWorkspaceSection {
         | 'payments'
         | 'sessions'
         | 'reports'
-        | 'branding';
+        | 'branding'
+        | 'payment-settings';
 
     icon: string;
 }
@@ -191,6 +194,7 @@ interface CompanyWorkspaceSection {
     standalone: true,
 
     imports: [
+        BrandingImagesComponent,
         DatePipe,
         ReactiveFormsModule,
         IonButton,
@@ -260,6 +264,11 @@ export class PlatformCompanyPage {
 
     readonly errorMessage =
         signal('');
+
+    onImagesUpdated(company: Company): void {
+        this.company.set(company);
+        this.populateBrandingForm(company);
+    }
 
     readonly company =
         signal<Company | null>(null);
@@ -413,6 +422,20 @@ export class PlatformCompanyPage {
 
 
     // =====================================================
+    // PAYMENT SETTINGS MANAGEMENT STATE
+    // =====================================================
+
+    readonly paymentSettingsSaving =
+        signal(false);
+
+    readonly paymentSettingsErrorMessage =
+        signal('');
+
+    readonly paymentSettingsSuccessMessage =
+        signal('');
+
+
+    // =====================================================
     // BRANDING MANAGEMENT STATE
     // =====================================================
 
@@ -492,6 +515,12 @@ export class PlatformCompanyPage {
             label: 'Reports',
             key: 'reports',
             icon: 'stats-chart-outline'
+        },
+
+        {
+            label: 'Payment Setup',
+            key: 'payment-settings',
+            icon: 'wallet-outline'
         },
 
         {
@@ -724,6 +753,46 @@ export class PlatformCompanyPage {
             available_until: [
                 ''
             ]
+        });
+
+
+    // =====================================================
+    // PAYMENT SETTINGS FORM
+    // =====================================================
+
+    readonly paymentSettingsForm =
+        this.fb.nonNullable.group({
+
+            enabled: [
+                true
+            ],
+
+            lipa_number: [
+                '',
+                [
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(50)
+                ]
+            ],
+
+            account_name: [
+                '',
+                [
+                    Validators.maxLength(120)
+                ]
+            ],
+
+            instructions: [
+                '',
+                [
+                    Validators.maxLength(500)
+                ]
+            ],
+
+            httpsms_owner: [''],
+            payment_phone: [''],
+            device_name: ['Payment phone']
         });
 
 
@@ -1222,6 +1291,10 @@ export class PlatformCompanyPage {
                     this.populateBrandingForm(
                         response.company
                     );
+
+                    this.populatePaymentSettingsForm(
+                        response.company
+                    );
                 },
 
 
@@ -1308,6 +1381,22 @@ export class PlatformCompanyPage {
             if (company) {
 
                 this.populateBrandingForm(
+                    company
+                );
+            }
+        }
+
+
+        if (
+            section === 'payment-settings'
+        ) {
+
+            const company =
+                this.company();
+
+            if (company) {
+
+                this.populatePaymentSettingsForm(
                     company
                 );
             }
@@ -3813,6 +3902,113 @@ export class PlatformCompanyPage {
     // =====================================================
     // SAVE COMPANY BRANDING
     // =====================================================
+    // SAVE PAYMENT SETTINGS
+    // =====================================================
+
+    savePaymentSettings(): void {
+
+        const company =
+            this.company();
+
+        if (!company) {
+            return;
+        }
+
+        this.paymentSettingsErrorMessage.set('');
+        this.paymentSettingsSuccessMessage.set('');
+
+        if (this.paymentSettingsForm.invalid) {
+            this.paymentSettingsForm.markAllAsTouched();
+            return;
+        }
+
+        const raw =
+            this.paymentSettingsForm.getRawValue();
+
+        const payload:
+            UpdateCompanyPaymentSettingsRequest = {
+            payment: {
+                enabled:
+                    raw.enabled,
+                lipa_number:
+                    raw.lipa_number.trim(),
+                account_name:
+                    raw.account_name.trim() ||
+                    null,
+                instructions:
+                    raw.instructions.trim() ||
+                    null,
+                httpsms_owner:
+                    raw.httpsms_owner.trim() ||
+                    null,
+                payment_phone:
+                    raw.payment_phone.trim() ||
+                    null,
+                device_name:
+                    raw.device_name.trim() ||
+                    null
+            }
+        };
+
+        this.paymentSettingsSaving.set(true);
+
+        this.companyService
+            .updateCompanyPaymentSettings(
+                company.id,
+                payload
+            )
+            .pipe(
+                finalize(
+                    () =>
+                        this.paymentSettingsSaving.set(false)
+                )
+            )
+            .subscribe({
+                next: (response) => {
+                    this.company.set(
+                        response.company
+                    );
+                    this.populatePaymentSettingsForm(
+                        response.company
+                    );
+                    this.paymentSettingsSuccessMessage.set(
+                        response.message ||
+                        'Payment settings saved successfully.'
+                    );
+                },
+                error: (error) => {
+                    console.error(
+                        'Failed to update payment settings:',
+                        error
+                    );
+                    this.paymentSettingsErrorMessage.set(
+                        error?.error?.message ||
+                        'Payment settings could not be updated.'
+                    );
+                }
+            });
+    }
+
+
+    resetPaymentSettingsForm(): void {
+
+        const company =
+            this.company();
+
+        if (!company) {
+            return;
+        }
+
+        this.paymentSettingsErrorMessage.set('');
+        this.paymentSettingsSuccessMessage.set('');
+
+        this.populatePaymentSettingsForm(
+            company
+        );
+    }
+
+
+    // =====================================================
 
     saveBranding(): void {
 
@@ -4704,6 +4900,40 @@ export class PlatformCompanyPage {
     // =====================================================
     // PRIVATE BRANDING HELPERS
     // =====================================================
+
+    private populatePaymentSettingsForm(
+        company: Company
+    ): void {
+
+        const payment =
+            company.settings
+                ?.payment ??
+            {};
+
+        this.paymentSettingsForm.reset({
+            enabled:
+                payment.enabled !== false,
+            lipa_number:
+                payment.lipa_number ??
+                '',
+            account_name:
+                payment.account_name ??
+                '',
+            instructions:
+                payment.instructions ??
+                '',
+            httpsms_owner:
+                payment.httpsms_owner ??
+                '',
+            payment_phone:
+                payment.payment_phone ??
+                '',
+            device_name:
+                payment.device_name ??
+                'Payment phone'
+        });
+    }
+
 
     private populateBrandingForm(
         company: Company

@@ -1,0 +1,135 @@
+// Shared presentation for the existing company payment forms.
+.payment-settings-card {
+    border: 1px solid #dfe6ec;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+
+    &.profile-card { padding: 0; }
+
+    .settings-card__header {
+        padding: 22px 24px;
+        background: #fff;
+    }
+
+    .settings-card__header h2 { font-size: 18px; }
+    .settings-card__header p { font-size: 13px; }
+    .settings-card__header > ion-icon,
+    .section-eyebrow { color: var(--company-primary, #2563eb); }
+
+    .payment-settings-form {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+    }
+
+    .payment-settings-group {
+        display: block;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    legend {
+        margin-bottom: 16px;
+        padding: 0;
+        color: #172033;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .payment-settings-group + .payment-settings-group {
+        padding-top: 18px;
+        border-top: 1px solid #e4e9ef;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 20px;
+    }
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 0;
+        gap: 8px;
+    }
+    .form-field > span { min-height: 20px; line-height: 20px; font-size: 13px; font-weight: 600; }
+    .payment-settings-hint { margin-bottom: 16px; }
+    .form-field ion-input { height: 46px; flex: 0 0 46px; --padding-top: 10px; --padding-bottom: 10px; }
+
+    .form-field ion-input,
+    .form-field textarea {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        color: #172033;
+        font-size: 14px;
+        --background: #fff;
+        --padding-start: 12px;
+        --padding-end: 12px;
+        --placeholder-color: #64748b;
+        --placeholder-opacity: 1;
+    }
+
+    .form-field textarea {
+        box-sizing: border-box;
+        padding: 12px;
+        resize: vertical;
+        line-height: 1.6;
+        font-family: inherit;
+    }
+
+    .form-field ion-input:focus-within,
+    .form-field textarea:focus {
+        border-color: var(--company-primary, #2563eb);
+        outline: 2px solid var(--company-primary, #2563eb);
+        outline-offset: 2px;
+    }
+
+    .field-help,
+    .payment-settings-hint {
+        margin: 0 0 12px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .field-error { font-size: 12px; }
+
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 20px;
+        border-top: 1px solid #e4e9ef;
+    }
+
+    .form-actions ion-button {
+        min-height: 42px;
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: 0;
+        text-transform: none;
+        --border-radius: 6px;
+        --box-shadow: none;
+    }
+
+    ion-button[type='submit'] { --background: var(--company-primary, #2563eb); }
+    ion-button[fill='outline'] { --color: #475569; --border-color: #cbd5e1; }
+
+    @media (max-width: 640px) {
+        .payment-settings-form,
+        .settings-card__header { padding: 18px; }
+        .form-grid { grid-template-columns: minmax(0, 1fr); }
+        .form-field ion-input,
+        .form-field textarea { font-size: 16px; }
+        .form-actions ion-button { flex: 1 1 auto; }
+    }
+}

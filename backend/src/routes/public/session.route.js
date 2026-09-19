@@ -1,5 +1,6 @@
 // Import Express
 import express from "express";
+import { reconnect } from '../../controllers/public/reconnect.controller.js';
 
 // Import public session controller
 import {
@@ -9,6 +10,8 @@ import {
 
 // Create router
 const router = express.Router();
+
+router.post('/companies/:companySlug/sessions/reconnect', reconnect);
 
 
 // Get one public session belonging to one company

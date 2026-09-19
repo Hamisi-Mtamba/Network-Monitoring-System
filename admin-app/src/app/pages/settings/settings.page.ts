@@ -1,3 +1,4 @@
+import { BrandingImagesComponent } from '../../components/branding-images/branding-images.component';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -25,6 +26,7 @@ import {
 
 import {
     businessOutline,
+    cardOutline,
     checkmarkCircleOutline,
     closeCircleOutline,
     cloudUploadOutline,
@@ -71,6 +73,7 @@ import {
     standalone: true,
 
     imports: [
+        BrandingImagesComponent,
         ReactiveFormsModule,
         IonButton,
         IonIcon,
@@ -116,6 +119,12 @@ export class SettingsPage {
     readonly error =
         signal(false);
 
+    onImagesUpdated(company: Company): void {
+        this.company.set(company);
+        this.populateBrandingForm(company);
+        this.companyService.setCompany(company);
+    }
+
     readonly company =
         signal<Company | null>(null);
 
@@ -125,10 +134,16 @@ export class SettingsPage {
     readonly savingBranding =
         signal(false);
 
+    readonly savingPayment =
+        signal(false);
+
     readonly profileSuccess =
         signal('');
 
     readonly brandingSuccess =
+        signal('');
+
+    readonly paymentSuccess =
         signal('');
 
     readonly formError =
@@ -208,6 +223,46 @@ export class SettingsPage {
             address: [
                 ''
             ]
+        });
+
+
+    // =====================================================
+    // PAYMENT SETTINGS FORM
+    // =====================================================
+
+    readonly paymentForm =
+        this.fb.nonNullable.group({
+
+            enabled: [
+                true
+            ],
+
+            lipa_number: [
+                '',
+                [
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(50)
+                ]
+            ],
+
+            account_name: [
+                '',
+                [
+                    Validators.maxLength(120)
+                ]
+            ],
+
+            instructions: [
+                '',
+                [
+                    Validators.maxLength(500)
+                ]
+            ],
+
+            httpsms_owner: [''],
+            payment_phone: [''],
+            device_name: ['Payment phone']
         });
 
 
@@ -319,6 +374,7 @@ export class SettingsPage {
 
         addIcons({
             businessOutline,
+            cardOutline,
             checkmarkCircleOutline,
             closeCircleOutline,
             cloudUploadOutline,
@@ -487,6 +543,90 @@ export class SettingsPage {
 
 
     // =====================================================
+    // PAYMENT SETTINGS
+    // =====================================================
+
+    savePaymentSettings(): void {
+
+        if (this.paymentForm.invalid) {
+            this.paymentForm.markAllAsTouched();
+            return;
+        }
+
+        this.paymentSuccess.set('');
+        this.formError.set('');
+        this.savingPayment.set(true);
+
+        const value =
+            this.paymentForm.getRawValue();
+
+        this.companyService
+            .updateCurrentCompanyPaymentSettings({
+                payment: {
+                    enabled:
+                        value.enabled,
+                    lipa_number:
+                        value.lipa_number.trim(),
+                    account_name:
+                        value.account_name.trim() ||
+                        null,
+                    instructions:
+                        value.instructions.trim() ||
+                        null,
+                    httpsms_owner:
+                        value.httpsms_owner.trim() ||
+                        null,
+                    payment_phone:
+                        value.payment_phone.trim() ||
+                        null,
+                    device_name:
+                        value.device_name.trim() ||
+                        null
+                }
+            })
+            .pipe(
+                finalize(
+                    () =>
+                        this.savingPayment.set(false)
+                )
+            )
+            .subscribe({
+                next: (response) => {
+                    this.setCompany(response.company);
+                    this.paymentSuccess.set(
+                        'Payment settings updated successfully.'
+                    );
+                },
+                error: (error) => {
+                    console.error(
+                        'Failed to save payment settings:',
+                        error
+                    );
+                    this.formError.set(
+                        error?.error?.message ||
+                        'Unable to save payment settings.'
+                    );
+                }
+            });
+    }
+
+
+    resetPaymentSettings(): void {
+
+        const company =
+            this.company();
+
+        if (!company) {
+            return;
+        }
+
+        this.populatePaymentForm(company);
+        this.paymentSuccess.set('');
+        this.formError.set('');
+    }
+
+
+    // =====================================================
     // BRAND COLORS
     // =====================================================
 
@@ -579,6 +719,10 @@ export class SettingsPage {
         }
 
         this.populateBrandingForm(
+            company
+        );
+
+        this.populatePaymentForm(
             company
         );
 
@@ -1042,6 +1186,40 @@ export class SettingsPage {
             address:
                 company.address ??
                 ''
+        });
+    }
+
+
+    private populatePaymentForm(
+        company: Company
+    ): void {
+
+        const payment =
+            company.settings
+                ?.payment ??
+            {};
+
+        this.paymentForm.reset({
+            enabled:
+                payment.enabled !== false,
+            lipa_number:
+                payment.lipa_number ??
+                '',
+            account_name:
+                payment.account_name ??
+                '',
+            instructions:
+                payment.instructions ??
+                '',
+            httpsms_owner:
+                payment.httpsms_owner ??
+                '',
+            payment_phone:
+                payment.payment_phone ??
+                '',
+            device_name:
+                payment.device_name ??
+                'Payment phone'
         });
     }
 

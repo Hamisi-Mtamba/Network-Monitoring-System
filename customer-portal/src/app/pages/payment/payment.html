@@ -1,671 +1,488 @@
 <main class="page-shell checkout-page">
-
-    <!-- ======================================================
-         BACK TO PACKAGES
-         ====================================================== -->
-
     <a
         class="back-link"
-        [routerLink]="[
-            '/',
-            tenantService.companySlug(),
-            'packages'
-        ]"
+        [routerLink]="['/', tenantService.companySlug(), 'packages']"
         aria-label="Return to internet packages"
     >
-        ← Back to packages
+        ← Packages
     </a>
 
-
-    <!-- ======================================================
-         LOADING STATE
-         ====================================================== -->
-
     @if (loadingPackage()) {
-
-        <app-loading-spinner
-            message="Preparing your payment..."
-        />
-
+        <app-loading-spinner message="Preparing your package..." />
     }
-
-
-    <!-- ======================================================
-         PACKAGE NOT AVAILABLE
-         ====================================================== -->
-
     @else if (!packageItem()) {
-
-        <section
-            class="state-panel state-panel--error"
-            role="alert"
-        >
-
-            <div
-                class="state-panel__icon"
-                aria-hidden="true"
-            >
-                !
-            </div>
-
-            <h1>
-                Package unavailable
-            </h1>
-
-            <p>
-                {{ errorMessage() }}
-            </p>
-
-            @if (tenantService.companySlug()) {
-
-                <a
-                    class="button button--primary"
-                    [routerLink]="[
-                        '/',
-                        tenantService.companySlug(),
-                        'packages'
-                    ]"
-                >
-                    Choose another package
-                </a>
-
-            }
-
+        <section class="state-panel state-panel--error" role="alert">
+            <h1>Package unavailable</h1>
+            <p>{{ errorMessage() }}</p>
         </section>
-
     }
-
-
-    <!-- ======================================================
-         PAYMENT PAGE
-         ====================================================== -->
-
     @else {
-
-        <!-- Page heading -->
         <header class="checkout-heading">
-
-            <span class="step-label">
-                Checkout
-            </span>
-
-            <h1>
-                Complete your payment
-            </h1>
-
+            <h1>Pay for your internet</h1>
             <p>
-                Choose a payment method and confirm the payment
-                from your phone.
+                Enter the mobile number you will use to make the payment.
             </p>
-
         </header>
 
-
         <div class="checkout-layout">
-
-
-            <!-- ==================================================
-                 SELECTED PACKAGE SUMMARY
-                 ================================================== -->
-
             <aside
                 class="summary-card"
-                aria-label="Selected package summary"
+                aria-label="Selected package"
             >
-
-                <div class="summary-card__label">
+                <span class="summary-card__label">
                     Selected package
-                </div>
-
-
-                <div
-                    class="summary-card__icon"
-                    aria-hidden="true"
-                >
-                    ⌁
-                </div>
-
+                </span>
 
                 <h2>
                     {{ packageItem()!.name }}
                 </h2>
 
-
                 <p class="summary-card__price">
-
-                    <span>
-                        TZS
-                    </span>
-
-                    {{
-                        packageItem()!.price.toLocaleString()
-                    }}
-
+                    <span>TZS</span>
+                    {{ packageItem()!.price.toLocaleString() }}
                 </p>
 
+                <div class="summary-row">
+                    <span>Access time</span>
 
-                <dl>
-
-                    <div>
-
-                        <dt>
-                            Duration
-                        </dt>
-
-                        <dd>
-                            {{
-                                packageService.formatDuration(
-                                    packageItem()!.duration_minutes
-                                )
-                            }}
-                        </dd>
-
-                    </div>
-
-
-                    <div>
-
-                        <dt>
-                            Speed
-                        </dt>
-
-                        <dd>
-                            {{ packageItem()!.speed }}
-                        </dd>
-
-                    </div>
-
-                </dl>
-
-
-                <a
-                    class="summary-card__change"
-                    [routerLink]="[
-                        '/',
-                        tenantService.companySlug(),
-                        'packages'
-                    ]"
-                >
-                    Change package
-                </a>
-
+                    <strong>
+                        {{
+                            packageService.formatDuration(
+                                packageItem()!.duration_minutes
+                            )
+                        }}
+                    </strong>
+                </div>
             </aside>
-
-
-            <!-- ==================================================
-                 PAYMENT SECTION
-                 ================================================== -->
 
             <section class="payment-card">
 
+                <!-- =====================================================
+                     PAYMENT APPROVED
+                     ===================================================== -->
 
-                <!-- ==============================================
-                     WAITING FOR PAYMENT CONFIRMATION
-                     ============================================== -->
-
-                @if (waiting()) {
-
-                    <div class="pending-state">
-
+                @if (approved()) {
+                    <div
+                        class="approved-state"
+                        role="status"
+                    >
                         <div
-                            class="pending-state__phone"
+                            class="status-icon status-icon--success"
                             aria-hidden="true"
                         >
                             ✓
                         </div>
 
-
-                        <span class="step-label">
-                            Payment request sent
+                        <span class="status-kicker">
+                            Payment approved
                         </span>
 
-
                         <h2>
-                            Check your phone
+                            You are connected
                         </h2>
 
-
                         <p>
-                            Approve the payment prompt on your phone.
-                            Internet access will be activated after
-                            confirmation.
+                            Your payment has been confirmed and your
+                            internet package is now active.
                         </p>
 
+                        <!-- Main amount -->
 
-                        <app-loading-spinner
-                            message="Waiting for payment confirmation..."
-                            [compact]="true"
-                        />
+                        <div class="approved-amount">
+                            <span>
+                                Amount paid
+                            </span>
 
+                            <strong>
+                                TZS
+                                {{
+                                    successDetails()
+                                        ?.amount
+                                        ?.toLocaleString()
+                                }}
+                            </strong>
+                        </div>
 
-                        <div class="pending-details">
+                        <!-- Merchant / payment destination -->
+
+                        @if (paymentInstructions(); as instructions) {
+                            <div class="approved-merchant">
+
+                                @if (instructions.account_name) {
+                                    <div>
+                                        <span>
+                                            Paid to
+                                        </span>
+
+                                        <strong>
+                                            {{ instructions.account_name }}
+                                        </strong>
+                                    </div>
+                                }
+
+                                <div>
+                                    <span>
+                                        Lipa number
+                                    </span>
+
+                                    <strong>
+                                        {{ instructions.lipa_number }}
+                                    </strong>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Payment/session details -->
+
+                        <div class="approved-details">
 
                             <div>
-
                                 <span>
                                     Package
                                 </span>
 
                                 <strong>
-                                    {{ packageItem()!.name }}
+                                    {{ successDetails()?.packageName }}
                                 </strong>
-
                             </div>
 
-
                             <div>
-
                                 <span>
-                                    Amount
+                                    Paying number
                                 </span>
 
+                                <strong>
+                                    {{ successDetails()?.phoneNumber }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Transaction reference
+                                </span>
+
+                                <strong class="approved-reference">
+                                    {{ successDetails()?.reference }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Internet status
+                                </span>
+
+                                <strong class="approved-status">
+                                    {{
+                                        successDetails()
+                                            ?.status
+                                            ?.toUpperCase()
+                                    }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Connected at
+                                </span>
+
+                                <strong>
+                                    {{ successDetails()?.startedAt }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Internet expires
+                                </span>
+
+                                <strong>
+                                    {{ successDetails()?.expiresAt }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="button button--primary button--full"
+                            (click)="continueBrowsing()"
+                        >
+                            Continue browsing
+                        </button>
+                    </div>
+                }
+
+                <!-- =====================================================
+                     WAITING / TIMEOUT / FAILED
+                     ===================================================== -->
+
+                @else if (
+                    waiting() ||
+                    timedOut() ||
+                    failed()
+                ) {
+                    <div class="waiting-state">
+
+                        @if (paymentInstructions(); as instructions) {
+                            <div class="lipa-card">
+                                <span class="lipa-card__label">
+                                    Lipa number
+                                </span>
+
+                                <strong>
+                                    {{ instructions.lipa_number }}
+                                </strong>
+
+                                @if (instructions.account_name) {
+                                    <span class="lipa-card__name">
+                                        {{ instructions.account_name }}
+                                    </span>
+                                }
+
+                                <button
+                                    type="button"
+                                    class="button lipa-card__copy"
+                                    aria-label="Copy Lipa number"
+                                    [disabled]="copyingLipaNumber()"
+                                    (click)="copyLipaNumber()"
+                                >
+                                    {{
+                                        copyingLipaNumber()
+                                            ? 'Copying...'
+                                            : 'Copy number'
+                                    }}
+                                </button>
+
+                                <span
+                                    class="lipa-card__feedback"
+                                    role="status"
+                                >
+                                    {{ copyMessage() }}
+                                </span>
+                            </div>
+                        }
+
+                        <!-- Waiting -->
+
+                        @if (waiting()) {
+                            <div
+                                class="status-icon status-icon--waiting"
+                                aria-hidden="true"
+                            ></div>
+
+                            <h2>
+                                Pay and wait for approval
+                            </h2>
+
+                            <p>
+                                Send exactly
                                 <strong>
                                     TZS
                                     {{
-                                        packageItem()!.price.toLocaleString()
+                                        packageItem()!
+                                            .price
+                                            .toLocaleString()
                                     }}
                                 </strong>
+                                to the Lipa number above using the
+                                number you entered.
 
-                            </div>
+                                Approval happens automatically after
+                                the payment SMS is received.
+                            </p>
 
+                            @if (
+                                paymentInstructions()?.instructions
+                            ) {
+                                <p class="merchant-instructions">
+                                    {{
+                                        paymentInstructions()!
+                                            .instructions
+                                    }}
+                                </p>
+                            }
 
-                            <div>
-
+                            <div class="payment-meta">
                                 <span>
-                                    Method
+                                    Paying number
                                 </span>
 
                                 <strong>
-                                    {{ selectedMethodName() }}
+                                    +255
+                                    {{
+                                        paymentForm.controls
+                                            .phoneNumber
+                                            .value
+                                    }}
                                 </strong>
-
                             </div>
 
+                            <p class="waiting-note">
+                                Waiting for payment confirmation…
+                            </p>
+                        }
 
-                            <div>
+                        <!-- Timed out -->
 
-                                <span>
-                                    Reference
-                                </span>
-
-                                <strong>
-                                    {{ reference() }}
-                                </strong>
-
+                        @else if (timedOut()) {
+                            <div
+                                class="status-icon"
+                                aria-hidden="true"
+                            >
+                                ⌛
                             </div>
 
-                        </div>
+                            <h2>
+                                Still waiting for confirmation
+                            </h2>
 
+                            <p>
+                                If you already paid, do not pay again.
+                                Check the payment status again.
+                            </p>
 
-                        <app-status-card
-                            status="pending"
-                            description="Keep this page open while your payment is being confirmed."
-                        />
+                            <button
+                                type="button"
+                                class="button button--primary button--full"
+                                (click)="retryStatusCheck()"
+                            >
+                                Check payment again
+                            </button>
+                        }
 
+                        <!-- Failed -->
 
-                        <button
-                            type="button"
-                            class="text-button"
-                            (click)="cancelPayment()"
-                        >
-                            Cancel and try again
-                        </button>
+                        @else if (failed()) {
+                            <div
+                                class="status-icon status-icon--error"
+                                aria-hidden="true"
+                            >
+                                !
+                            </div>
 
-                    </div>
+                            <h2>
+                                Payment was not approved
+                            </h2>
 
-                }
+                            <p>
+                                No internet package has been activated.
+                                You can start the payment again.
+                            </p>
 
-
-                <!-- ==============================================
-                     PAYMENT FAILED
-                     ============================================== -->
-
-                @else if (failed()) {
-
-                    <div
-                        class="payment-feedback"
-                        role="alert"
-                    >
-
-                        <div
-                            class="feedback-icon feedback-icon--error"
-                            aria-hidden="true"
-                        >
-                            ×
-                        </div>
-
-
-                        <h2>
-                            Payment was not completed
-                        </h2>
-
-
-                        <p>
-                            No internet package was activated.
-                            Check your balance or payment prompt,
-                            then try again.
-                        </p>
-
-
-                        <button
-                            type="button"
-                            class="button button--primary button--full"
-                            (click)="retryPayment()"
-                        >
-                            Retry payment
-                        </button>
+                            <button
+                                type="button"
+                                class="button button--primary button--full"
+                                (click)="retryPayment()"
+                            >
+                                Start again
+                            </button>
+                        }
 
                     </div>
-
                 }
 
-
-                <!-- ==============================================
-                     PAYMENT TIMED OUT
-                     ============================================== -->
-
-                @else if (timedOut()) {
-
-                    <div
-                        class="payment-feedback"
-                        role="alert"
-                    >
-
-                        <div
-                            class="feedback-icon feedback-icon--warning"
-                            aria-hidden="true"
-                        >
-                            ⌛
-                        </div>
-
-
-                        <h2>
-                            Confirmation is taking longer
-                        </h2>
-
-
-                        <p>
-                            Check your phone and payment messages.
-                            If the payment was not completed,
-                            start the request again.
-                        </p>
-
-
-                        <button
-                            type="button"
-                            class="button button--primary button--full"
-                            (click)="retryPayment()"
-                        >
-                            Try again
-                        </button>
-
-                    </div>
-
-                }
-
-
-                <!-- ==============================================
+                <!-- =====================================================
                      PAYMENT FORM
-                     ============================================== -->
+                     ===================================================== -->
 
                 @else {
-
                     <form
                         [formGroup]="paymentForm"
                         (ngSubmit)="initiatePayment()"
                         novalidate
                     >
+                        <div class="phone-field">
+                            <label for="phoneNumber">
+                                Number you will pay from
+                            </label>
 
+                            <div class="phone-input-wrap">
+                                <span aria-hidden="true">
+                                    +255
+                                </span>
 
-                        <!-- ======================================
-                             PAYMENT METHOD
-                             ====================================== -->
-
-                        <fieldset>
-
-                            <legend>
-                                Payment method
-                            </legend>
-
-
-                            <p class="field-hint">
-                                Choose the mobile money account
-                                you want to use.
-                            </p>
-
-
-                            <div class="method-grid">
-
-                                @for (
-                                    method of paymentMethods;
-                                    track method.id
-                                ) {
-
-                                    <app-payment-method-card
-                                        [method]="method"
-                                        [selected]="
-                                            paymentForm.controls
-                                                .paymentMethod
-                                                .value === method.id
-                                        "
-                                        [disabled]="submitting()"
-                                        (methodSelected)="
-                                            chooseMethod($event)
-                                        "
-                                    />
-
-                                }
-
+                                <input
+                                    id="phoneNumber"
+                                    type="tel"
+                                    inputmode="numeric"
+                                    autocomplete="tel-national"
+                                    formControlName="phoneNumber"
+                                    placeholder="712345678"
+                                    maxlength="9"
+                                    nmsSubscriberPhone
+                                    aria-describedby="phoneHint phoneError"
+                                />
                             </div>
 
+                            <p
+                                id="phoneHint"
+                                class="field-hint"
+                            >
+                                Enter the mobile-money number that will
+                                make the payment. You can use any
+                                supported mobile network.
+                            </p>
 
                             @if (
                                 paymentForm.controls
-                                    .paymentMethod
+                                    .phoneNumber
                                     .touched &&
                                 paymentForm.controls
-                                    .paymentMethod
+                                    .phoneNumber
                                     .invalid
                             ) {
-
                                 <p
+                                    id="phoneError"
                                     class="field-error"
                                     role="alert"
                                 >
-                                    Choose a payment method to continue.
+                                    Enter a valid Tanzanian mobile
+                                    number, for example 712345678.
                                 </p>
-
                             }
-
-                        </fieldset>
-
-
-                        <!-- ======================================
-                             PHONE NUMBER
-                             ====================================== -->
-
-                        @if (
-                            paymentForm.controls
-                                .paymentMethod
-                                .value
-                        ) {
-
-                            <div class="phone-field">
-
-                                <label for="phoneNumber">
-                                    Mobile money phone number
-                                </label>
-
-
-                                <div class="phone-input-wrap">
-
-                                    <span aria-hidden="true">
-                                        +255
-                                    </span>
-
-
-                                    <input
-                                        id="phoneNumber"
-                                        type="tel"
-                                        inputmode="tel"
-                                        autocomplete="tel"
-                                        formControlName="phoneNumber"
-                                        placeholder="07XXXXXXXX"
-                                        maxlength="13"
-                                        (blur)="sanitizePhoneInput()"
-                                        aria-describedby="phoneHint phoneError"
-                                    />
-
-                                </div>
-
-
-                                <p
-                                    id="phoneHint"
-                                    class="field-hint"
-                                >
-                                    Enter the number registered
-                                    with {{ selectedMethodName() }}.
-                                </p>
-
-
-                                @if (
-                                    paymentForm.controls
-                                        .phoneNumber
-                                        .touched &&
-                                    paymentForm.controls
-                                        .phoneNumber
-                                        .invalid
-                                ) {
-
-                                    <p
-                                        id="phoneError"
-                                        class="field-error"
-                                        role="alert"
-                                    >
-                                        Enter a valid Tanzanian
-                                        mobile number, for example
-                                        0712345678.
-                                    </p>
-
-                                }
-
-                            </div>
-
-                        }
-
-
-                        <!-- ======================================
-                             API ERROR
-                             ====================================== -->
+                        </div>
 
                         @if (errorMessage()) {
-
                             <div
                                 class="inline-alert"
                                 role="alert"
                             >
                                 {{ errorMessage() }}
                             </div>
-
                         }
-
-
-                        <!-- ======================================
-                             MOBILE MONEY SUBMIT
-                             ====================================== -->
 
                         <button
                             type="submit"
-                            class="button button--primary button--full pay-button"
+                            class="button button--primary button--full"
                             [disabled]="
                                 paymentForm.invalid ||
                                 submitting()
                             "
                         >
-
                             @if (submitting()) {
-
-                                Sending payment request...
-
-                            } @else {
-
-                                Pay TZS
-                                {{
-                                    packageItem()!.price.toLocaleString()
-                                }}
-
+                                Preparing payment…
                             }
-
+                            @else {
+                                Show Lipa number
+                            }
                         </button>
 
-
-                        <p class="secure-note">
-
-                            <span aria-hidden="true">
-                                ▣
-                            </span>
-
-                            Your payment details are sent securely.
-
+                        <p class="process-note">
+                            Next, you will see the Lipa number and this
+                            page will wait for automatic payment approval.
                         </p>
 
-
-                        <!-- ======================================
-                             CASH PAYMENT OPTION
-                             ====================================== -->
-
-                        <div class="cash-option">
-
-
-                            <div class="cash-option__divider">
-
-                                <span>
-                                    OR
-                                </span>
-
-                            </div>
-
-
-                            <div class="cash-option__content">
-
-                                <div>
-
-                                    <h3>
-                                        Pay with cash
-                                    </h3>
-
-
-                                    <p>
-                                        Submit a cash request and
-                                        pay the administrator directly.
-                                        Your internet package will be
-                                        activated after the payment
-                                        is confirmed.
-                                    </p>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    class="button button--cash button--full"
-                                    (click)="goToCashPayment()"
-                                >
-                                    Continue with cash
-                                </button>
-
-                            </div>
-
-                        </div>
-
+                        <button
+                            type="button"
+                            class="cash-link"
+                            (click)="goToCashPayment()"
+                        >
+                            Paying cash instead?
+                        </button>
                     </form>
-
                 }
 
             </section>
-
         </div>
-
     }
-
 </main>

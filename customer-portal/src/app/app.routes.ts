@@ -1,3 +1,5 @@
+import { captureWifiContext } from './services/wifi-context.service';
+import { ConnectionCheckPage, reconnectBeforePurchase } from './services/reconnect.guard';
 // Import Angular routing types
 import {
     Routes
@@ -7,6 +9,8 @@ import {
 // Define all customer portal routes
 export const routes: Routes = [
 
+    { path: ':companySlug/connection-check', component: ConnectionCheckPage, canActivate: [captureWifiContext] },
+
     // =========================================================
     // COMPANY PACKAGES
     // =========================================================
@@ -15,6 +19,9 @@ export const routes: Routes = [
     // /abc-company/packages
     {
         path: ':companySlug/packages',
+
+        canActivate: [reconnectBeforePurchase],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
             import('./pages/packages/packages')
@@ -36,6 +43,9 @@ export const routes: Routes = [
     {
         path: ':companySlug/company',
 
+        canActivate: [captureWifiContext],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+
         loadComponent: () =>
             import('./pages/company/company')
                 .then(
@@ -55,6 +65,9 @@ export const routes: Routes = [
     // /abc-company/payment/3
     {
         path: ':companySlug/payment/:packageId',
+
+        canActivate: [reconnectBeforePurchase],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
             import('./pages/payment/payment')
@@ -76,6 +89,9 @@ export const routes: Routes = [
     {
         path: ':companySlug/payment-success/:reference',
 
+        canActivate: [captureWifiContext],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+
         loadComponent: () =>
             import('./pages/payment-success/payment-success')
                 .then(
@@ -95,6 +111,9 @@ export const routes: Routes = [
     // /abc-company/session/12
     {
         path: ':companySlug/session/:id',
+
+        canActivate: [captureWifiContext],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
             import('./pages/session-status/session-status')
@@ -116,6 +135,9 @@ export const routes: Routes = [
     {
         path: ':companySlug/cash-payment/:packageId',
 
+        canActivate: [reconnectBeforePurchase],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+
         loadComponent: () =>
             import('./pages/cash-payment/cash-payment')
                 .then(
@@ -136,6 +158,9 @@ export const routes: Routes = [
     {
         path: ':companySlug/cash-payment-status/:reference',
 
+        canActivate: [captureWifiContext],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+
         loadComponent: () =>
             import('./pages/cash-payment-status/cash-payment-status')
                 .then(
@@ -155,6 +180,9 @@ export const routes: Routes = [
     // /abc-company/expired
     {
         path: ':companySlug/expired',
+
+        canActivate: [captureWifiContext],
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
             import('./pages/expired/expired')

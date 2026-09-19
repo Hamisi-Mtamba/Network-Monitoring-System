@@ -5,6 +5,7 @@ export interface InternetPackage {
   name: string;
   price: number;
   duration_minutes: number;
+  // Kept for API/backward compatibility; intentionally not shown in the customer UI.
   speed?: string;
   is_active?: boolean;
   available_from?: string | null;
@@ -16,4 +17,3 @@ export type PackageApiResponse =
   | InternetPackage[]
   | { packages: InternetPackage[] }
   | { data: InternetPackage[] };
-

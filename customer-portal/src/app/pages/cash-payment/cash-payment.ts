@@ -1,3 +1,6 @@
+import { SUBSCRIBER_PHONE_PATTERN, toInternationalPhone } from '../../shared/subscriber-phone';
+import { SubscriberPhoneDirective } from '../../shared/subscriber-phone.directive';
+import { WifiContextService } from '../../services/wifi-context.service';
 import {
     Component,
     OnInit,
@@ -40,6 +43,7 @@ import {
     standalone: true,
 
     imports: [
+        SubscriberPhoneDirective,
         RouterLink,
         ReactiveFormsModule
     ],
@@ -50,6 +54,8 @@ import {
 })
 export class CashPaymentPageComponent
     implements OnInit {
+
+    private readonly wifiContextService = inject(WifiContextService);
 
     readonly packageItem =
         signal<InternetPackage | null>(
@@ -82,7 +88,7 @@ export class CashPaymentPageComponent
                 Validators.required,
 
                 Validators.pattern(
-                    /^(?:\+?255|0)[67]\d{8}$/
+                    SUBSCRIBER_PHONE_PATTERN
                 )
             ]
         );
@@ -170,6 +176,8 @@ export class CashPaymentPageComponent
             return;
         }
 
+
+        this.wifiContextService.capture(companySlug, this.route.snapshot.queryParamMap);
 
         this.tenantService
             .setCompanySlug(
@@ -294,42 +302,12 @@ export class CashPaymentPageComponent
 
 
     // =====================================================
-    // PHONE INPUT
-    // =====================================================
-
-    sanitizePhoneInput(): void {
-
-        const current =
-            this.phoneNumber.value ||
-            '';
-
-
-        const cleaned =
-            current.replace(
-                /[\s()-]/g,
-                ''
-            );
-
-
-        if (
-            cleaned !==
-            current
-        ) {
-
-            this.phoneNumber.setValue(
-                cleaned
-            );
-        }
-    }
-
-
-    // =====================================================
     // CREATE CASH PAYMENT REQUEST
     // =====================================================
 
     requestCashPayment(): void {
 
-        this.sanitizePhoneInput();
+
 
 
         this.phoneNumber
@@ -345,37 +323,8 @@ export class CashPaymentPageComponent
                 .companySlug();
 
 
-        const mac =
-            this.route.snapshot
-                .queryParamMap
-                .get(
-                    'mac'
-                );
-
-
-        const ip =
-            this.route.snapshot
-                .queryParamMap
-                .get(
-                    'ip'
-                );
-
-
-        const router =
-            this.route.snapshot
-                .queryParamMap
-                .get(
-                    'router'
-                );
-
-
-        const loginUrl =
-            this.route.snapshot
-                .queryParamMap
-                .get(
-                    'loginUrl'
-                );
-
+        const wifi = companySlug ? this.wifiContextService.get(companySlug) : null;
+        const { mac, ip, router, loginUrl } = wifi || {};
 
         if (
             this.phoneNumber.invalid ||
@@ -415,7 +364,7 @@ export class CashPaymentPageComponent
 
 
         const normalizedPhone =
-            this.normalizePhone(
+            toInternationalPhone(
                 this.phoneNumber.value!
             );
 
@@ -507,36 +456,4 @@ export class CashPaymentPageComponent
     }
 
 
-    // =====================================================
-    // PHONE NORMALIZATION
-    // =====================================================
-
-    private normalizePhone(
-        phone: string
-    ): string {
-
-        if (
-            phone.startsWith(
-                '0'
-            )
-        ) {
-
-            return `+255${phone.slice(
-                1
-            )}`;
-        }
-
-
-        if (
-            phone.startsWith(
-                '255'
-            )
-        ) {
-
-            return `+${phone}`;
-        }
-
-
-        return phone;
-    }
 }

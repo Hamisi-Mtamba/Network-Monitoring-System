@@ -2683,6 +2683,151 @@
 
 
         <!-- =================================================
+             PAYMENT SETTINGS SECTION
+             ================================================= -->
+        @else if (activeSection() === 'payment-settings') {
+            <section class="workspace-section">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">
+                            Customer payments
+                        </span>
+                        <h2>
+                            Lipa payment settings
+                        </h2>
+                        <p>
+                            Configure the merchant/Lipa details shown
+                            to this company's customers during checkout.
+                        </p>
+                    </div>
+                </div>
+                <section class="profile-card payment-settings-card">
+                    <form
+                        class="company-form payment-settings-form"
+                        [formGroup]="paymentSettingsForm"
+                        (ngSubmit)="savePaymentSettings()"
+                    >
+                        <fieldset class="payment-settings-group">
+                            <legend>Payment Details</legend>
+                            <div class="form-grid">
+                                <label class="form-field">
+                                    <span>
+                                        Lipa number
+                                    </span>
+                                    <ion-input
+                                        aria-label="Lipa number" formControlName="lipa_number"
+                                        placeholder="Enter merchant/Lipa number"
+                                    ></ion-input>
+                                    @if (
+                                        paymentSettingsForm.controls.lipa_number.touched &&
+                                        paymentSettingsForm.controls.lipa_number.invalid
+                                    ) {
+                                        <small class="field-error">
+                                            Enter a valid Lipa number.
+                                        </small>
+                                    }
+                                </label>
+                                <label class="form-field">
+                                    <span>
+                                        Merchant / account name
+                                    </span>
+                                    <ion-input
+                                        aria-label="Merchant / account name" formControlName="account_name"
+                                        placeholder="Optional account name"
+                                    ></ion-input>
+                                </label>
+                            </div>
+                            </fieldset>
+                <fieldset class="payment-settings-group">
+                    <legend>Customer Instructions</legend>
+                    <label class="form-field">
+                                <span>
+                                    Customer payment instructions
+                                </span>
+                                <textarea
+                                    formControlName="instructions" rows="3"
+                                    placeholder="Example: Pay the exact amount shown, then wait for automatic approval."
+                                ></textarea>
+                                <small class="field-help">
+                                    Optional short instruction shown on the customer payment page.
+                                </small>
+                            </label>
+                        </fieldset>
+                        <fieldset class="payment-settings-group">
+                            <legend>Automatic Verification</legend>
+                            <p class="payment-settings-hint">Details for the phone receiving payment messages for this company.</p>
+                            <div class="form-grid">
+                                <label class="form-field">
+                                    <span>httpSMS owner</span>
+                                    <ion-input aria-label="httpSMS owner" formControlName="httpsms_owner" placeholder="Copy the owner value from httpSMS"></ion-input>
+                                </label>
+                                <label class="form-field">
+                                    <span>Payment phone</span>
+                                    <ion-input aria-label="Payment phone" formControlName="payment_phone" placeholder="+255..."></ion-input>
+                                </label>
+                                <label class="form-field">
+                                    <span>Device name</span>
+                                    <ion-input aria-label="Device name" formControlName="device_name" placeholder="Payment phone"></ion-input>
+                                </label>
+                            </div>
+                        </fieldset>
+                        @if (paymentSettingsErrorMessage()) {
+                            <div
+                                class="inline-alert"
+                                role="alert"
+                            >
+                                <span aria-hidden="true">
+                                    !
+                                </span>
+                                <p>
+                                    {{ paymentSettingsErrorMessage() }}
+                                </p>
+                            </div>
+                        }
+                        @if (paymentSettingsSuccessMessage()) {
+                            <div class="inline-success">
+                                <ion-icon
+                                    name="checkmark-circle-outline"
+                                ></ion-icon>
+                                {{ paymentSettingsSuccessMessage() }}
+                            </div>
+                        }
+                        <div class="form-actions">
+                            <ion-button
+                                type="button"
+                                fill="outline"
+                                (click)="resetPaymentSettingsForm()"
+                                [disabled]="paymentSettingsSaving()"
+                            >
+                                Reset
+                            </ion-button>
+                            <ion-button
+                                type="submit"
+                                [disabled]="
+                                    paymentSettingsSaving() ||
+                                    paymentSettingsForm.invalid
+                                "
+                            >
+                                @if (paymentSettingsSaving()) {
+                                    <ion-spinner
+                                        slot="start"
+                                        name="crescent"
+                                    ></ion-spinner>
+                                    Saving...
+                                } @else {
+                                    <ion-icon
+                                        slot="start"
+                                        name="save-outline"
+                                    ></ion-icon>
+                                    Save payment settings
+                                }
+                            </ion-button>
+                        </div>
+                    </form>
+                </section>
+            </section>
+        }
+        <!-- =================================================
              BRANDING SECTION
              ================================================= -->
 
@@ -3325,134 +3470,13 @@
                         </div>
 
                     </div>
+                    @if (company(); as imageCompany) {
+                <app-branding-images [company]="imageCompany" [platform]="true" (updated)="onImagesUpdated($event)" />
+            }
 
+            <div class="branding-image-grid">
 
-                    <div class="branding-image-grid">
-
-                        <!-- Background image -->
-
-                        <article class="branding-image-card">
-
-                            <div class="branding-image-card__preview">
-
-                                @if (backgroundImageUrl()) {
-
-                                    <img
-                                        [src]="
-                                            publicImageUrl(
-                                                backgroundImageUrl()
-                                            )
-                                        "
-                                        alt="Customer portal background preview"
-                                    />
-
-                                } @else {
-
-                                    <div class="branding-placeholder">
-
-                                        <ion-icon
-                                            name="image-outline"
-                                        ></ion-icon>
-
-                                        <span>
-                                            No background image
-                                        </span>
-
-                                    </div>
-
-                                }
-
-                            </div>
-
-
-                            <div class="branding-image-card__body">
-
-                                <div>
-
-                                    <strong>
-                                        Background image
-                                    </strong>
-
-                                    <span>
-                                        Main customer portal background.
-                                    </span>
-
-                                </div>
-
-
-                                <div class="branding-image-actions">
-
-                                    <label
-                                        class="branding-file-button"
-                                        [class.branding-file-button--disabled]="
-                                            brandingUploading() !== null ||
-                                            brandingRemoving() !== null
-                                        "
-                                    >
-
-                                        <input
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/webp"
-                                            (change)="
-                                                onBrandingFileSelected(
-                                                    $event,
-                                                    'background'
-                                                )
-                                            "
-                                            [disabled]="
-                                                brandingUploading() !== null ||
-                                                brandingRemoving() !== null
-                                            "
-                                        />
-
-                                        @if (
-                                            brandingUploading() ===
-                                            'background'
-                                        ) {
-
-                                            <ion-spinner
-                                                name="crescent"
-                                            ></ion-spinner>
-
-                                            Uploading...
-
-                                        } @else {
-
-                                            Upload
-
-                                        }
-
-                                    </label>
-
-
-                                    @if (backgroundImageUrl()) {
-
-                                        <button
-                                            type="button"
-                                            class="action-link action-link--danger"
-                                            (click)="
-                                                removeBrandingImage(
-                                                    'background'
-                                                )
-                                            "
-                                            [disabled]="
-                                                brandingUploading() !== null ||
-                                                brandingRemoving() !== null
-                                            "
-                                        >
-                                            Remove
-                                        </button>
-
-                                    }
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
-
-                        <!-- Login image -->
+<!-- Login image -->
 
                         <article class="branding-image-card">
 
@@ -3575,131 +3599,7 @@
 
                         </article>
 
-
-                        <!-- Banner image -->
-
-                        <article class="branding-image-card">
-
-                            <div class="branding-image-card__preview">
-
-                                @if (bannerImageUrl()) {
-
-                                    <img
-                                        [src]="
-                                            publicImageUrl(
-                                                bannerImageUrl()
-                                            )
-                                        "
-                                        alt="Customer portal banner preview"
-                                    />
-
-                                } @else {
-
-                                    <div class="branding-placeholder">
-
-                                        <ion-icon
-                                            name="image-outline"
-                                        ></ion-icon>
-
-                                        <span>
-                                            No banner image
-                                        </span>
-
-                                    </div>
-
-                                }
-
-                            </div>
-
-
-                            <div class="branding-image-card__body">
-
-                                <div>
-
-                                    <strong>
-                                        Banner image
-                                    </strong>
-
-                                    <span>
-                                        Promotional or welcome banner
-                                        shown in the customer portal.
-                                    </span>
-
-                                </div>
-
-
-                                <div class="branding-image-actions">
-
-                                    <label
-                                        class="branding-file-button"
-                                        [class.branding-file-button--disabled]="
-                                            brandingUploading() !== null ||
-                                            brandingRemoving() !== null
-                                        "
-                                    >
-
-                                        <input
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/webp"
-                                            (change)="
-                                                onBrandingFileSelected(
-                                                    $event,
-                                                    'banner'
-                                                )
-                                            "
-                                            [disabled]="
-                                                brandingUploading() !== null ||
-                                                brandingRemoving() !== null
-                                            "
-                                        />
-
-                                        @if (
-                                            brandingUploading() ===
-                                            'banner'
-                                        ) {
-
-                                            <ion-spinner
-                                                name="crescent"
-                                            ></ion-spinner>
-
-                                            Uploading...
-
-                                        } @else {
-
-                                            Upload
-
-                                        }
-
-                                    </label>
-
-
-                                    @if (bannerImageUrl()) {
-
-                                        <button
-                                            type="button"
-                                            class="action-link action-link--danger"
-                                            (click)="
-                                                removeBrandingImage(
-                                                    'banner'
-                                                )
-                                            "
-                                            [disabled]="
-                                                brandingUploading() !== null ||
-                                                brandingRemoving() !== null
-                                            "
-                                        >
-                                            Remove
-                                        </button>
-
-                                    }
-
-                                </div>
-
-                            </div>
-
-                        </article>
-
-                    </div>
+</div>
 
 
                     <small class="branding-upload-note">

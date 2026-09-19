@@ -1,3 +1,191 @@
-.package-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px }.package-card{padding:21px;display:flex;flex-direction:column;min-height:330px;border:1px solid #e4eaf1;border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(22,48,82,.035)}.package-card.inactive{opacity:.72}.package-top{display:flex;justify-content:space-between;align-items:center}.package-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;color:#2563eb;background:#eaf0ff;font-size:20px}.package-card>p{margin:22px 0 5px;color:#2563eb;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.package-card>h2{margin:0;color:#112b49;font-size:21px}.package-card>strong{margin:12px 0 18px;color:#102a49;font-size:19px}.meta{display:flex;gap:14px;flex-wrap:wrap;color:#74869a;font-size:10px}.meta span{display:flex;align-items:center;gap:5px}.schedule-note{margin:16px 0 0;padding:10px;border-radius:9px;background:#f8fafc}.schedule-note b,.schedule-note span{display:block}.schedule-note b{color:#52677e;font-size:9px;text-transform:uppercase}.schedule-note span{margin-top:4px;color:#8190a1;font-size:9px}.package-actions{margin-top:auto;padding-top:18px;display:flex;gap:5px;border-top:1px solid #eef2f6}.package-actions ion-button{--border-radius:9px;font-size:10px;text-transform:none}.status-row{padding-top:11px;display:flex;align-items:center;justify-content:space-between;color:#607389;font-size:10px;font-weight:700}.status-row ion-toggle{--handle-width:17px;--handle-height:17px;transform:scale(.82);transform-origin:right center}
-ion-datetime{width:100%;margin:5px 0 14px;border:1px solid #e1e7ee;border-radius:12px;background:#f8fafc}.spread{grid-template-columns:auto 1fr auto auto}.form-hint{color:#8a99aa;font-size:10px}
-@media(max-width:1050px){.package-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.package-grid{grid-template-columns:1fr}}
+/* =========================================================
+   PACKAGE GRID & CARDS
+   ========================================================= */
+
+.package-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.package-card {
+    padding: 21px;
+    display: flex;
+    flex-direction: column;
+    min-height: 330px;
+    border: 1px solid #e4eaf1;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(22, 48, 82, .035);
+}
+
+.package-card.inactive {
+    opacity: .72;
+}
+
+.package-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.package-icon {
+    width: 43px;
+    height: 43px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #2563eb;
+    background: #eaf0ff;
+    font-size: 20px;
+}
+
+.package-card > p {
+    margin: 22px 0 5px;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.package-card > h2 {
+    margin: 0;
+    color: #112b49;
+    font-size: 21px;
+}
+
+.package-card > strong {
+    margin: 12px 0 18px;
+    color: #102a49;
+    font-size: 19px;
+}
+
+.meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    color: #74869a;
+    font-size: 10px;
+}
+
+.meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.schedule-note {
+    margin: 16px 0 0;
+    padding: 10px;
+    border-radius: 9px;
+    background: #f8fafc;
+}
+
+.schedule-note b,
+.schedule-note span {
+    display: block;
+}
+
+.schedule-note b {
+    color: #52677e;
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.schedule-note span {
+    margin-top: 4px;
+    color: #8190a1;
+    font-size: 9px;
+}
+
+.package-actions {
+    margin-top: auto;
+    padding-top: 18px;
+    display: flex;
+    gap: 5px;
+    border-top: 1px solid #eef2f6;
+    flex-wrap: wrap;
+}
+
+.package-actions ion-button {
+    --border-radius: 9px;
+    font-size: 10px;
+    text-transform: none;
+}
+
+.status-row {
+    padding-top: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #607389;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-row ion-toggle {
+    --handle-width: 17px;
+    --handle-height: 17px;
+    transform: scale(.82);
+    transform-origin: right center;
+}
+
+/* =========================================================
+   SCHEDULE MODAL
+   ========================================================= */
+
+ion-datetime {
+    width: 100%;
+    max-width: 100%;
+    margin: 5px 0 14px;
+    border: 1px solid #e1e7ee;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.spread {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.spread span {
+    flex: 1;
+}
+
+.form-hint {
+    color: #8a99aa;
+    font-size: 10px;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+
+@media (max-width: 1050px) {
+    .package-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .package-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .spread {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .spread ion-button {
+        width: 100%;
+    }
+
+    .spread span {
+        display: none;
+    }
+}

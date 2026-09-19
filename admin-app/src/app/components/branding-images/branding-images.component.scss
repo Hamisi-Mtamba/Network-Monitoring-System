@@ -1,0 +1,26 @@
+:host { display: block; }
+.image-editor { padding: 22px; }
+.upload-row, .image-row { display: flex; align-items: end; gap: 16px; }
+label { display: grid; gap: 8px; color: #334155; font-size: 13px; font-weight: 600; }
+select, button { min-height: 42px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font: inherit; }
+select { min-width: 160px; width: 100%; }
+.upload-action { position: relative; overflow: hidden; padding: 12px 18px; border-radius: 6px; background: var(--company-primary, #2563eb); color: #fff; }
+.upload-action input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.hint { color: #64748b; font-size: 12px; line-height: 1.6; margin: 12px 0 20px; }
+.image-list { display: grid; gap: 14px; }
+.image-row { align-items: center; padding-top: 14px; border-top: 1px solid #e2e8f0; }
+.image-row img { width: 120px; height: 76px; object-fit: contain; background: #f8fafc; border-radius: 4px; }
+.image-row label { flex: 1; }
+.remove { color: #b91c1c; cursor: pointer; }
+.error { color: #b91c1c; }
+.success { color: #047857; }
+select:focus-visible, button:focus-visible, .upload-action:focus-within { outline: 2px solid var(--company-primary, #2563eb); outline-offset: 3px; }
+button:disabled, select:disabled { opacity: .6; cursor: default; }
+@media (max-width: 540px) {
+    .image-editor { padding: 16px; }
+    .upload-row { flex-wrap: wrap; }
+    .image-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
+    .image-row img { width: 76px; }
+    .remove { grid-column: 2; justify-self: start; }
+    select { min-width: 0; font-size: 16px; }
+}

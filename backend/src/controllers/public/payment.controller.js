@@ -1,3 +1,4 @@
+import { createReferencedPayment, normalizePaymentIdentity, PaymentReferenceError } from '../../../services/transaction-reference.service.js';
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
@@ -15,7 +16,8 @@ const findCompanyBySlug = async (companySlug) => {
             id,
             name,
             slug,
-            status
+            status,
+            settings
         FROM companies
         WHERE slug = $1
           AND status = 'active'
@@ -35,6 +37,49 @@ const findCompanyBySlug = async (companySlug) => {
     return result.rows[0];
 };
 
+
+
+
+// =========================================================
+// PUBLIC PAYMENT INSTRUCTIONS
+// =========================================================
+
+// Resolve the company's merchant/Lipa number without hard-coding it in the
+// customer portal. Preferred storage is companies.settings.payment. A global
+// environment fallback is supported for small deployments using one merchant
+// number across all tenants.
+const getPaymentInstructions = (company) => {
+
+    const paymentSettings =
+        company?.settings?.payment ||
+        company?.settings?.payments ||
+        {};
+
+    const lipaNumber =
+        String(
+            paymentSettings.lipa_number ||
+            process.env.LIPA_NUMBER ||
+            ''
+        ).trim();
+
+    const accountName =
+        String(
+            paymentSettings.account_name ||
+            paymentSettings.lipa_name ||
+            process.env.LIPA_ACCOUNT_NAME ||
+            ''
+        ).trim();
+
+    const enabled = paymentSettings.enabled !== false;
+    const instructions = String(paymentSettings.instructions || '').trim();
+
+    return {
+        enabled,
+        lipa_number: lipaNumber,
+        account_name: accountName || null,
+        instructions: instructions || null
+    };
+};
 
 // =========================================================
 // ROUTER LOOKUP
@@ -75,28 +120,6 @@ const findCompanyRouter = async (
 
 
     return result.rows[0];
-};
-
-
-// =========================================================
-// PAYMENT REFERENCES
-// =========================================================
-
-// Generate a mobile payment transaction reference
-const generateMobilePaymentReference = () => {
-
-    return `MOBILEPAYMENT-${Date.now()}-${Math.floor(
-        Math.random() * 1000000
-    )}`;
-};
-
-
-// Generate a cash payment transaction reference
-const generateCashPaymentReference = () => {
-
-    return `CASHPAYMENT-${Date.now()}-${Math.floor(
-        Math.random() * 1000000
-    )}`;
 };
 
 
@@ -194,6 +217,9 @@ const initiatePayment = async (
         }
 
 
+        normalizePaymentIdentity({ paymentMethod: payment_method,
+            phoneNumber: phone_number, macAddress: mac });
+
         // Normalize package ID
         const packageId =
             Number(
@@ -225,6 +251,31 @@ const initiatePayment = async (
             return res.status(404).json({
                 success: false,
                 message: "Company not found"
+            });
+        }
+
+
+        // Resolve the merchant number shown after the customer enters the
+        // paying phone number. Do not create a pending payment when the company
+        // has no usable payment destination configured.
+        const paymentInstructions =
+            getPaymentInstructions(company);
+
+
+        if (!paymentInstructions.enabled) {
+
+            return res.status(503).json({
+                success: false,
+                message: "Mobile-money payments are currently disabled for this company"
+            });
+        }
+
+
+        if (!paymentInstructions.lipa_number) {
+
+            return res.status(503).json({
+                success: false,
+                message: "Payment number is not configured for this company"
             });
         }
 
@@ -295,74 +346,11 @@ const initiatePayment = async (
             packageResult.rows[0];
 
 
-        // Generate transaction reference
-        const transactionReference =
-            generateMobilePaymentReference();
-
-
-        // Create payment with captive/router context
-        const result =
-            await pool.query(
-                `
-                INSERT INTO payments (
-                    company_id,
-                    package_id,
-                    phone_number,
-                    payment_method,
-                    amount,
-                    transaction_reference,
-                    status,
-                    router_id,
-                    device_mac,
-                    device_ip,
-                    mikrotik_login_url,
-                    created_at
-                )
-
-                VALUES (
-                    $1,
-                    $2,
-                    $3,
-                    $4,
-                    $5,
-                    $6,
-                    'pending',
-                    $7,
-                    $8,
-                    $9,
-                    $10,
-                    CURRENT_TIMESTAMP
-                )
-
-                RETURNING
-                    id,
-                    company_id,
-                    package_id,
-                    phone_number,
-                    payment_method,
-                    amount,
-                    transaction_reference,
-                    status,
-                    router_id,
-                    device_mac,
-                    device_ip,
-                    mikrotik_login_url,
-                    created_at
-                `,
-                [
-                    company.id,
-                    selectedPackage.id,
-                    phone_number.trim(),
-                    payment_method.trim(),
-                    selectedPackage.price,
-                    transactionReference,
-                    selectedRouter.id,
-                    mac.trim(),
-                    ip.trim(),
-                    login_url.trim()
-                ]
-            );
-
+        const result = await createReferencedPayment({
+            db: pool, companyId: company.id, packageId: selectedPackage.id,
+            routerId: selectedRouter.id, paymentMethod: payment_method,
+            phoneNumber: phone_number, macAddress: mac, ipAddress: ip, loginUrl: login_url
+        });
 
         // TODO:
         // Connect the real mobile-money provider here later.
@@ -376,10 +364,16 @@ const initiatePayment = async (
                 "Payment initiated successfully",
 
             payment:
-                result.rows[0]
+                result.rows[0],
+
+            payment_instructions:
+                paymentInstructions
         });
 
     } catch (error) {
+        if (error instanceof PaymentReferenceError) {
+            return res.status(error.status).json({ success: false, message: error.message });
+        }
 
         console.error(
             "Initiate payment error:",
@@ -457,6 +451,9 @@ const createCashPaymentRequest = async (
             });
         }
 
+
+        normalizePaymentIdentity({ paymentMethod: 'cash',
+            phoneNumber: phone_number, macAddress: mac });
 
         // Normalize package ID
         const packageId =
@@ -561,73 +558,11 @@ const createCashPaymentRequest = async (
             packageResult.rows[0];
 
 
-        // Generate cash transaction reference
-        const transactionReference =
-            generateCashPaymentReference();
-
-
-        // Create cash payment request with MikroTik context
-        const result =
-            await pool.query(
-                `
-                INSERT INTO payments (
-                    company_id,
-                    package_id,
-                    phone_number,
-                    payment_method,
-                    amount,
-                    transaction_reference,
-                    status,
-                    router_id,
-                    device_mac,
-                    device_ip,
-                    mikrotik_login_url,
-                    created_at
-                )
-
-                VALUES (
-                    $1,
-                    $2,
-                    $3,
-                    'cash',
-                    $4,
-                    $5,
-                    'awaiting_cash_confirmation',
-                    $6,
-                    $7,
-                    $8,
-                    $9,
-                    CURRENT_TIMESTAMP
-                )
-
-                RETURNING
-                    id,
-                    company_id,
-                    package_id,
-                    phone_number,
-                    payment_method,
-                    amount,
-                    transaction_reference,
-                    status,
-                    router_id,
-                    device_mac,
-                    device_ip,
-                    mikrotik_login_url,
-                    created_at
-                `,
-                [
-                    company.id,
-                    selectedPackage.id,
-                    phone_number.trim(),
-                    selectedPackage.price,
-                    transactionReference,
-                    selectedRouter.id,
-                    mac.trim(),
-                    ip.trim(),
-                    login_url.trim()
-                ]
-            );
-
+        const result = await createReferencedPayment({
+            db: pool, companyId: company.id, packageId: selectedPackage.id,
+            routerId: selectedRouter.id, paymentMethod: 'cash',
+            phoneNumber: phone_number, macAddress: mac, ipAddress: ip, loginUrl: login_url
+        });
 
         return res.status(201).json({
 
@@ -641,6 +576,9 @@ const createCashPaymentRequest = async (
         });
 
     } catch (error) {
+        if (error instanceof PaymentReferenceError) {
+            return res.status(error.status).json({ success: false, message: error.message });
+        }
 
         console.error(
             "Cash payment request error:",

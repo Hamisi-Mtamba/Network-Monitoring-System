@@ -1,199 +1,82 @@
 <main class="page-shell packages-page">
-
-    <!-- ======================================================
-         PAGE HEADING
-         ====================================================== -->
-
+    @if (banners().length) {
+        <section class="portal-promotion" aria-label="Company promotions" [attr.aria-roledescription]="banners().length > 1 ? 'carousel' : null">
+            <div class="banner-slides">
+                @for (image of banners(); track image.url; let index = $index) {
+                    <img [src]="image.url" [alt]="tenantService.company()?.name + ' promotion ' + (index + 1)"
+                        [class.is-active]="index === bannerIndex()" [attr.aria-hidden]="index !== bannerIndex()"
+                        (error)="imageFailed(image.url)" />
+                }
+            </div>
+            @if (banners().length > 1) {
+                <div class="banner-controls">
+                    <button type="button" aria-label="Previous banner" (click)="showBanner(-1)">Previous</button>
+                    <span>{{ bannerIndex() + 1 }} / {{ banners().length }}</span>
+                    <button type="button" aria-label="Next banner" (click)="showBanner(1)">Next</button>
+                </div>
+            }
+        </section>
+    }
+    @if (rotating() && !reducedMotion()) {
+        <div class="rotation-control">
+            <button type="button" (click)="paused.set(!paused())">{{ paused() ? 'Resume image rotation' : 'Pause image rotation' }}</button>
+        </div>
+    }
+    <div class="packages-content" [class.has-background]="backgrounds().length > 0">
+        @if (backgrounds().length) {
+            <div class="package-backdrop" aria-hidden="true">
+                @for (image of backgrounds(); track image.url; let index = $index) {
+                    <img [src]="image.url" alt="" [class.is-active]="index === backgroundIndex()" (error)="imageFailed(image.url)" />
+                }
+            </div>
+        }
     <header class="page-heading">
-
-        <span class="eyebrow">
-            Simple plans. Instant access.
-        </span>
-
-        <h1>
-            Choose your internet package
-        </h1>
-
+        <h1>Choose a package</h1>
         <p>
             @if (tenantService.company(); as company) {
-                Select a package from {{ company.name }}
-                and get connected.
+                Pick the access time you need from {{ company.name }}.
             } @else {
-                Select a package and get connected.
+                Pick the access time you need.
             }
         </p>
-
     </header>
 
-
-    <!-- ======================================================
-         DEVELOPMENT FALLBACK NOTICE
-         ====================================================== -->
-
     @if (packageService.usingMockData()) {
-
-        <div
-            class="demo-note"
-            role="note"
-        >
+        <div class="demo-note" role="note">
             Demo package information is currently being displayed.
         </div>
-
     }
-
-
-    <!-- ======================================================
-         LOADING STATE
-         ====================================================== -->
 
     @if (loading()) {
-
-        <app-loading-spinner
-            message="Loading available packages..."
-        />
-
+        <app-loading-spinner message="Loading packages..." />
     }
-
-
-    <!-- ======================================================
-         ERROR STATE
-         ====================================================== -->
-
     @else if (errorMessage()) {
-
-        <section
-            class="state-panel state-panel--error"
-            role="alert"
-        >
-
-            <span
-                class="state-panel__icon"
-                aria-hidden="true"
-            >
-                !
-            </span>
-
-            <h2>
-                Unable to load packages
-            </h2>
-
-            <p>
-                {{ errorMessage() }}
-            </p>
-
-            <p class="state-panel__hint">
-                Refresh the page to try again.
-            </p>
-
+        <section class="state-panel state-panel--error" role="alert">
+            <span class="state-panel__icon" aria-hidden="true">!</span>
+            <h2>Packages unavailable</h2>
+            <p>{{ errorMessage() }}</p>
+            <p class="state-panel__hint">Refresh the page to try again.</p>
         </section>
-
     }
-
-
-    <!-- ======================================================
-         NO PACKAGES
-         ====================================================== -->
-
     @else if (packages().length === 0) {
-
         <section class="state-panel">
-
-            <span
-                class="state-panel__icon"
-                aria-hidden="true"
-            >
-                ⌁
-            </span>
-
-            <h2>
-                No packages available
-            </h2>
-
-            <p>
-                This provider does not currently have any
-                internet packages available for purchase.
-            </p>
-
+            <h2>No packages available</h2>
+            <p>This provider does not currently have a package available for purchase.</p>
         </section>
-
     }
-
-
-    <!-- ======================================================
-         PACKAGE LIST
-         ====================================================== -->
-
     @else {
-
-        <section
-            class="package-grid"
-            aria-label="Available internet packages"
-        >
-
-            @for (
-                packageItem of packages();
-                track packageItem.id
-            ) {
-
+        <section class="package-grid" aria-label="Available internet packages">
+            @for (packageItem of packages(); track packageItem.id) {
                 <app-package-card
                     [packageItem]="packageItem"
                     (selected)="choosePackage($event)"
                 />
-
             }
-
         </section>
-
     }
 
-
-    <!-- ======================================================
-         SERVICE BENEFITS
-         ====================================================== -->
-
-    <section
-        class="trust-row"
-        aria-label="Service benefits"
-    >
-
-        <div>
-
-            <span aria-hidden="true">
-                ⚡
-            </span>
-
-            <strong>
-                Quick activation
-            </strong>
-
-        </div>
-
-
-        <div>
-
-            <span aria-hidden="true">
-                ⌁
-            </span>
-
-            <strong>
-                Reliable access
-            </strong>
-
-        </div>
-
-
-        <div>
-
-            <span aria-hidden="true">
-                ✓
-            </span>
-
-            <strong>
-                Secure payments
-            </strong>
-
-        </div>
-
-    </section>
-
+    <p class="packages-help">
+        Choose one package to continue. Payment instructions will be shown on the next page.
+    </p>
+    </div>
 </main>

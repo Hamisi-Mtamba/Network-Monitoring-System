@@ -1,3 +1,5 @@
+@use '../payment-settings';
+
 /* =========================================================
    SETTINGS PAGE
    ========================================================= */
@@ -5,11 +7,16 @@
 .settings-page {
     display: grid;
     gap: 22px;
+    width: 100%;
+    max-width: 1440px;
+    min-height: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
 
     padding:
         26px
         clamp(18px, 3vw, 34px)
-        42px;
+        calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
 
@@ -120,6 +127,7 @@
 .company-banner__logo {
     display: grid;
     place-items: center;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
 
     flex: 0 0 auto;
 
@@ -137,12 +145,17 @@
 }
 
 .company-banner__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     max-width: 100%;
     max-height: 100%;
 
     padding: 8px;
 
     object-fit: contain;
+    object-position: center;
 }
 
 .company-banner__logo ion-icon {
@@ -408,6 +421,7 @@
 .logo-preview {
     display: grid;
     place-items: center;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
 
     width: 190px;
     height: 150px;
@@ -421,12 +435,17 @@
 }
 
 .logo-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     max-width: 100%;
     max-height: 100%;
 
     padding: 16px;
 
     object-fit: contain;
+    object-position: center;
 }
 
 .logo-actions {
@@ -971,7 +990,7 @@
         padding:
             20px
             16px
-            32px;
+            calc(48px + env(safe-area-inset-bottom, 0px));
     }
 
     .page-heading {
@@ -1084,4 +1103,13 @@
     .portal-preview__body {
         padding: 22px 16px;
     }
+}
+
+.inline-success {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
 }

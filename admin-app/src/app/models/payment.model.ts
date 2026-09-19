@@ -151,3 +151,37 @@ export interface CompanyPaymentDetailsResponse {
 
     session: PaymentInternetSession | null;
 }
+// =========================================================
+// AUTOMATIC PAYMENT SMS REVIEW
+// =========================================================
+
+export interface PaymentSmsReview {
+    id: number;
+    sender: string | null;
+    raw_message: string;
+    provider: string | null;
+    provider_transaction_id: string | null;
+    payer_phone: string | null;
+    amount: number | string | null;
+    received_at: string;
+    processing_status: string;
+    processing_error: string | null;
+    payment_id: number | null;
+    device_name: string | null;
+    gateway_phone: string | null;
+}
+
+export interface PendingPaymentMatchOption {
+    id: number;
+    transaction_reference: string;
+    phone_number: string;
+    amount: number | string;
+    created_at: string;
+    package_name: string;
+}
+
+export interface PaymentSmsReviewResponse {
+    success: boolean;
+    sms_reviews: PaymentSmsReview[];
+    pending_payments: PendingPaymentMatchOption[];
+}

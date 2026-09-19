@@ -1,5 +1,12 @@
+export interface CompanyBrandingImage {
+    url: string;
+    role: 'banner' | 'background';
+}
+
 // Company branding configuration
 export interface CompanyBranding {
+
+    images?: CompanyBrandingImage[];
 
     primary_color?: string;
 
@@ -53,4 +60,13 @@ export interface CompanyResponse {
     success: boolean;
 
     company: Company;
+}
+// Legacy uploads remain visible until the first image edit saves the collection.
+export function getBrandingImages(branding?: CompanyBranding): CompanyBrandingImage[] {
+    if (Array.isArray(branding?.images)) return branding.images.filter(image =>
+        image && (image.role === 'banner' || image.role === 'background') && typeof image.url === 'string' && image.url.trim());
+    return (['banner', 'background'] as const).flatMap(role => {
+        const url = branding?.[`${role}_image_url`]?.trim();
+        return url ? [{ url, role }] : [];
+    });
 }

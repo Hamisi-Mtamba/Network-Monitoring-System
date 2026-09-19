@@ -127,6 +127,7 @@ import {
     getCompanyProfile,
     updateCompanyProfile,
     updateCompanyLogo,
+    updateCompanyPaymentSettings,
     updateCompanyBranding as updateCompanyProfileBranding
 } from "../../controllers/admin/companyProfile.controller.js";
 
@@ -145,6 +146,7 @@ import companyImageUpload from "../../middlewares/companyImageUpload.middleware.
 import {
     uploadCompanyLogo,
     uploadBrandingImage,
+    updateBrandingImageRole,
     removeCompanyLogo,
     removeBrandingImage
 } from "../../controllers/admin/companyImage.controller.js";
@@ -498,6 +500,20 @@ router.patch(
 
 
 // =========================================================
+// COMPANY PAYMENT SETTINGS
+// =========================================================
+
+// Superadmin can configure payment settings for selected company
+router.patch(
+    "/companies/:companyId/payment-settings",
+
+    platformCompanyContext,
+
+    updateCompanyPaymentSettings
+);
+
+
+// =========================================================
 // COMPANY LOGO
 // =========================================================
 
@@ -588,5 +604,7 @@ router.delete(
 // =========================================================
 // EXPORT PLATFORM ROUTER
 // =========================================================
+
+router.patch('/companies/:companyId/profile/branding/:imageType', platformCompanyContext, updateBrandingImageRole);
 
 export default router;

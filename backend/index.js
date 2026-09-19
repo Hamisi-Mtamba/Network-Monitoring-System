@@ -50,6 +50,10 @@ import companyProfileRoutes from "./src/routes/admin/companyProfile.route.js";
 // Import public company routes
 import publicCompanyRoutes from "./src/routes/public/company.route.js";
 
+// Import httpSMS payment gateway webhook routes
+import httpSmsRoutes from "./src/routes/integrations/httpsms.routes.js";
+import { processPendingPaymentSms } from "./services/payment-verification.service.js";
+
 // Import company upload error handler
 import uploadErrorHandler from "./src/middlewares/uploadError.middleware.js";
 
@@ -99,6 +103,10 @@ app.use("/api/admin/company", companyProfileRoutes);
 // Mount public company routes
 app.use("/api/public", publicCompanyRoutes);
 
+
+// Receive signed httpSMS events from the dedicated payment phone
+app.use("/api/integrations", httpSmsRoutes);
+
 // Handle Multer/file upload errors
 app.use(uploadErrorHandler);
 
@@ -124,4 +132,11 @@ connectDB();
 
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
+
+        // Retry any SMS that was stored before a restart or transient failure.
+        setInterval(() => {
+            processPendingPaymentSms().catch(error =>
+                console.error('Payment SMS worker error:', error.message)
+            );
+        }, 5000).unref();
     });

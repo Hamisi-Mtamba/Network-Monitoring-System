@@ -11,6 +11,7 @@ import {
     confirmCashPayment,
     markPaymentSuccessful
 } from "../../controllers/admin/payment.controller.js";
+import { getPaymentSmsReview, retryPaymentSms, matchPaymentSms } from "../../controllers/admin/paymentSms.controller.js";
 
 
 const router =
@@ -56,6 +57,17 @@ router.patch(
     "/cash-requests/:reference/confirm",
     confirmCashPayment
 );
+
+
+
+
+// =========================================================
+// AUTOMATIC PAYMENT SMS REVIEW
+// =========================================================
+
+router.get("/sms-review", getPaymentSmsReview);
+router.patch("/sms-review/:id/retry", retryPaymentSms);
+router.patch("/sms-review/:id/match", matchPaymentSms);
 
 
 // =========================================================

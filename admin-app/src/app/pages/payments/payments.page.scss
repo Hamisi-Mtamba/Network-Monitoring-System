@@ -623,11 +623,14 @@
 
     .record-card > div {
         align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
 
     .record-card > div > strong {
-        max-width: 60%;
+        max-width: 100%;
+        word-break: break-all;
     }
 
 
@@ -635,10 +638,64 @@
         align-items: flex-start;
 
         flex-direction: column;
+        gap: 4px;
     }
 
 
     .cash-confirm-button {
         margin-top: 12px;
+        min-height: 38px;
     }
+}
+/* Automatic mobile-money SMS review */
+.sms-review-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.sms-review-card {
+    border: 1px solid var(--ion-color-light-shade, #d7d8da);
+    border-radius: 14px;
+    padding: 1rem;
+    background: var(--ion-background-color, #fff);
+}
+
+.sms-review-card__top,
+.sms-review-actions,
+.sms-facts {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.sms-review-card__top small,
+.sms-facts span {
+    display: block;
+    opacity: .65;
+    margin-top: .2rem;
+}
+
+.sms-raw {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding: .85rem;
+    border-radius: 10px;
+    background: rgba(127, 127, 127, .08);
+    line-height: 1.5;
+}
+
+.sms-facts > div {
+    min-width: 150px;
+}
+
+.sms-review-error {
+    font-weight: 600;
+}
+
+.sms-review-actions ion-select {
+    min-width: min(100%, 360px);
+    flex: 1;
 }
