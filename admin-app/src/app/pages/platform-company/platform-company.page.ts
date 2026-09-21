@@ -4622,7 +4622,7 @@ export class PlatformCompanyPage {
         }
 
 
-        return `http://localhost:4000${value}`;
+        return value;
     }
 
 

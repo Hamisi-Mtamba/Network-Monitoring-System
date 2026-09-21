@@ -1,11 +1,9 @@
-// Backend server URL
+// Backend server configuration
 export const API_CONFIG = {
 
-    // Main backend server
-    backendUrl: 'http://localhost:4000',
+    backendUrl: '',
 
-    // Public API root
-    publicApiUrl: 'http://localhost:4000/api/public'
+    publicApiUrl: '/api/public'
 
 } as const;
 
@@ -24,12 +22,10 @@ export const getPublicFileUrl = (
     filePath?: string | null
 ): string | null => {
 
-    // Stop when there is no file
     if (!filePath) {
         return null;
     }
 
-    // Leave complete external URLs unchanged
     if (
         filePath.startsWith('http://') ||
         filePath.startsWith('https://')
@@ -37,6 +33,5 @@ export const getPublicFileUrl = (
         return filePath;
     }
 
-    // Prefix locally uploaded images with backend server
     return `${API_CONFIG.backendUrl}${filePath}`;
 };

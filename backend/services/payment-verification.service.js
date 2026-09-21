@@ -27,25 +27,83 @@ const markReview = async (smsId, status, reason, parsed = {}) => {
 
 // Router activation happens after the payment transaction commits.
 const provisionSession = async session => {
+
     try {
+
+        const routerResult =
+            await pool.query(
+                `SELECT
+                    id,
+                    company_id,
+                    public_id,
+                    name,
+                    host,
+                    status,
+                    api_username,
+                    api_password
+                 FROM mikrotik_routers
+                 WHERE id = $1
+                   AND company_id = $2
+                   AND status = 'active'
+                 LIMIT 1`,
+                [
+                    session.router_id,
+                    session.company_id
+                ]
+            );
+
+
+        const router =
+            routerResult.rows[0];
+
+
+        if (!router) {
+
+            throw new Error(
+                'Active MikroTik router was not found for this session'
+            );
+        }
+
+
         await provisionHotspotAccess({
-            macAddress: session.device_mac,
-            durationMinutes: Number(session.duration_minutes)
+
+            router,
+
+            macAddress:
+                session.device_mac,
+
+            durationMinutes:
+                Number(
+                    session.duration_minutes
+                )
         });
+
 
         await pool.query(
             `UPDATE internet_sessions
              SET status = 'active'
-             WHERE id = $1 AND status = 'pending_activation'`,
-            [session.id]
+             WHERE id = $1
+               AND status = 'pending_activation'`,
+            [
+                session.id
+            ]
         );
+
     } catch (error) {
-        console.error('Automatic payment MikroTik activation error:', error.message);
+
+        console.error(
+            'Automatic payment MikroTik activation error:',
+            error.message
+        );
+
+
         await pool.query(
             `UPDATE internet_sessions
              SET status = 'pending_activation'
              WHERE id = $1`,
-            [session.id]
+            [
+                session.id
+            ]
         );
     }
 };
