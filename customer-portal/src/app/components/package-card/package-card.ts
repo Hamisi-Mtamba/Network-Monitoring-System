@@ -11,11 +11,14 @@ import { PackageService } from '../../services/package.service';
 })
 export class PackageCardComponent {
   readonly packageItem = input.required<InternetPackage>();
+  readonly isSelected = input(false);
+  readonly disabled = input(false);
   readonly selected = output<InternetPackage>();
 
   constructor(readonly packageService: PackageService) {}
 
   choosePackage(): void {
+    if (this.disabled()) return;
     this.selected.emit(this.packageItem());
   }
 }

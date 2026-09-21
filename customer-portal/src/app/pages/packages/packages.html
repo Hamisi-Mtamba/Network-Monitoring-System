@@ -69,14 +69,22 @@
             @for (packageItem of packages(); track packageItem.id) {
                 <app-package-card
                     [packageItem]="packageItem"
+                    [isSelected]="selectingPackageId() === packageItem.id"
+                    [disabled]="selectingPackageId() !== null"
                     (selected)="choosePackage($event)"
                 />
             }
         </section>
     }
 
-    <p class="packages-help">
+    <p class="packages-help" role="status">
+        @if (selectionError()) {
+            {{ selectionError() }}
+        } @else if (selectingPackageId() !== null) {
+            Package selected. Opening payment…
+        } @else {
         Choose one package to continue. Payment instructions will be shown on the next page.
+        }
     </p>
     </div>
 </main>

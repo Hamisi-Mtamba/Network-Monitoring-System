@@ -76,6 +76,9 @@ export class PackagesPageComponent
     readonly loading =
         signal(true);
 
+    readonly selectingPackageId = signal<InternetPackage['id'] | null>(null);
+    readonly selectionError = signal('');
+
 
     // Error message shown in the UI
     readonly errorMessage =
@@ -248,9 +251,10 @@ export class PackagesPageComponent
 
 
     // Customer selects one internet package
-    choosePackage(
+    async choosePackage(
         packageItem: InternetPackage
-    ): void {
+    ): Promise<void> {
+        if (this.selectingPackageId() !== null) return;
 
         // Save selected package for checkout
         this.packageService
@@ -276,8 +280,19 @@ export class PackagesPageComponent
 
 
         // Continue to the payment page while preserving tenant context
-        void this.router.navigate(
-            ['/', companySlug, 'payment', packageItem.id],
-            { queryParamsHandling: 'preserve' });
+        this.selectingPackageId.set(packageItem.id);
+        this.selectionError.set('');
+        try {
+            const navigated = await this.router.navigate(
+                ['/', companySlug, 'payment', packageItem.id],
+                { queryParamsHandling: 'preserve' });
+            if (!navigated) {
+                this.selectionError.set('Unable to open payment. Please choose your package again.');
+            }
+        } catch {
+            this.selectionError.set('Unable to open payment. Please choose your package again.');
+        } finally {
+            this.selectingPackageId.set(null);
+        }
     }
 }

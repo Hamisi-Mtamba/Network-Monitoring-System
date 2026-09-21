@@ -19,9 +19,35 @@
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
-.package-card:focus-visible {
+.package-card:focus-within {
     border-color: var(--company-primary, #2563eb);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--company-primary, #2563eb) 18%, transparent);
+}
+
+.package-card.package-card--selected {
+    border-color: var(--company-primary, #2563eb);
+    background: color-mix(in srgb, var(--company-primary, #2563eb) 8%, white);
+    box-shadow: 0 0 0 3px var(--company-primary, #2563eb);
+}
+
+.package-card--selected .package-card__button:disabled {
+    opacity: 1;
+    cursor: progress;
+}
+
+.package-card:active:not([aria-busy='true']) {
+    border-color: var(--company-primary, #2563eb);
+    background: color-mix(in srgb, var(--company-primary, #2563eb) 8%, white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .package-card {
+        transition: none;
+    }
+
+    .package-card:hover {
+        transform: none;
+    }
 }
 
 .package-card__heading {

@@ -191,6 +191,29 @@ button {
     color: inherit;
 }
 
+/* Shared feedback also covers card buttons and links styled as buttons. */
+button:not(:disabled):not([aria-disabled='true']):active,
+a.button:not([aria-disabled='true']):active {
+    filter: brightness(0.85);
+    scale: 0.97;
+}
+
+/* Retain a visible indication after a click while the control has focus. */
+button:not(:disabled):not([aria-disabled='true']):focus,
+a.button:not([aria-disabled='true']):focus {
+    outline: 3px solid var(--company-primary, #2563eb);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button:not(:disabled):not([aria-disabled='true']):active,
+    a.button:not([aria-disabled='true']):active {
+        scale: none;
+        transform: none;
+        transition: none;
+    }
+}
+
 
 /* =========================================================
    LINKS

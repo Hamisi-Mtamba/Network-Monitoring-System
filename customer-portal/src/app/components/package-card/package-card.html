@@ -1,10 +1,8 @@
 <article
     class="package-card"
-    tabindex="0"
-    role="button"
+    [class.package-card--selected]="isSelected()"
+    [attr.aria-busy]="isSelected()"
     (click)="choosePackage()"
-    (keydown.enter)="choosePackage()"
-    (keydown.space)="$event.preventDefault(); choosePackage()"
 >
     <div class="package-card__content">
         <div class="package-card__heading">
@@ -36,9 +34,10 @@
     <button
         type="button"
         class="package-card__button"
+        [disabled]="disabled()"
         (click)="$event.stopPropagation(); choosePackage()"
     >
-        Choose package
+        {{ isSelected() ? 'Selected — opening payment…' : 'Choose package' }}
         <span aria-hidden="true">→</span>
     </button>
 </article>

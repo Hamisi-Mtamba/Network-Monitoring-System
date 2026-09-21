@@ -33,6 +33,29 @@ button, input, select, textarea {
     font: inherit;
 }
 
+/* Keep click feedback consistent for native and Ionic buttons. */
+button:not(:disabled):not([aria-disabled='true']):active,
+ion-button:not([disabled]):not([aria-disabled='true']):active,
+ion-button:not([disabled]):not([aria-disabled='true']).ion-activated {
+    filter: brightness(0.85);
+    scale: 0.97;
+}
+
+/* Focus remains visible after releasing the mouse, until focus moves. */
+button:not(:disabled):not([aria-disabled='true']):focus,
+ion-button:not([disabled]):not([aria-disabled='true']):focus-within {
+    outline: 3px solid var(--company-primary, #2563eb);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button:not(:disabled):not([aria-disabled='true']):active,
+    ion-button:not([disabled]):not([aria-disabled='true']):active,
+    ion-button:not([disabled]):not([aria-disabled='true']).ion-activated {
+        scale: none;
+    }
+}
+
 /* =========================================================
    PAGE CONTAINER
    ========================================================= */
