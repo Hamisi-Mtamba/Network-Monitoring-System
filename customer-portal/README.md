@@ -1,10 +1,6 @@
 # CustomerPortal
 
-<<<<<<< HEAD
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.20.
-=======
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.3.
->>>>>>> omary
 
 ## Development server
 

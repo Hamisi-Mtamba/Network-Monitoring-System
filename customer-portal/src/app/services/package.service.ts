@@ -180,7 +180,8 @@ export class PackageService {
             this.selectedPackageState();
 
         if (
-            selected?.id === id
+            selected &&
+            Number(selected.id) === id
         ) {
             return of(selected);
         }
@@ -193,7 +194,7 @@ export class PackageService {
                     (packages) =>
                         packages.find(
                             (item) =>
-                                item.id === id
+                                Number(item.id) === id
                         )
                 )
             );

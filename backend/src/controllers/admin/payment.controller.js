@@ -370,6 +370,22 @@ const provisionPaymentOnMikrotik = async (
     }
 
 
+    if (!payment.router_id) {
+
+        throw new Error(
+            "Payment router is missing"
+        );
+    }
+
+
+    if (!payment.company_id) {
+
+        throw new Error(
+            "Payment company is missing"
+        );
+    }
+
+
     const durationMinutes =
         Number(
             payment.duration_minutes
@@ -387,7 +403,49 @@ const provisionPaymentOnMikrotik = async (
     }
 
 
+    const routerResult =
+        await pool.query(
+            `
+                SELECT
+                    id,
+                    company_id,
+                    public_id,
+                    name,
+                    host,
+                    status,
+                    api_username,
+                    api_password
+
+                FROM mikrotik_routers
+
+                WHERE id = $1
+                  AND company_id = $2
+                  AND status = 'active'
+
+                LIMIT 1
+            `,
+            [
+                payment.router_id,
+                payment.company_id
+            ]
+        );
+
+
+    const router =
+        routerResult.rows[0];
+
+
+    if (!router) {
+
+        throw new Error(
+            "Active MikroTik router was not found for this payment"
+        );
+    }
+
+
     await provisionHotspotAccess({
+
+        router,
 
         macAddress:
             payment.device_mac,
