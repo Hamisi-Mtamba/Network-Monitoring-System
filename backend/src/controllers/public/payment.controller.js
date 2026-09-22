@@ -432,6 +432,13 @@ const createCashPaymentRequest = async (
             });
         }
 
+        if (typeof phone_number !== 'string' || !phone_number.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Phone number is required for cash payment"
+            });
+        }
+
 
         // Validate captive portal information
         if (
