@@ -85,8 +85,6 @@ export class CashPaymentPageComponent
         new FormControl(
             '',
             [
-                Validators.required,
-
                 Validators.pattern(
                     SUBSCRIBER_PHONE_PATTERN
                 )
@@ -364,9 +362,9 @@ export class CashPaymentPageComponent
 
 
         const normalizedPhone =
-            toInternationalPhone(
-                this.phoneNumber.value!
-            );
+            this.phoneNumber.value
+                ? toInternationalPhone(this.phoneNumber.value)
+                : undefined;
 
 
         this.paymentService

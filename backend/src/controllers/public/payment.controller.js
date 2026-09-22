@@ -422,14 +422,13 @@ const createCashPaymentRequest = async (
         // Validate required payment fields
         if (
             !companySlug ||
-            !package_id ||
-            !phone_number
+            !package_id
         ) {
 
             return res.status(400).json({
                 success: false,
                 message:
-                    "Company, package and phone number are required"
+                    "Company and package are required"
             });
         }
 

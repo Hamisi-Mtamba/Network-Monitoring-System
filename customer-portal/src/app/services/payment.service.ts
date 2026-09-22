@@ -142,7 +142,7 @@ export class PaymentService {
     initiateCashPayment(
         payload: {
             package_id: number;
-            phone_number: string;
+            phone_number?: string;
             mac: string;
             ip: string;
             router: string;

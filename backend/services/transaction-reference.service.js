@@ -89,8 +89,12 @@ export const normalizePaymentIdentity = ({
     }
 
 
+    // Cash requests may be identified by device and reference without a phone.
+    const phoneOptional = method === 'cash' &&
+        (phoneNumber == null || (typeof phoneNumber === 'string' && !phoneNumber.trim()));
+
     if (
-        !/^255[67]\d{8}$/.test(
+        !phoneOptional && !/^255[67]\d{8}$/.test(
             phone
         )
     ) {
@@ -212,7 +216,7 @@ export const generateTransactionReference = ({
 
     return (
         `${METHODS[method]}-` +
-        `${phone}-` +
+        (phone ? `${phone}-` : '') +
         `${mac}-` +
         `${endingTime}`
     );
