@@ -1,0 +1,48 @@
+<section class="status-layout enter">
+    <div class="status-main" aria-live="polite">
+        <span class="eyebrow">YOUR INTERNET ACCESS</span>
+        <div class="status-symbol" [class.is-complete]="view() === 'active'" [class.is-waiting]="loading() || view() === 'pending' || view() === 'activating'">
+            @if (view() === 'active') { <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m13 24 8 8 15-17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> }
+            @else { <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="13" stroke="currentColor" stroke-width="1.5"/><path d="M24 16v9l6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> }
+        </div>
+        <h1>{{ view() ? headings[view()!] : loading() ? 'Checking your payment.' : 'Let’s check that.' }}</h1>
+        <p class="status-copy">
+            @switch (view()) {
+                @case ('pending') { Check your phone for the mobile-money prompt and approve the payment. This page updates automatically. }
+                @case ('cash') { Give your payment reference to the company administrator and pay in cash. We’ll connect you once they confirm receipt. }
+                @case ('activating') { Your payment is confirmed. We’re activating your internet access. You don’t need to pay again. }
+                @case ('active') { Your package is active. Enjoy your time online. }
+                @case ('suspended') { Your payment is recorded. Contact your Wi-Fi provider to reactivate the remaining time. }
+                @case ('expired') { This package has ended. Choose another whenever you’re ready. }
+                @case ('failed') { This payment was cancelled or did not complete. If money was deducted, contact your provider with the reference below. }
+                @default { Please keep this page open while we check your payment. }
+            }
+        </p>
+        @if (error()) { <p class="notice notice-error" role="alert">{{ error() }}</p> }
+        @if (paused()) { <p class="notice">It’s taking longer than expected. Your request is saved. Check again or contact your provider.</p> }
+        <div class="status-actions">
+            @if (view() === 'active') {
+                <button class="button" (click)="continueBrowsing()">Continue browsing <span aria-hidden="true">↗</span></button>
+                <a class="text-link" [routerLink]="['/', slug, 'session', response()?.session?.id]">View remaining time</a>
+            } @else if (view() === 'failed' || view() === 'expired') {
+                <a class="button" [routerLink]="['/',slug,'packages']">Choose a package <span aria-hidden="true">→</span></a>
+            } @else if (paused() || error() || view() === 'suspended') {
+                <button class="button" (click)="checkAgain()">Check again</button>
+            } @else { <span class="live-status"><i></i> {{ view() === 'cash' ? 'Waiting for confirmation' : 'Checking automatically' }}</span> }
+        </div>
+    </div>
+    <aside class="receipt">
+        <div class="receipt-heading"><span class="eyebrow">PAYMENT SUMMARY</span><span class="receipt-mark" aria-hidden="true">↗</span></div>
+        @if (response(); as result) {
+            <h2>{{ result.payment.package_name || 'Internet package' }}</h2>
+            <div class="receipt-price"><span>TZS</span> {{ result.payment.amount | number:'1.0-2' }}</div>
+            <dl>
+                <div><dt>Payment</dt><dd>{{ result.payment.payment_method === 'cash' ? 'Cash' : 'Mobile money' }}</dd></div>
+                <div><dt>Status</dt><dd>{{ result.payment.status === 'successful' ? 'Paid' : view() === 'failed' ? 'Not completed' : 'Awaiting payment' }}</dd></div>
+                @if (view() === 'active') { <div><dt>Ends</dt><dd>{{ result.session?.expires_at | date:'d MMM, h:mm a' }}</dd></div> }
+            </dl>
+        }
+        <div class="receipt-reference"><span class="eyebrow">YOUR REFERENCE</span><code>{{ reference }}</code></div>
+        <a class="text-link" [routerLink]="['/',slug,'company']">Need a hand? Contact your provider <span aria-hidden="true">↗</span></a>
+    </aside>
+</section>

@@ -1,25 +1,12 @@
-import {
-    HttpErrorResponse,
-    HttpInterceptorFn
-} from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 
-import {
-    inject
-} from '@angular/core';
+import { inject } from '@angular/core';
 
-import {
-    catchError,
-    throwError
-} from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 
-import {
-    API_CONFIG
-} from '../config/api.config';
+import { API_CONFIG } from '../config/api.config';
 
-import {
-    AuthService
-} from '../services/auth.service';
-
+import { AuthService } from '../services/auth.service';
 
 /* =========================================================
    AUTH INTERCEPTOR
@@ -37,115 +24,63 @@ import {
  *
  * ========================================================= */
 
-export const authInterceptor: HttpInterceptorFn =
-    (
-        request,
-        next
-    ) => {
+export const authInterceptor: HttpInterceptorFn = (request, next) => {
+  const auth = inject(AuthService);
 
-        const auth =
-            inject(AuthService);
+  // =====================================================
+  // API TYPE
+  // =====================================================
 
+  const isAdminApi = request.url.startsWith(API_CONFIG.baseUrl);
 
-        // =====================================================
-        // API TYPE
-        // =====================================================
+  const isPlatformApi = request.url.startsWith(API_CONFIG.platformUrl);
 
-        const isAdminApi =
-            request.url.startsWith(
-                API_CONFIG.baseUrl
-            );
+  const isProtectedApi = isAdminApi || isPlatformApi;
 
+  // =====================================================
+  // PUBLIC AUTH ENDPOINTS
+  // =====================================================
 
-        const isPlatformApi =
-            request.url.startsWith(
-                API_CONFIG.platformUrl
-            );
+  const isLogin = request.url.endsWith('/auth/login');
 
+  // =====================================================
+  // CURRENT JWT
+  // =====================================================
 
-        const isProtectedApi =
-            isAdminApi ||
-            isPlatformApi;
+  const token = auth.token;
 
+  // =====================================================
+  // ATTACH JWT
+  // =====================================================
 
-        // =====================================================
-        // PUBLIC AUTH ENDPOINTS
-        // =====================================================
+  const authenticatedRequest =
+    isProtectedApi && !isLogin && token
+      ? request.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      : request;
 
-        const isLogin =
-            request.url.endsWith(
-                '/auth/login'
-            );
+  // =====================================================
+  // SEND REQUEST
+  // =====================================================
 
+  return next(authenticatedRequest).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // =====================================
+      // EXPIRED / INVALID AUTHENTICATION
+      // =====================================
 
-        // =====================================================
-        // CURRENT JWT
-        // =====================================================
+      if ((error.status === 401 || (error.status === 403 && ['ADMIN_SUSPENDED','COMPANY_SUSPENDED','COMPANY_NOT_FOUND','COMPANY_REQUIRED'].includes(error.error?.code))) && isProtectedApi && !isLogin && auth.token) {
+        auth.logout();
+      }
 
-        const token =
-            auth.token;
+      // =====================================
+      // PROPAGATE ORIGINAL ERROR
+      // =====================================
 
-
-        // =====================================================
-        // ATTACH JWT
-        // =====================================================
-
-        const authenticatedRequest =
-            isProtectedApi &&
-            !isLogin &&
-            token
-
-                ? request.clone({
-
-                    setHeaders: {
-
-                        Authorization:
-                            `Bearer ${token}`
-                    }
-                })
-
-                : request;
-
-
-        // =====================================================
-        // SEND REQUEST
-        // =====================================================
-
-        return next(
-            authenticatedRequest
-        )
-            .pipe(
-
-                catchError(
-                    (
-                        error:
-                            HttpErrorResponse
-                    ) => {
-
-                        // =====================================
-                        // EXPIRED / INVALID AUTHENTICATION
-                        // =====================================
-
-                        if (
-                            error.status === 401 &&
-                            isProtectedApi &&
-                            !isLogin &&
-                            auth.token
-                        ) {
-
-                            auth.logout();
-                        }
-
-
-                        // =====================================
-                        // PROPAGATE ORIGINAL ERROR
-                        // =====================================
-
-                        return throwError(
-                            () =>
-                                error
-                        );
-                    }
-                )
-            );
-    };
+      return throwError(() => error);
+    }),
+  );
+};

@@ -1,13 +1,89 @@
 <div class="page-container detail-page">
-  <a class="back-link" routerLink="/payments"><ion-icon name="arrow-back-outline"></ion-icon>Back to payments</a>
-  @if(loading()){<div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading transaction…</p></div>}
-  @else if(error()||!payment()){<div class="state-card error-state"><h2>Payment not found</h2><p>This transaction could not be loaded.</p><ion-button routerLink="/payments">Return to payments</ion-button></div>}
-  @else if(payment();as item){
-    <header class="detail-heading"><div><p>TRANSACTION DETAILS</p><h1>{{item.transaction_reference}}</h1><span>Payment #{{item.id}}</span></div><span class="status-badge large" [class.success]="item.status==='successful'" [class.failed]="item.status==='failed'">{{item.status}}</span></header>
-    <section class="detail-hero"><span class="hero-icon"><ion-icon name="card-outline"></ion-icon></span><div><small>TRANSACTION AMOUNT</small><strong>{{money(item.amount)}}</strong><p>{{item.payment_method}} payment from {{item.phone_number}}</p></div></section>
-    <section class="detail-grid">
-      <article class="detail-card"><h2>Payment information</h2><dl><div><dt>Reference</dt><dd>{{item.transaction_reference}}</dd></div><div><dt>Status</dt><dd>{{item.status}}</dd></div><div><dt>Created</dt><dd>{{item.created_at|date:'medium'}}</dd></div><div><dt>Paid at</dt><dd>{{item.paid_at?(item.paid_at|date:'medium'):'Not yet paid'}}</dd></div></dl></article>
-      <article class="detail-card"><h2>Customer & package</h2><dl><div><dt>Phone number</dt><dd>{{item.phone_number}}</dd></div><div><dt>Payment method</dt><dd>{{item.payment_method}}</dd></div><div><dt>Package</dt><dd>{{item.package_name}}</dd></div><div><dt>Speed / duration</dt><dd>{{item.speed}} · {{item.duration_minutes}} min</dd></div></dl></article>
-    </section>
+  <a class="back-link" routerLink="/payments"
+    ><ion-icon name="arrow-back-outline"></ion-icon>Back to payments</a
+  >
+  @if(loading()){
+  <div class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading transaction…</p>
+  </div>
+  } @else if(error()||!payment()){
+  <div class="state-card error-state">
+    <h2>Payment not found</h2>
+    <p>This transaction could not be loaded.</p>
+    <ion-button routerLink="/payments">Return to payments</ion-button>
+  </div>
+  } @else if(payment();as item){
+  <header class="detail-heading">
+    <div>
+      <p>TRANSACTION DETAILS</p>
+      <h1>{{item.transaction_reference}}</h1>
+      <span>Payment #{{item.id}}</span>
+    </div>
+    <span
+      class="status-badge large"
+      [class.success]="item.status==='successful'"
+      [class.failed]="item.status==='failed'"
+      >{{item.status}}</span
+    >
+  </header>
+  <section class="detail-hero">
+    <span class="hero-icon"><ion-icon name="card-outline"></ion-icon></span>
+    <div>
+      <small>TRANSACTION AMOUNT</small><strong>{{money(item.amount)}}</strong>
+      <p>{{item.payment_method}} payment from {{item.phone_number || 'Not supplied'}}</p>
+    </div>
+  </section>
+  <section class="detail-card" style="margin-bottom:20px">
+    <h2>Internet access</h2>
+    @if(session(); as access) {
+      <p>{{ access.status === 'pending_activation' ? 'Waiting for router activation' : access.status }}</p>
+      <a [routerLink]="['/sessions',access.id]">View session →</a>
+    } @else { <p>{{ item.status === 'successful' ? 'Payment received. Access is awaiting activation.' : 'Access begins after payment and router activation.' }}</p> }
+  </section>
+  <section class="detail-grid">
+    <article class="detail-card">
+      <h2>Payment information</h2>
+      <dl>
+        <div>
+          <dt>Reference</dt>
+          <dd>{{item.transaction_reference}}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{{item.status}}</dd>
+        </div>
+        <div>
+          <dt>Created</dt>
+          <dd>{{item.created_at|date:'medium'}}</dd>
+        </div>
+        <div>
+          <dt>Paid at</dt>
+          <dd>{{item.paid_at?(item.paid_at|date:'medium'):'Not yet paid'}}</dd>
+        </div>
+      </dl>
+    </article>
+    <article class="detail-card">
+      <h2>Customer & package</h2>
+      <dl>
+        <div>
+          <dt>Phone number</dt>
+          <dd>{{item.phone_number || 'Not supplied'}}</dd>
+        </div>
+        <div>
+          <dt>Payment method</dt>
+          <dd>{{item.payment_method}}</dd>
+        </div>
+        <div>
+          <dt>Package</dt>
+          <dd>{{item.package_name}}</dd>
+        </div>
+        <div>
+          <dt>Duration</dt>
+          <dd>{{item.duration_minutes}} min</dd>
+        </div>
+      </dl>
+    </article>
+  </section>
   }
 </div>

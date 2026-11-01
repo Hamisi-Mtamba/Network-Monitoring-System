@@ -1,9 +1,7 @@
 import pg from 'pg';
 
 const { Pool } = pg;
-// DEBUG ONLY: Check whether environment variables are being loaded
-console.log("Password type:", typeof process.env.DB_PASSWORD);
-console.log("Password exists:", !!process.env.DB_PASSWORD);
+
 
 // create a PostgreSQL connection pool using environment variables for configuration
 

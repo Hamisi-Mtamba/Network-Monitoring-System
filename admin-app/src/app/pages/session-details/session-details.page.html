@@ -1,7 +1,96 @@
-<div class="page-container detail-page"><a class="back-link" routerLink="/sessions"><ion-icon name="arrow-back-outline"></ion-icon>Back to sessions</a>
-@if(loading()){<div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading session…</p></div>}
-@else if(error()||!session()){<div class="state-card error-state"><h2>Session not found</h2><p>This internet session could not be loaded.</p><ion-button routerLink="/sessions">Return to sessions</ion-button></div>}
-@else if(session();as item){<header class="detail-heading"><div><p>SESSION DETAILS</p><h1>Session #{{item.id}}</h1><span>{{item.phone_number}} · {{item.package_name}}</span></div><span class="status-badge large" [class.success]="item.status==='active'" [class.failed]="item.status==='failed'||item.status==='suspended'">{{item.status.replace('_',' ')}}</span></header>
-<section class="session-hero"><span><ion-icon name="wifi-outline"></ion-icon></span><div><small>CONNECTION PACKAGE</small><strong>{{item.package_name}}</strong><p>{{item.speed}} · {{item.duration_minutes}} minutes</p></div>@if(item.status==='active'||item.status==='suspended'){<ion-button [color]="item.status==='active'?'danger':'success'" fill="outline" (click)="changeStatus()"><ion-icon slot="start" [name]="item.status==='active'?'pause-circle-outline':'play-circle-outline'"></ion-icon>{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button>}</section>
-<section class="detail-grid"><article class="detail-card"><h2>Session timeline</h2><dl><div><dt>Started</dt><dd>{{item.started_at|date:'medium'}}</dd></div><div><dt>Expires</dt><dd>{{item.expires_at|date:'medium'}}</dd></div><div><dt>Created</dt><dd>{{item.created_at|date:'medium'}}</dd></div><div><dt>Status</dt><dd>{{item.status.replace('_',' ')}}</dd></div></dl></article><article class="detail-card"><h2>Payment context</h2><dl><div><dt>Transaction</dt><dd>{{item.transaction_reference}}</dd></div><div><dt>Phone</dt><dd>{{item.phone_number}}</dd></div><div><dt>Method</dt><dd>{{item.payment_method}}</dd></div><div><dt>Amount</dt><dd>{{money(item.amount)}}</dd></div></dl></article></section><p class="integration-note">Router access is currently reflected in PostgreSQL only. MikroTik enforcement will be connected through the backend in a future integration.</p>}
+<div class="page-container detail-page">
+  <a class="back-link" routerLink="/sessions"
+    ><ion-icon name="arrow-back-outline"></ion-icon>Back to sessions</a
+  >
+  @if(loading()){
+  <div class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading session…</p>
+  </div>
+  } @else if(error()||!session()){
+  <div class="state-card error-state">
+    <h2>Session not found</h2>
+    <p>This internet session could not be loaded.</p>
+    <ion-button routerLink="/sessions">Return to sessions</ion-button>
+  </div>
+  } @else if(session();as item){
+  <header class="detail-heading">
+    <div>
+      <p>SESSION DETAILS</p>
+      <h1>Session #{{item.id}}</h1>
+      <span>{{item.phone_number}} · {{item.package_name}}</span>
+    </div>
+    <span
+      class="status-badge large"
+      [class.success]="item.status==='active'"
+      [class.failed]="item.status==='failed'||item.status==='suspended'"
+      >{{item.status.replace('_',' ')}}</span
+    >
+  </header>
+  <section class="session-hero">
+    <span><ion-icon name="wifi-outline"></ion-icon></span>
+    <div>
+      <small>CONNECTION PACKAGE</small><strong>{{item.package_name}}</strong>
+      <p>{{item.speed}} · {{item.duration_minutes}} minutes</p>
+    </div>
+    @if(item.status==='active'||item.status==='suspended'){<ion-button
+      [color]="item.status==='active'?'danger':'success'"
+      fill="outline"
+      (click)="changeStatus()"
+      ><ion-icon
+        slot="start"
+        [name]="item.status==='active'?'pause-circle-outline':'play-circle-outline'"
+      ></ion-icon
+      >{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button
+    >}
+  </section>
+  <section class="detail-grid">
+    <article class="detail-card">
+      <h2>Session timeline</h2>
+      <dl>
+        <div>
+          <dt>Started</dt>
+          <dd>{{item.started_at|date:'medium'}}</dd>
+        </div>
+        <div>
+          <dt>Expires</dt>
+          <dd>{{item.expires_at|date:'medium'}}</dd>
+        </div>
+        <div>
+          <dt>Created</dt>
+          <dd>{{item.created_at|date:'medium'}}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{{item.status.replace('_',' ')}}</dd>
+        </div>
+      </dl>
+    </article>
+    <article class="detail-card">
+      <h2>Payment context</h2>
+      <dl>
+        <div>
+          <dt>Transaction</dt>
+          <dd>{{item.transaction_reference}}</dd>
+        </div>
+        <div>
+          <dt>Phone</dt>
+          <dd>{{item.phone_number}}</dd>
+        </div>
+        <div>
+          <dt>Method</dt>
+          <dd>{{item.payment_method}}</dd>
+        </div>
+        <div>
+          <dt>Amount</dt>
+          <dd>{{money(item.amount)}}</dd>
+        </div>
+      </dl>
+    </article>
+  </section>
+  <p class="integration-note">
+    Router access is currently reflected in PostgreSQL only. MikroTik
+    enforcement will be connected through the backend in a future integration.
+  </p>
+  }
 </div>

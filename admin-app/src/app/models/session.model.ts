@@ -3,91 +3,78 @@
 // =========================================================
 
 export type SessionStatus =
-    'active' |
-    'suspended' |
-    'expired' |
-    'failed' |
-    'pending_activation';
-
+  'active' | 'suspended' | 'expired' | 'failed' | 'pending_activation';
 
 // =========================================================
 // INTERNET SESSION
 // =========================================================
 
 export interface InternetSession {
+  id: number;
 
-    id: number;
+  // Returned by platform/company-scoped endpoints
+  company_id?: number;
 
-    // Returned by platform/company-scoped endpoints
-    company_id?: number;
+  started_at: string | null;
 
-    started_at: string | null;
+  expires_at: string | null;
 
-    expires_at: string | null;
+  status: SessionStatus;
 
-    status: SessionStatus;
+  created_at: string;
 
-    created_at: string;
+  package_id: number;
 
-    package_id: number;
+  package_name?: string;
 
-    package_name?: string;
+  duration_minutes?: number;
 
-    duration_minutes?: number;
+  speed?: string;
 
-    speed?: string;
+  payment_id: number;
 
-    payment_id: number;
+  transaction_reference?: string;
 
-    transaction_reference?: string;
+  phone_number?: string;
 
-    phone_number?: string;
+  payment_method?: string;
 
-    payment_method?: string;
+  amount?: number | string;
 
-    amount?: number | string;
-
-    // Not returned by the current shared session controller,
-    // but kept optional for compatibility with older UI code.
-    paid_at?: string | null;
+  // Not returned by the current shared session controller,
+  // but kept optional for compatibility with older UI code.
+  paid_at?: string | null;
 }
-
 
 // =========================================================
 // NORMAL / SHARED SESSION LIST RESPONSE
 // =========================================================
 
 export interface SessionListResponse {
+  success: boolean;
 
-    success: boolean;
-
-    sessions: InternetSession[];
+  sessions: InternetSession[];
 }
-
 
 // =========================================================
 // NORMAL / SHARED SESSION RESPONSE
 // =========================================================
 
 export interface SessionResponse {
+  success: boolean;
 
-    success: boolean;
+  message?: string;
 
-    message?: string;
-
-    session: InternetSession;
+  session: InternetSession;
 }
-
 
 // =========================================================
 // UPDATE SESSION STATUS REQUEST
 // =========================================================
 
 export interface UpdateSessionStatusRequest {
-
-    status: SessionStatus;
+  status: SessionStatus;
 }
-
 
 // =========================================================
 // SUPERADMIN COMPANY SESSION LIST
@@ -102,12 +89,10 @@ export interface UpdateSessionStatusRequest {
  * controller through platformCompanyContext.
  */
 export interface CompanySessionsResponse {
+  success: boolean;
 
-    success: boolean;
-
-    sessions: InternetSession[];
+  sessions: InternetSession[];
 }
-
 
 // =========================================================
 // SUPERADMIN COMPANY SESSION DETAIL
@@ -119,10 +104,9 @@ export interface CompanySessionsResponse {
  * GET /api/platform/companies/:companyId/sessions/:id
  */
 export interface CompanySessionResponse {
+  success: boolean;
 
-    success: boolean;
+  message?: string;
 
-    message?: string;
-
-    session: InternetSession;
+  session: InternetSession;
 }

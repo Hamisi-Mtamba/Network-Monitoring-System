@@ -1,37 +1,11 @@
-// Import Angular dependency injection
-import {
-    Injectable
-} from '@angular/core';
-
-// Import HttpClient
-import {
-    HttpClient
-} from '@angular/common/http';
-
-// Import API builder
-import {
-    getCompanyPublicApiUrl
-} from '../config/api.config';
-
-
-@Injectable({
-    providedIn: 'root'
-})
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
+import { getCompanyPublicApiUrl } from '../config/api.config';
+import { SessionApiResponse } from '../models/session.model';
+@Injectable({providedIn:'root'})
 export class SessionService {
-
-    constructor(
-        private readonly http: HttpClient
-    ) {}
-
-
-    // Get one customer's internet session
-    getSession(
-        companySlug: string,
-        sessionId: number
-    ) {
-
-        return this.http.get<any>(
-            `${getCompanyPublicApiUrl(companySlug)}/sessions/${sessionId}`
-        );
-    }
+    constructor(private readonly http:HttpClient){}
+    getSession(slug:string,id:number){return this.http.get<SessionApiResponse>(`${getCompanyPublicApiUrl(slug)}/sessions/${id}`).pipe(map(response=>
+        'session' in response?response.session:'data' in response?response.data:response));}
 }

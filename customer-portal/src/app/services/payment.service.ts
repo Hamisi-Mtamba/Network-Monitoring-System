@@ -1,197 +1,39 @@
-// Import Angular HTTP client
-import {
-    HttpClient
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { getCompanyPublicApiUrl } from '../config/api.config';
+import { CashPaymentRequest, PaymentInitiationRequest, PaymentInitiationResponse, PaymentStatusResponse } from '../models/payment.model';
+import { TenantService } from './tenant.service';
+import { WifiContextService } from './wifi-context.service';
 
-
-// Import Angular dependency injection and signals
-import {
-    Injectable,
-    signal
-} from '@angular/core';
-
-
-// Import RxJS Observable
-import {
-    Observable
-} from 'rxjs';
-
-
-// Import tenant-aware public API builder
-import {
-    getCompanyPublicApiUrl
-} from '../config/api.config';
-
-
-// Import payment models
-import {
-    PaymentInitiationRequest,
-    PaymentInitiationResponse,
-    PaymentStatusResponse,
-    PaymentSuccessDetails
-} from '../models/payment.model';
-
-
-// Import tenant service
-import {
-    TenantService
-} from './tenant.service';
-
-
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({providedIn:'root'})
 export class PaymentService {
-
-    // Keep the most recent successful payment details
-    // so the success page can survive route changes or refreshes
-    private readonly lastSuccessState =
-        signal<PaymentSuccessDetails | null>(
-            this.restoreSuccess()
-        );
-
-
-    // Expose successful payment details as read-only state
-    readonly lastSuccess =
-        this.lastSuccessState.asReadonly();
-
-
-    // Inject backend HTTP client and current tenant service
-    constructor(
-        private readonly http: HttpClient,
-        private readonly tenantService: TenantService
-    ) {}
-
-
-    // Start a mobile-money payment for the current company
-    //
-    // The frontend deliberately does NOT send the package price.
-    // The backend reads the trusted package price from PostgreSQL.
-    initiatePayment(
-        payload: PaymentInitiationRequest
-    ): Observable<PaymentInitiationResponse> {
-
-        // Get the company currently being served by this portal
-        const companySlug =
-            this.tenantService.requireSlug();
-
-
-        // Build company-specific payment endpoint
-        const url =
-            `${getCompanyPublicApiUrl(companySlug)}/payments/initiate`;
-
-
-        // Send payment request
-        return this.http.post<PaymentInitiationResponse>(
-            url,
-            payload
-        );
+    private readonly http=inject(HttpClient);
+    private readonly tenant=inject(TenantService);
+    private readonly wifi=inject(WifiContextService);
+    initiatePayment(payload:PaymentInitiationRequest) {
+        return this.http.post<PaymentInitiationResponse>(`${getCompanyPublicApiUrl(this.tenant.requireSlug())}/payments/initiate`,payload);
     }
-
-
-    // Check the current payment status for the current company
-    getPaymentStatus(
-        reference: string
-    ): Observable<PaymentStatusResponse> {
-
-        // Get current company context
-        const companySlug =
-            this.tenantService.requireSlug();
-
-
-        // Protect the payment reference before putting it into the URL
-        const encodedReference =
-            encodeURIComponent(reference);
-
-
-        // Build company-specific payment status endpoint
-        const url =
-            `${getCompanyPublicApiUrl(companySlug)}/payments/${encodedReference}/status`;
-
-
-        // Request payment status
-        return this.http.get<PaymentStatusResponse>(
-            url
-        );
+    initiateCashPayment(payload:CashPaymentRequest) {
+        return this.http.post<PaymentInitiationResponse>(`${getCompanyPublicApiUrl(this.tenant.requireSlug())}/payments/cash-request`,payload);
     }
-
-
-    // Remember successful payment details
-    rememberSuccess(
-        details: PaymentSuccessDetails
-    ): void {
-
-        // Save in Angular application state
-        this.lastSuccessState.set(
-            details
-        );
-
-
-        // Preserve payment success during browser refresh
-        sessionStorage.setItem(
-            'y4c-payment-success',
-            JSON.stringify(details)
-        );
+    // Capture slug explicitly so a tenant switch cannot move a running poll to another company.
+    getPaymentStatus(reference:string,slug=this.tenant.requireSlug()) {
+        return this.http.get<PaymentStatusResponse>(`${getCompanyPublicApiUrl(slug)}/payments/${encodeURIComponent(reference)}/status`);
     }
-
-
-    // Create a cash-payment request for the current company
-    //
-    // Price is deliberately not sent.
-    // The backend reads the trusted price from PostgreSQL.
-    initiateCashPayment(
-        payload: {
-            package_id: number;
-            phone_number: string;
-            mac: string;
-            ip: string;
-            router: string;
-            login_url: string;
-        }
-    ): Observable<any> {
-
-        // Get current company context
-        const companySlug =
-            this.tenantService.requireSlug();
-
-
-        // Build company-specific cash-payment endpoint
-        const url =
-            `${getCompanyPublicApiUrl(companySlug)}/payments/cash-request`;
-
-
-        // Create cash-payment request
-        return this.http.post<any>(
-            url,
-            payload
-        );
+    private key(slug:string):string|null {
+        const context=this.wifi.get(slug);
+        return context ? `nms-pending:${slug}:${context.router}:${context.mac}` : null;
     }
-
-
-    // Restore successful payment details after browser refresh
-    private restoreSuccess():
-        PaymentSuccessDetails | null {
-
-        try {
-
-            // Read saved payment success details
-            const stored =
-                sessionStorage.getItem(
-                    'y4c-payment-success'
-                );
-
-
-            // Return parsed details when available
-            return stored
-                ? JSON.parse(
-                    stored
-                ) as PaymentSuccessDetails
-                : null;
-
-        } catch {
-
-            // Ignore corrupted browser storage
-            return null;
-        }
+    rememberPending(slug:string,reference:string):void {
+        const key=this.key(slug); if(!key)return;
+        try {localStorage.setItem(key,reference);} catch { /* Captive browsers may disable storage. */ }
+    }
+    pending(slug:string):string|null {
+        const key=this.key(slug);if(!key)return null;
+        try {const reference=localStorage.getItem(key);return reference && reference.length<250 ? reference : null;} catch{return null;}
+    }
+    clearPending(slug:string,reference:string):void {
+        const key=this.key(slug);if(!key)return;
+        try {if(localStorage.getItem(key)===reference)localStorage.removeItem(key);} catch { /* Keep server status authoritative. */ }
     }
 }

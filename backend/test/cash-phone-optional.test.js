@@ -25,7 +25,7 @@ test('supplied cash numbers are validated and existing references stay compatibl
 });
 
 test('mobile money still requires a phone number and cash still requires a valid device', () => {
-    for (const paymentMethod of ['lipa', 'mpesa', 'airtel_money', 'mixx_by_yas', 'halopesa']) {
+    for (const paymentMethod of ['selcom', 'mpesa', 'airtel_money', 'mixx_by_yas', 'halopesa']) {
         assert.throws(() => generateTransactionReference({ ...identity, paymentMethod }),
             /Invalid Tanzanian mobile number/);
     }

@@ -1,13 +1,138 @@
 <div class="page-container">
-  <header class="page-heading"><div><p>ACCESS CONTROL</p><h1>Internet sessions</h1><span>Monitor customer connectivity and control session access.</span></div><ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Refresh</ion-button></header>
-  <section class="filter-panel"><div class="search-control"><ion-icon name="search-outline"></ion-icon><ion-input placeholder="Session, phone, reference or package" (ionInput)="query.set($any($event.target).value||'')"></ion-input></div><ion-select label="Status" labelPlacement="stacked" value="all" (ionChange)="status.set($event.detail.value)"><ion-select-option value="all">All statuses</ion-select-option><ion-select-option value="active">Active</ion-select-option><ion-select-option value="suspended">Suspended</ion-select-option><ion-select-option value="expired">Expired</ion-select-option><ion-select-option value="failed">Failed</ion-select-option><ion-select-option value="pending_activation">Pending activation</ion-select-option></ion-select><span class="result-count">{{filtered().length}} sessions</span></section>
-  @if(loading()){<div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading sessions…</p></div>}
-  @else if(error()){<div class="state-card error-state"><h2>Sessions unavailable</h2><p>We could not retrieve internet sessions.</p><ion-button (click)="load()">Try again</ion-button></div>}
-  @else if(filtered().length===0){<div class="state-card"><span class="empty-icon"><ion-icon name="wifi-outline"></ion-icon></span><h2>No sessions found</h2><p>Adjust the filters or wait for a customer connection.</p></div>}
-  @else{
-    <section class="data-panel desktop-table"><table><thead><tr><th>Session</th><th>Customer</th><th>Package</th><th>Speed</th><th>Started</th><th>Expires</th><th>Status</th><th>Action</th><th></th></tr></thead><tbody>
-      @for(item of filtered();track item.id){<tr><td><strong>#{{item.id}}</strong></td><td>{{item.phone_number}}</td><td>{{item.package_name}}</td><td>{{item.speed}}</td><td>{{item.started_at|date:'short'}}</td><td>{{item.expires_at|date:'short'}}</td><td><span class="status-badge" [class.success]="item.status==='active'" [class.failed]="item.status==='failed'||item.status==='suspended'">{{item.status.replace('_',' ')}}</span></td><td>@if(item.status==='active'||item.status==='suspended'){<ion-button size="small" fill="clear" [color]="item.status==='active'?'danger':'success'" (click)="changeStatus(item)"><ion-icon slot="start" [name]="item.status==='active'?'pause-circle-outline':'play-circle-outline'"></ion-icon>{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button>}</td><td><a [routerLink]="['/sessions',item.id]"><ion-icon name="chevron-forward-outline"></ion-icon></a></td></tr>}
-    </tbody></table></section>
-    <section class="mobile-cards">@for(item of filtered();track item.id){<article class="record-card"><a [routerLink]="['/sessions',item.id]"><div><strong>Session #{{item.id}}</strong><span class="status-badge" [class.success]="item.status==='active'" [class.failed]="item.status==='failed'||item.status==='suspended'">{{item.status.replace('_',' ')}}</span></div><p>{{item.phone_number}} · {{item.package_name}}</p><footer><b>{{item.speed}}</b><span>Expires {{item.expires_at|date:'short'}}</span></footer></a>@if(item.status==='active'||item.status==='suspended'){<ion-button size="small" fill="outline" [color]="item.status==='active'?'danger':'success'" (click)="changeStatus(item)">{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button>}</article>}</section>
+  <header class="page-heading">
+    <div>
+      <p>ACCESS CONTROL</p>
+      <h1>Internet sessions</h1>
+      <span>Monitor customer connectivity and control session access.</span>
+    </div>
+    <ion-button fill="outline" (click)="load()"
+      ><ion-icon slot="start" name="refresh-outline"></ion-icon
+      >Refresh</ion-button
+    >
+  </header>
+  <section class="filter-panel">
+    <div class="search-control">
+      <ion-icon name="search-outline"></ion-icon
+      ><ion-input
+        placeholder="Session, phone, reference or package"
+        (ionInput)="query.set($any($event.target).value||'')"
+      ></ion-input>
+    </div>
+    <ion-select
+      label="Status"
+      labelPlacement="stacked"
+      value="all"
+      (ionChange)="status.set($event.detail.value)"
+      ><ion-select-option value="all">All statuses</ion-select-option
+      ><ion-select-option value="active">Active</ion-select-option
+      ><ion-select-option value="suspended">Suspended</ion-select-option
+      ><ion-select-option value="expired">Expired</ion-select-option
+      ><ion-select-option value="failed">Failed</ion-select-option
+      ><ion-select-option value="pending_activation"
+        >Pending activation</ion-select-option
+      ></ion-select
+    ><span class="result-count">{{filtered().length}} sessions</span>
+  </section>
+  @if(loading()){
+  <div class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading sessions…</p>
+  </div>
+  } @else if(error()){
+  <div class="state-card error-state">
+    <h2>Sessions unavailable</h2>
+    <p>We could not retrieve internet sessions.</p>
+    <ion-button (click)="load()">Try again</ion-button>
+  </div>
+  } @else if(filtered().length===0){
+  <div class="state-card">
+    <span class="empty-icon"><ion-icon name="wifi-outline"></ion-icon></span>
+    <h2>No sessions found</h2>
+    <p>Adjust the filters or wait for a customer connection.</p>
+  </div>
+  } @else{
+  <section class="data-panel desktop-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Session</th>
+          <th>Customer</th>
+          <th>Package</th>
+          <th>Speed</th>
+          <th>Started</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Action</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(item of filtered();track item.id){
+        <tr>
+          <td><strong>#{{item.id}}</strong></td>
+          <td>{{item.phone_number}}</td>
+          <td>{{item.package_name}}</td>
+          <td>{{item.speed}}</td>
+          <td>{{item.started_at|date:'short'}}</td>
+          <td>{{item.expires_at|date:'short'}}</td>
+          <td>
+            <span
+              class="status-badge"
+              [class.success]="item.status==='active'"
+              [class.failed]="item.status==='failed'||item.status==='suspended'"
+              >{{item.status.replace('_',' ')}}</span
+            >
+          </td>
+          <td>
+            @if(item.status==='active'||item.status==='suspended'){<ion-button
+              size="small"
+              fill="clear"
+              [color]="item.status==='active'?'danger':'success'"
+              (click)="changeStatus(item)"
+              ><ion-icon
+                slot="start"
+                [name]="item.status==='active'?'pause-circle-outline':'play-circle-outline'"
+              ></ion-icon
+              >{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button
+            >}
+          </td>
+          <td>
+            <a [routerLink]="['/sessions',item.id]"
+              ><ion-icon name="chevron-forward-outline"></ion-icon
+            ></a>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+  <section class="mobile-cards">
+    @for(item of filtered();track item.id){
+    <article class="record-card">
+      <a [routerLink]="['/sessions',item.id]"
+        ><div>
+          <strong>Session #{{item.id}}</strong
+          ><span
+            class="status-badge"
+            [class.success]="item.status==='active'"
+            [class.failed]="item.status==='failed'||item.status==='suspended'"
+            >{{item.status.replace('_',' ')}}</span
+          >
+        </div>
+        <p>{{item.phone_number}} · {{item.package_name}}</p>
+        <footer>
+          <b>{{item.speed}}</b
+          ><span>Expires {{item.expires_at|date:'short'}}</span>
+        </footer></a
+      >@if(item.status==='active'||item.status==='suspended'){<ion-button
+        size="small"
+        fill="outline"
+        [color]="item.status==='active'?'danger':'success'"
+        (click)="changeStatus(item)"
+        >{{item.status==='active'?'Suspend':'Reactivate'}}</ion-button
+      >}
+    </article>
+    }
+  </section>
   }
 </div>

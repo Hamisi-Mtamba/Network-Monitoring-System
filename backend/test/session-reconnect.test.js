@@ -80,9 +80,10 @@ test('invalid device identity fails before acquiring a DB connection', async () 
     await assert.rejects(reconnectSession({ pool: { connect: () => assert.fail() } }, { ...input, mac: 'invalid' }), { status: 400 });
 });
 
-test('fixed REST target refuses an unrelated router mapping', () => {
-    assert.throws(() => assertConfiguredRouter({ host: '192.168.88.1', public_id: 'OTHER-TENANT' }));
-    assert.throws(() => assertConfiguredRouter({ host: '192.168.99.1', public_id: input.router }));
+test('router validation permits tenant-specific hosts and rejects missing/inactive routers', () => {
+    assert.doesNotThrow(() => assertConfiguredRouter({host:'10.50.0.2',status:'active'}));
+    assert.throws(() => assertConfiguredRouter({host:''}));
+    assert.throws(() => assertConfiguredRouter({host:'10.50.0.3',status:'suspended'}));
     assert.equal(parseRouterDuration('1d2h3m4s'), 93784);
     assert.equal(parseRouterDuration(''), null);
     assert.equal(parseRouterDuration(undefined), null);

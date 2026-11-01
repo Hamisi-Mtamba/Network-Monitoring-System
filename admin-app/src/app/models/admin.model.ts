@@ -5,10 +5,7 @@
 /**
  * Administrator roles supported by the multi-tenant backend.
  */
-export type AdminRole =
-    'admin' |
-    'superadmin';
-
+export type AdminRole = 'admin' | 'superadmin';
 
 // =========================================================
 // ADMIN ACCOUNT
@@ -18,57 +15,51 @@ export type AdminRole =
  * Administrator account returned by the backend.
  */
 export interface Admin {
+  // Unique administrator ID
+  id: number;
 
-    // Unique administrator ID
-    id: number;
+  // Normal admins belong to a company.
+  // Superadmin has no company.
+  company_id?: number | null;
 
-    // Normal admins belong to a company.
-    // Superadmin has no company.
-    company_id?: number | null;
+  // Administrator display name
+  name: string;
 
-    // Administrator display name
-    name: string;
+  // Administrator email
+  email: string;
 
-    // Administrator email
-    email: string;
+  // Administrator role
+  role: AdminRole;
 
-    // Administrator role
-    role: AdminRole;
+  // Backend account status
+  status?: string;
 
-    // Backend account status
-    status?: string;
+  // Legacy/backend compatibility field
+  is_active?: boolean;
 
-    // Legacy/backend compatibility field
-    is_active?: boolean;
-
-    // Account creation date
-    created_at?: string;
+  // Account creation date
+  created_at?: string;
 }
-
 
 // =========================================================
 // AUTHENTICATION
 // =========================================================
 
 export interface LoginRequest {
+  email: string;
 
-    email: string;
-
-    password: string;
+  password: string;
 }
-
 
 export interface LoginResponse {
+  success: boolean;
 
-    success: boolean;
+  message: string;
 
-    message: string;
+  token: string;
 
-    token: string;
-
-    admin: Admin;
+  admin: Admin;
 }
-
 
 /**
  * Response returned by:
@@ -76,12 +67,10 @@ export interface LoginResponse {
  * GET /api/admin/auth/me
  */
 export interface AdminResponse {
+  success: boolean;
 
-    success: boolean;
-
-    admin: Admin;
+  admin: Admin;
 }
-
 
 // =========================================================
 // COMPANY ADMIN LIST RESPONSE
@@ -91,14 +80,12 @@ export interface AdminResponse {
  * Small company object returned alongside a company's admins.
  */
 export interface AdminCompanySummary {
+  id: number;
 
-    id: number;
+  name: string;
 
-    name: string;
-
-    status: string;
+  status: string;
 }
-
 
 /**
  * Response returned by:
@@ -106,14 +93,12 @@ export interface AdminCompanySummary {
  * GET /api/platform/companies/:companyId/admins
  */
 export interface CompanyAdminsResponse {
+  success: boolean;
 
-    success: boolean;
+  company: AdminCompanySummary;
 
-    company: AdminCompanySummary;
-
-    admins: Admin[];
+  admins: Admin[];
 }
-
 
 // =========================================================
 // COMPANY ADMIN ACTION RESPONSE
@@ -125,14 +110,12 @@ export interface CompanyAdminsResponse {
  * or changing the password of a company admin.
  */
 export interface CompanyAdminResponse {
+  success: boolean;
 
-    success: boolean;
+  message: string;
 
-    message: string;
-
-    admin: Admin;
+  admin: Admin;
 }
-
 
 // =========================================================
 // CREATE COMPANY ADMIN
@@ -144,14 +127,12 @@ export interface CompanyAdminResponse {
  * POST /api/platform/companies/:companyId/admins
  */
 export interface CreateCompanyAdminRequest {
+  name: string;
 
-    name: string;
+  email: string;
 
-    email: string;
-
-    password: string;
+  password: string;
 }
-
 
 // =========================================================
 // UPDATE COMPANY ADMIN
@@ -163,12 +144,10 @@ export interface CreateCompanyAdminRequest {
  * PATCH /api/platform/companies/:companyId/admins/:adminId
  */
 export interface UpdateCompanyAdminRequest {
+  name?: string;
 
-    name?: string;
-
-    email?: string;
+  email?: string;
 }
-
 
 // =========================================================
 // CHANGE ADMIN PASSWORD
@@ -181,6 +160,5 @@ export interface UpdateCompanyAdminRequest {
  * /api/platform/companies/:companyId/admins/:adminId/password
  */
 export interface ChangeCompanyAdminPasswordRequest {
-
-    password: string;
+  password: string;
 }

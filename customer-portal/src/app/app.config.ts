@@ -1,3 +1,5 @@
+import { RouteReuseStrategy, withInMemoryScrolling } from '@angular/router';
+import { PortalRouteReuseStrategy } from './services/portal-route-reuse';
 // Import Angular application configuration utilities
 import {
     ApplicationConfig,
@@ -32,7 +34,8 @@ export const appConfig: ApplicationConfig = {
         provideBrowserGlobalErrorListeners(),
 
         // Register application routes
-        provideRouter(routes),
+        provideRouter(routes,withInMemoryScrolling({scrollPositionRestoration:'enabled'})),
+        {provide:RouteReuseStrategy,useClass:PortalRouteReuseStrategy},
 
         // Enable HttpClient throughout the customer portal
         provideHttpClient()

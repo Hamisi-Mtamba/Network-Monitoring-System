@@ -1,9 +1,9 @@
 // Backend server configuration
 export const API_CONFIG = {
 
-    backendUrl: '',
+    backendUrl: 'http://192.168.1.189:4000',
 
-    publicApiUrl: '/api/public'
+    publicApiUrl: 'http://192.168.1.189:4000/api/public'
 
 } as const;
 

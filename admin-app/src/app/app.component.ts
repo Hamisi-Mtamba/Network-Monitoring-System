@@ -1,15 +1,7 @@
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-
-@Component({
-  selector: 'app-root',
-
-  //Root ionic component
-  standalone:true,
-
-  templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
-})
-export class AppComponent {
-  constructor() {}
-}
+import { RouterOutlet } from '@angular/router';
+import { IonApp } from '@ionic/angular/standalone';
+import { GlobalConfirmComponent } from './components/global-confirm/global-confirm.component';
+import { GlobalToastComponent } from './components/global-toast/global-toast.component';
+@Component({selector:'app-root',standalone:true,templateUrl:'app.component.html',imports:[IonApp,RouterOutlet,GlobalToastComponent,GlobalConfirmComponent]})
+export class AppComponent {}

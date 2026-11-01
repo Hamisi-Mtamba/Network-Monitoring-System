@@ -1,1055 +1,563 @@
 import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    inject,
-    signal
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
 } from '@angular/core';
 
-import {
-    DatePipe
-} from '@angular/common';
+import { DatePipe } from '@angular/common';
+
+import { RouterLink } from '@angular/router';
 
 import {
-    RouterLink
-} from '@angular/router';
-
-import {
-    AlertController,
-    IonButton,
-    IonIcon,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-    IonSpinner,
-    ToastController
+  AlertController,
+  IonButton,
+  IonIcon,
+  IonInput,
+  IonSelect,
+  IonSelectOption,
+  IonSpinner,
+  ToastController,
 } from '@ionic/angular/standalone';
 
-import {
-    addIcons
-} from 'ionicons';
+import { addIcons } from 'ionicons';
 
 import {
-    cardOutline,
-    cashOutline,
-    chevronForwardOutline,
-    checkmarkCircleOutline,
-    downloadOutline,
-    refreshOutline,
-    searchOutline
+  cardOutline,
+  cashOutline,
+  chevronForwardOutline,
+  checkmarkCircleOutline,
+  downloadOutline,
+  refreshOutline,
+  searchOutline,
 } from 'ionicons/icons';
 
-import {
-    finalize
-} from 'rxjs';
+import { finalize } from 'rxjs';
 
 import {
-    Payment,
-    PaymentStatus,
-    PaymentSmsReview,
-    PendingPaymentMatchOption
+  Payment,
+  PaymentStatus,
 } from '../../models/payment.model';
 
-import {
-    PaymentService
-} from '../../services/payment.service';
-
+import { PaymentService } from '../../services/payment.service';
 
 /* =========================================================
    ADMIN PAYMENT PAGE
    ========================================================= */
 
 @Component({
-    selector: 'app-payments',
+  selector: 'app-payments',
 
-    standalone: true,
+  standalone: true,
 
-    imports: [
-        DatePipe,
-        RouterLink,
-        IonButton,
-        IonIcon,
-        IonInput,
-        IonSelect,
-        IonSelectOption,
-        IonSpinner
-    ],
+  imports: [
+    DatePipe,
+    RouterLink,
+    IonButton,
+    IonIcon,
+    IonInput,
+    IonSelect,
+    IonSelectOption,
+    IonSpinner,
+  ],
 
-    templateUrl:
-        './payments.page.html',
+  templateUrl: './payments.page.html',
 
-    styleUrl:
-        './payments.page.scss',
+  styleUrl: './payments.page.scss',
 
-    changeDetection:
-        ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentsPage {
+  // =====================================================
+  // SERVICES
+  // =====================================================
 
-    // =====================================================
-    // SERVICES
-    // =====================================================
+  private readonly service = inject(PaymentService);
 
-    private readonly service =
-        inject(PaymentService);
+  private readonly alertController = inject(AlertController);
 
-    private readonly alertController =
-        inject(AlertController);
+  private readonly toastController = inject(ToastController);
 
-    private readonly toastController =
-        inject(ToastController);
+  // =====================================================
+  // PAYMENT HISTORY STATE
+  // =====================================================
 
+  readonly payments = signal<Payment[]>([]);
 
-    // =====================================================
-    // PAYMENT HISTORY STATE
-    // =====================================================
+  readonly loading = signal(true);
 
-    readonly payments =
-        signal<Payment[]>([]);
+  readonly error = signal(false);
 
-    readonly loading =
-        signal(true);
+  readonly query = signal('');
 
-    readonly error =
-        signal(false);
+  readonly status = signal('all');
 
-    readonly query =
-        signal('');
+  readonly method = signal('all');
 
-    readonly status =
-        signal('all');
+  // =====================================================
+  // CASH PAYMENT REQUEST STATE
+  // =====================================================
 
-    readonly method =
-        signal('all');
+  readonly cashRequests = signal<Payment[]>([]);
 
+  readonly cashLoading = signal(false);
 
-    // =====================================================
-    // CASH PAYMENT REQUEST STATE
-    // =====================================================
+  readonly cashError = signal(false);
 
-    readonly cashRequests =
-        signal<Payment[]>([]);
+  readonly cashLoaded = signal(false);
 
-    readonly cashLoading =
-        signal(false);
+  readonly confirmingReference = signal<string | null>(null);
 
-    readonly cashError =
-        signal(false);
+  // =====================================================
+  // ACTIVE PAGE VIEW
+  // =====================================================
 
-    readonly cashLoaded =
-        signal(false);
+  readonly activeView = signal<'all' | 'cash'>('all');
 
-    readonly confirmingReference =
-        signal<string | null>(
-            null
-        );
+  // =====================================================
+  // PAYMENT METHOD FILTER OPTIONS
+  // =====================================================
 
+  readonly methods = computed(() => {
+    return [
+      ...new Set(
+        this.payments()
+          .map((payment) => payment.payment_method)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ];
+  });
 
-    // =====================================================
-    // ACTIVE PAGE VIEW
-    // =====================================================
+  // =====================================================
+  // FILTERED PAYMENT HISTORY
+  // =====================================================
 
-    readonly activeView =
-        signal<'all' | 'cash' | 'sms'>(
-            'all'
-        );
+  readonly filtered = computed(() => {
+    const query = this.query().toLowerCase().trim();
 
-    readonly smsReviews = signal<PaymentSmsReview[]>([]);
-    readonly smsPendingPayments = signal<PendingPaymentMatchOption[]>([]);
-    readonly smsLoading = signal(false);
-    readonly smsError = signal(false);
-    readonly smsLoaded = signal(false);
-    readonly selectedSmsPayment = signal<Record<number, number>>({});
-    readonly resolvingSmsId = signal<number | null>(null);
+    const status = this.status();
 
+    const method = this.method();
 
-    // =====================================================
-    // PAYMENT METHOD FILTER OPTIONS
-    // =====================================================
+    return this.payments().filter((payment) => {
+      const searchableText = [
+        payment.transaction_reference,
+        payment.phone_number,
+        payment.payment_method,
+        payment.status,
+        payment.package_name,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
-    readonly methods =
-        computed(() => {
+      const matchesQuery = !query || searchableText.includes(query);
 
-            return [
-                ...new Set(
-                    this.payments()
-                        .map(
-                            (payment) =>
-                                payment.payment_method
-                        )
-                        .filter(
-                            (
-                                value
-                            ): value is string =>
-                                Boolean(value)
-                        )
-                )
-            ];
-        });
-
-
-    // =====================================================
-    // FILTERED PAYMENT HISTORY
-    // =====================================================
-
-    readonly filtered =
-        computed(() => {
-
-            const query =
-                this.query()
-                    .toLowerCase()
-                    .trim();
-
-            const status =
-                this.status();
-
-            const method =
-                this.method();
-
-
-            return this.payments()
-                .filter(
-                    (payment) => {
-
-                        const searchableText =
-                            [
-                                payment.transaction_reference,
-                                payment.phone_number,
-                                payment.payment_method,
-                                payment.status,
-                                payment.package_name
-                            ]
-                                .filter(Boolean)
-                                .join(' ')
-                                .toLowerCase();
-
-
-                        const matchesQuery =
-                            !query ||
-                            searchableText.includes(
-                                query
-                            );
-
-
-                        const matchesStatus =
-                            status === 'all' ||
-                            payment.status === status;
-
-
-                        const matchesMethod =
-                            method === 'all' ||
-                            payment.payment_method === method;
-
-
-                        return (
-                            matchesQuery &&
-                            matchesStatus &&
-                            matchesMethod
-                        );
-                    }
-                );
-        });
-
-
-    // =====================================================
-    // PAYMENT COUNTS
-    // =====================================================
-
-    readonly totalPayments =
-        computed(
-            () =>
-                this.payments().length
-        );
-
-
-    readonly successfulPayments =
-        computed(
-            () =>
-                this.payments()
-                    .filter(
-                        (payment) =>
-                            payment.status ===
-                            'successful'
-                    )
-                    .length
-        );
-
-
-    readonly pendingPayments =
-        computed(
-            () =>
-                this.payments()
-                    .filter(
-                        (payment) =>
-                            payment.status ===
-                                'pending' ||
-                            String(payment.status) ===
-                                'awaiting_cash_confirmation'
-                    )
-                    .length
-        );
-
-
-    readonly failedPayments =
-        computed(
-            () =>
-                this.payments()
-                    .filter(
-                        (payment) =>
-                            payment.status ===
-                            'failed'
-                    )
-                    .length
-        );
-
-
-    readonly successfulRevenue =
-        computed(() => {
-
-            return this.payments()
-                .filter(
-                    (payment) =>
-                        payment.status ===
-                        'successful'
-                )
-                .reduce(
-                    (
-                        total,
-                        payment
-                    ) =>
-                        total +
-                        Number(
-                            payment.amount ?? 0
-                        ),
-                    0
-                );
-        });
-
-
-    // =====================================================
-    // CASH REQUEST COUNTS
-    // =====================================================
-
-    readonly pendingCashCount =
-        computed(
-            () =>
-                this.cashRequests().length
-        );
-
-
-    readonly pendingCashAmount =
-        computed(() => {
-
-            return this.cashRequests()
-                .reduce(
-                    (
-                        total,
-                        request
-                    ) =>
-                        total +
-                        Number(
-                            request.amount ?? 0
-                        ),
-                    0
-                );
-        });
-
-
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
-
-    constructor() {
-
-        addIcons({
-            cardOutline,
-            cashOutline,
-            chevronForwardOutline,
-            checkmarkCircleOutline,
-            downloadOutline,
-            refreshOutline,
-            searchOutline
-        });
-
-
-        this.load();
+      const matchesStatus = status === 'all' || payment.status === status;
+
+      const matchesMethod =
+        method === 'all' || payment.payment_method === method;
+
+      return matchesQuery && matchesStatus && matchesMethod;
+    });
+  });
+
+  // =====================================================
+  // PAYMENT COUNTS
+  // =====================================================
+
+  readonly totalPayments = computed(() => this.payments().length);
+
+  readonly successfulPayments = computed(
+    () =>
+      this.payments().filter((payment) => payment.status === 'successful')
+        .length,
+  );
+
+  readonly pendingPayments = computed(
+    () =>
+      this.payments().filter(
+        (payment) =>
+          payment.status === 'pending' ||
+          String(payment.status) === 'awaiting_cash_confirmation',
+      ).length,
+  );
+
+  readonly failedPayments = computed(
+    () =>
+      this.payments().filter((payment) => payment.status === 'failed').length,
+  );
+
+  readonly successfulRevenue = computed(() => {
+    return this.payments()
+      .filter((payment) => payment.status === 'successful')
+      .reduce((total, payment) => total + Number(payment.amount ?? 0), 0);
+  });
+
+  // =====================================================
+  // CASH REQUEST COUNTS
+  // =====================================================
+
+  readonly pendingCashCount = computed(() => this.cashRequests().length);
+
+  readonly pendingCashAmount = computed(() => {
+    return this.cashRequests().reduce(
+      (total, request) => total + Number(request.amount ?? 0),
+      0,
+    );
+  });
+
+  // =====================================================
+  // CONSTRUCTOR
+  // =====================================================
+
+  constructor() {
+    addIcons({
+      cardOutline,
+      cashOutline,
+      chevronForwardOutline,
+      checkmarkCircleOutline,
+      downloadOutline,
+      refreshOutline,
+      searchOutline,
+    });
+
+    this.load();
+  }
+
+  // =====================================================
+  // LOAD PAYMENT HISTORY
+  // =====================================================
+
+  load(): void {
+    this.loading.set(true);
+
+    this.error.set(false);
+
+    this.service
+      .getPayments()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.payments.set(response.payments ?? []);
+        },
+
+        error: (error) => {
+          console.error('Failed to load payments:', error);
+
+          this.error.set(true);
+        },
+      });
+  }
+
+  // =====================================================
+  // REFRESH CURRENT VIEW
+  // =====================================================
+
+  refreshCurrentView(): void {
+    if (this.activeView() === 'cash') {
+      this.loadCashRequests();
+      return;
+    }
+    this.load();
+  }
+
+  // =====================================================
+  // CHANGE PAGE VIEW
+  // =====================================================
+
+  changeView(view: 'all' | 'cash'): void {
+    this.activeView.set(view);
+
+    if (view === 'cash' && !this.cashLoaded()) {
+      this.loadCashRequests();
+    }
+  }
+
+  // =====================================================
+  // LOAD CASH PAYMENT REQUESTS
+  // =====================================================
+
+  loadCashRequests(): void {
+    this.cashLoading.set(true);
+
+    this.cashError.set(false);
+
+    this.service
+      .getCashRequests()
+      .pipe(finalize(() => this.cashLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.cashRequests.set(response.cash_requests ?? []);
+
+          this.cashLoaded.set(true);
+        },
+
+        error: (error) => {
+          console.error('Failed to load cash requests:', error);
+
+          this.cashError.set(true);
+        },
+      });
+  }
+
+  // =====================================================
+  // CONFIRM CASH PAYMENT
+  // =====================================================
+
+  async confirmCash(request: Payment): Promise<void> {
+    const reference = request.transaction_reference?.trim();
+
+    if (!reference) {
+      await this.showToast(
+        'This cash request does not have a valid payment reference.',
+        'danger',
+      );
+
+      return;
     }
 
+    if (request.payment_method !== 'cash') {
+      await this.showToast(
+        'Only cash payments can be confirmed here.',
+        'danger',
+      );
 
-    // =====================================================
-    // LOAD PAYMENT HISTORY
-    // =====================================================
-
-    load(): void {
-
-        this.loading.set(
-            true
-        );
-
-        this.error.set(
-            false
-        );
-
-
-        this.service
-            .getPayments()
-            .pipe(
-                finalize(
-                    () =>
-                        this.loading.set(
-                            false
-                        )
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.payments.set(
-                        response.payments ??
-                        []
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load payments:',
-                        error
-                    );
-
-                    this.error.set(
-                        true
-                    );
-                }
-            });
+      return;
     }
 
+    if (request.status !== ('awaiting_cash_confirmation' as PaymentStatus)) {
+      await this.showToast(
+        'This cash payment is no longer waiting for confirmation.',
+        'warning',
+      );
 
-    // =====================================================
-    // REFRESH CURRENT VIEW
-    // =====================================================
-
-    refreshCurrentView(): void {
-
-        if (this.activeView() === 'cash') {
-            this.loadCashRequests();
-            return;
-        }
-        if (this.activeView() === 'sms') {
-            this.loadSmsReview();
-            return;
-        }
-        this.load();
+      return;
     }
 
-
-    // =====================================================
-    // CHANGE PAGE VIEW
-    // =====================================================
-
-    changeView(
-        view:
-            'all' |
-            'cash' |
-            'sms'
-    ): void {
-
-        this.activeView.set(
-            view
-        );
-
-
-        if (view === 'cash' && !this.cashLoaded()) {
-            this.loadCashRequests();
-        }
-        if (view === 'sms' && !this.smsLoaded()) {
-            this.loadSmsReview();
-        }
+    if (this.confirmingReference() !== null) {
+      return;
     }
 
+    const alert = await this.alertController.create({
+      header: 'Confirm Cash Payment',
 
-    // =====================================================
-    // LOAD CASH PAYMENT REQUESTS
-    // =====================================================
+      subHeader: request.package_name || 'Internet package',
 
-    loadCashRequests(): void {
+      message: `Confirm that you physically received ${this.money(request.amount)} from ${request.phone_number || 'this customer'}. The router will activate access after confirmation.`,
 
-        this.cashLoading.set(
-            true
-        );
+      buttons: [
+        {
+          text: 'Cancel',
 
-        this.cashError.set(
-            false
-        );
+          role: 'cancel',
+        },
 
+        {
+          text: 'Confirm Payment',
 
-        this.service
-            .getCashRequests()
-            .pipe(
-                finalize(
-                    () =>
-                        this.cashLoading.set(
-                            false
-                        )
-                )
-            )
-            .subscribe({
+          role: 'confirm',
 
-                next: (response) => {
+          handler: () => {
+            this.performCashConfirmation(reference);
+          },
+        },
+      ],
+    });
 
-                    this.cashRequests.set(
-                        response.cash_requests ??
-                        []
-                    );
+    await alert.present();
+  }
 
-                    this.cashLoaded.set(
-                        true
-                    );
-                },
+  // =====================================================
+  // PERFORM CASH CONFIRMATION
+  // =====================================================
 
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load cash requests:',
-                        error
-                    );
-
-                    this.cashError.set(
-                        true
-                    );
-                }
-            });
+  private performCashConfirmation(reference: string): void {
+    if (this.confirmingReference() !== null) {
+      return;
     }
 
+    this.confirmingReference.set(reference);
 
-    // =====================================================
-    // AUTOMATIC PAYMENT SMS REVIEW
-    // =====================================================
+    this.service
+      .confirmCashPayment(reference)
+      .pipe(finalize(() => this.confirmingReference.set(null)))
+      .subscribe({
+        next: async (response) => {
+          /*
+           * Immediately remove the request from
+           * the pending cash list.
+           */
+          this.cashRequests.update((requests) =>
+            requests.filter(
+              (request) => request.transaction_reference !== reference,
+            ),
+          );
 
-    loadSmsReview(): void {
-        this.smsLoading.set(true);
-        this.smsError.set(false);
-        this.service.getPaymentSmsReview()
-            .pipe(finalize(() => this.smsLoading.set(false)))
-            .subscribe({
-                next: response => {
-                    this.smsReviews.set(response.sms_reviews ?? []);
-                    this.smsPendingPayments.set(response.pending_payments ?? []);
-                    this.smsLoaded.set(true);
-                },
-                error: error => {
-                    console.error('Failed to load payment SMS review:', error);
-                    this.smsError.set(true);
-                }
-            });
-    }
-
-    selectSmsPayment(smsId: number, value: unknown): void {
-        const paymentId = Number(value);
-        this.selectedSmsPayment.update(current => ({ ...current, [smsId]: paymentId }));
-    }
-
-    retrySms(sms: PaymentSmsReview): void {
-        if (this.resolvingSmsId() !== null) return;
-        this.resolvingSmsId.set(sms.id);
-        this.service.retryPaymentSms(sms.id)
-            .pipe(finalize(() => this.resolvingSmsId.set(null)))
-            .subscribe({
-                next: async () => {
-                    await this.showToast('SMS checked again.', 'success');
-                    this.loadSmsReview();
-                    this.load();
-                },
-                error: async error => {
-                    await this.showToast(error?.error?.message || 'Could not retry this SMS.', 'danger');
-                }
-            });
-    }
-
-    matchSms(sms: PaymentSmsReview): void {
-        const paymentId = this.selectedSmsPayment()[sms.id];
-        if (!Number.isInteger(paymentId) || paymentId <= 0 || this.resolvingSmsId() !== null) return;
-        this.resolvingSmsId.set(sms.id);
-        this.service.matchPaymentSms(sms.id, paymentId)
-            .pipe(finalize(() => this.resolvingSmsId.set(null)))
-            .subscribe({
-                next: async response => {
-                    await this.showToast(response.message || 'Payment matched.', 'success');
-                    this.loadSmsReview();
-                    this.load();
-                },
-                error: async error => {
-                    await this.showToast(error?.error?.message || 'Could not match this payment.', 'danger');
-                }
-            });
-    }
-
-    // =====================================================
-    // CONFIRM CASH PAYMENT
-    // =====================================================
-
-    async confirmCash(
-        request: Payment
-    ): Promise<void> {
-
-        const reference =
-            request
-                .transaction_reference
-                ?.trim();
-
-
-        if (!reference) {
-
-            await this.showToast(
-                'This cash request does not have a valid payment reference.',
-                'danger'
+          /*
+           * Replace the corresponding payment in
+           * payment history when it already exists.
+           */
+          this.payments.update((payments) => {
+            const exists = payments.some(
+              (payment) => payment.id === response.payment.id,
             );
 
-            return;
-        }
-
-
-        if (
-            request.payment_method !==
-            'cash'
-        ) {
-
-            await this.showToast(
-                'Only cash payments can be confirmed here.',
-                'danger'
-            );
-
-            return;
-        }
-
-
-        if (
-            request.status !==
-            ('awaiting_cash_confirmation' as PaymentStatus)
-        ) {
-
-            await this.showToast(
-                'This cash payment is no longer waiting for confirmation.',
-                'warning'
-            );
-
-            return;
-        }
-
-
-        if (
-            this.confirmingReference() !==
-            null
-        ) {
-            return;
-        }
-
-
-        const alert =
-            await this.alertController
-                .create({
-
-                    header:
-                        'Confirm Cash Payment',
-
-                    subHeader:
-                        request.package_name ||
-                        'Internet package',
-
-                    message:
-                        `Confirm that you physically received ${this.money(request.amount)} from ${request.phone_number || 'this customer'}. Internet access will be activated immediately after confirmation.`,
-
-                    buttons: [
-
-                        {
-                            text:
-                                'Cancel',
-
-                            role:
-                                'cancel'
-                        },
-
-                        {
-                            text:
-                                'Confirm Payment',
-
-                            role:
-                                'confirm',
-
-                            handler:
-                                () => {
-
-                                    this.performCashConfirmation(
-                                        reference
-                                    );
-                                }
-                        }
-                    ]
-                });
-
-
-        await alert.present();
-    }
-
-
-    // =====================================================
-    // PERFORM CASH CONFIRMATION
-    // =====================================================
-
-    private performCashConfirmation(
-        reference: string
-    ): void {
-
-        if (
-            this.confirmingReference() !==
-            null
-        ) {
-            return;
-        }
-
-
-        this.confirmingReference.set(
-            reference
-        );
-
-
-        this.service
-            .confirmCashPayment(
-                reference
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.confirmingReference.set(
-                            null
-                        )
-                )
-            )
-            .subscribe({
-
-                next: async (
-                    response
-                ) => {
-
-                    /*
-                     * Immediately remove the request from
-                     * the pending cash list.
-                     */
-                    this.cashRequests.update(
-                        (requests) =>
-                            requests.filter(
-                                (request) =>
-                                    request.transaction_reference !==
-                                    reference
-                            )
-                    );
-
-
-                    /*
-                     * Replace the corresponding payment in
-                     * payment history when it already exists.
-                     */
-                    this.payments.update(
-                        (payments) => {
-
-                            const exists =
-                                payments.some(
-                                    (payment) =>
-                                        payment.id ===
-                                        response.payment.id
-                                );
-
-
-                            if (!exists) {
-
-                                return [
-                                    response.payment,
-                                    ...payments
-                                ];
-                            }
-
-
-                            return payments.map(
-                                (payment) =>
-                                    payment.id ===
-                                    response.payment.id
-                                        ? {
-                                            ...payment,
-                                            ...response.payment
-                                        }
-                                        : payment
-                            );
-                        }
-                    );
-
-
-                    await this.showToast(
-                        response.already_confirmed
-                            ? 'Cash payment was already confirmed.'
-                            : 'Cash payment confirmed. Internet access is now active.',
-                        'success'
-                    );
-
-
-                    /*
-                     * Reload both backend views so our local
-                     * state cannot become stale.
-                     */
-                    this.loadCashRequests();
-
-                    this.load();
-                },
-
-
-                error: async (
-                    error
-                ) => {
-
-                    console.error(
-                        'Cash confirmation failed:',
-                        error
-                    );
-
-
-                    await this.showToast(
-                        error?.error?.message ||
-                        'Unable to confirm this cash payment.',
-                        'danger'
-                    );
-
-
-                    /*
-                     * Reload pending requests because another
-                     * admin may already have processed it.
-                     */
-                    this.loadCashRequests();
-                }
-            });
-    }
-
-
-    // =====================================================
-    // CHECK WHETHER REQUEST IS BEING CONFIRMED
-    // =====================================================
-
-    isConfirming(
-        request: Payment
-    ): boolean {
-
-        return (
-            this.confirmingReference() ===
-            request.transaction_reference
-        );
-    }
-
-
-    // =====================================================
-    // MONEY FORMATTER
-    // =====================================================
-
-    money(
-        value:
-            number |
-            string |
-            null |
-            undefined
-    ): string {
-
-        if (
-            value === null ||
-            value === undefined ||
-            value === ''
-        ) {
-
-            return 'TZS 0';
-        }
-
-
-        const amount =
-            Number(
-                value
-            );
-
-
-        if (
-            Number.isNaN(
-                amount
-            )
-        ) {
-
-            return 'TZS 0';
-        }
-
-
-        return `TZS ${amount.toLocaleString(
-            'en-TZ',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
+            if (!exists) {
+              return [response.payment, ...payments];
             }
-        )}`;
-    }
 
-
-    // =====================================================
-    // PAYMENT STATUS LABEL
-    // =====================================================
-
-    statusLabel(
-        status:
-            PaymentStatus
-    ): string {
-
-        if (
-            status ===
-            'successful'
-        ) {
-
-            return 'Successful';
-        }
-
-
-        if (
-            status ===
-            'pending'
-        ) {
-
-            return 'Pending';
-        }
-
-
-        if (
-            status ===
-            'failed'
-        ) {
-
-            return 'Failed';
-        }
-
-
-        if (
-            status ===
-            'awaiting_cash_confirmation'
-        ) {
-
-            return 'Awaiting Cash Confirmation';
-        }
-
-
-        return String(
-            status
-        )
-            .replace(
-                /[_-]+/g,
-                ' '
-            )
-            .replace(
-                /\b\w/g,
-                (character) =>
-                    character.toUpperCase()
+            return payments.map((payment) =>
+              payment.id === response.payment.id
+                ? {
+                    ...payment,
+                    ...response.payment,
+                  }
+                : payment,
             );
+          });
+
+          await this.showToast(
+            response.already_confirmed
+              ? 'Cash payment was already confirmed.'
+              : 'Cash received. Router activation is being processed.',
+            'success',
+          );
+
+          /*
+           * Reload both backend views so our local
+           * state cannot become stale.
+           */
+          this.loadCashRequests();
+
+          this.load();
+        },
+
+        error: async (error) => {
+          console.error('Cash confirmation failed:', error);
+
+          await this.showToast(
+            error?.error?.message || 'Unable to confirm this cash payment.',
+            'danger',
+          );
+
+          /*
+           * Reload pending requests because another
+           * admin may already have processed it.
+           */
+          this.loadCashRequests();
+        },
+      });
+  }
+
+  // =====================================================
+  // CHECK WHETHER REQUEST IS BEING CONFIRMED
+  // =====================================================
+
+  isConfirming(request: Payment): boolean {
+    return this.confirmingReference() === request.transaction_reference;
+  }
+
+  // =====================================================
+  // MONEY FORMATTER
+  // =====================================================
+
+  money(value: number | string | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return 'TZS 0';
     }
 
+    const amount = Number(value);
 
-    // =====================================================
-    // PAYMENT METHOD LABEL
-    // =====================================================
-
-    methodLabel(
-        method:
-            string |
-            null |
-            undefined
-    ): string {
-
-        if (!method) {
-            return '—';
-        }
-
-
-        if (
-            method === 'cash'
-        ) {
-            return 'Cash';
-        }
-
-
-        return method
-            .replace(
-                /[_-]+/g,
-                ' '
-            )
-            .replace(
-                /\b\w/g,
-                (character) =>
-                    character.toUpperCase()
-            );
+    if (Number.isNaN(amount)) {
+      return 'TZS 0';
     }
 
+    return `TZS ${amount.toLocaleString('en-TZ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
+  }
 
-    // =====================================================
-    // STATUS CSS HELPER
-    // =====================================================
+  // =====================================================
+  // PAYMENT STATUS LABEL
+  // =====================================================
 
-    statusClass(
-        status:
-            PaymentStatus
-    ): string {
-
-        if (
-            status ===
-            'successful'
-        ) {
-
-            return 'status--successful';
-        }
-
-
-        if (
-            status ===
-                'pending'
-        ) {
-
-            return 'status--pending';
-        }
-
-
-        return 'status--failed';
+  statusLabel(status: PaymentStatus): string {
+    if (status === 'successful') {
+      return 'Successful';
     }
 
-
-    // =====================================================
-    // TOAST HELPER
-    // =====================================================
-
-    private async showToast(
-        message: string,
-        color:
-            'success' |
-            'danger' |
-            'warning' |
-            'primary' = 'primary'
-    ): Promise<void> {
-
-        const toast =
-            await this.toastController
-                .create({
-
-                    message,
-
-                    duration:
-                        2500,
-
-                    position:
-                        'top',
-
-                    color
-                });
-
-
-        await toast.present();
+    if (status === 'pending') {
+      return 'Pending';
     }
+
+    if (status === 'failed') {
+      return 'Failed';
+    }
+
+    if (status === 'awaiting_cash_confirmation') {
+      return 'Awaiting Cash Confirmation';
+    }
+
+    return String(status)
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  // =====================================================
+  // PAYMENT METHOD LABEL
+  // =====================================================
+
+  methodLabel(method: string | null | undefined): string {
+    if (!method) {
+      return '—';
+    }
+
+    if (method === 'cash') {
+      return 'Cash';
+    }
+
+    return method
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  // =====================================================
+  // STATUS CSS HELPER
+  // =====================================================
+
+  statusClass(status: PaymentStatus): string {
+    if (status === 'successful') {
+      return 'status--successful';
+    }
+
+    if (status === 'pending') {
+      return 'status--pending';
+    }
+
+    return 'status--failed';
+  }
+
+  // =====================================================
+  // TOAST HELPER
+  // =====================================================
+
+  private async showToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' | 'primary' = 'primary',
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+
+      duration: 2500,
+
+      position: 'top',
+
+      color,
+    });
+
+    await toast.present();
+  }
 }

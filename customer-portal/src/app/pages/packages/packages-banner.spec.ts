@@ -33,14 +33,14 @@ describe('Package page company banner', () => {
     it('keeps packages visible without an empty banner area', () => {
         const fixture = render();
         expect(fixture.nativeElement.querySelector('.portal-promotion')).toBeNull();
-        expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Choose a package');
+        expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Welcome to Alpha Wi-Fi');
     });
 
     it('uses the uploaded banner URL and removes failed artwork', () => {
         company.update(value => ({ ...value!, settings: { branding: { banner_image_url: '/uploads/alpha/banner.png' } } }));
         const fixture = render();
         const img = fixture.nativeElement.querySelector('.portal-promotion img') as HTMLImageElement;
-        expect(img.src).toBe(getPublicFileUrl('/uploads/alpha/banner.png'));
+        expect(img.getAttribute('src')).toBe(getPublicFileUrl('/uploads/alpha/banner.png'));
         img.dispatchEvent(new Event('error'));
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('.portal-promotion')).toBeNull();

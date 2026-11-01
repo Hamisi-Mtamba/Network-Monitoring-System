@@ -12,19 +12,19 @@
 
     border: 1px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
     border-radius: 12px;
 
     background: var(
         --surface-soft,
-        #f8fafc
+        #FFFFFF
     );
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 }
 
@@ -41,11 +41,11 @@
 
     border-radius: 50%;
 
-    background: #64748b;
+    background: var(--company-accent);
 
     box-shadow:
         0 0 0 5px
-        #e2e8f0;
+        var(--company-background);
 }
 
 
@@ -63,10 +63,10 @@
 .status-card__label {
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.76rem;
+    font-size:1rem;
     font-weight: 650;
 }
 
@@ -74,7 +74,7 @@
 .status-card__value {
     margin-top: 2px;
 
-    font-size: 0.93rem;
+    font-size:1rem;
     font-weight: 740;
 
     letter-spacing: 0.045em;
@@ -86,10 +86,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.82rem;
+    font-size:1rem;
     line-height: 1.45;
 }
 
@@ -99,21 +99,21 @@
    ========================================================= */
 
 .status-card[data-tone='success'] {
-    border-color: #bbf7d0;
+    border-color: var(--company-background);
 
-    background: #ecfdf3;
+    background: #FFFFFF;
 
-    color: #15803d;
+    color: var(--company-text);
 }
 
 
 .status-card[data-tone='success']
 .status-card__icon {
-    background: #16a34a;
+    background: var(--company-primary);
 
     box-shadow:
         0 0 0 5px
-        #dcfce7;
+        var(--company-background);
 }
 
 
@@ -136,7 +136,7 @@
 
     box-shadow:
         0 0 0 5px
-        #ffedd5;
+        var(--brand-soft);
 }
 
 
@@ -170,13 +170,13 @@
 .status-card[data-tone='neutral'] {
     border-color: var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
-    background: #f8fafc;
+    background: #FFFFFF;
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 }

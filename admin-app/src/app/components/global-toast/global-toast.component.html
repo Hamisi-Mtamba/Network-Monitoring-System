@@ -1,0 +1,34 @@
+<section class="toast-region" aria-label="Notifications">
+  @for (item of service.notifications(); track item.id) {
+    <article
+      class="toast"
+      [class]="'toast toast--' + item.type"
+      [attr.role]="item.type === 'error' || item.type === 'warning' ? 'alert' : 'status'"
+      [attr.aria-live]="item.type === 'error' || item.type === 'warning' ? 'assertive' : 'polite'"
+      (mouseenter)="service.pause(item.id)"
+      (mouseleave)="service.resume(item.id)"
+    >
+      <span class="toast__icon" aria-hidden="true">
+        <ion-icon [name]="icon(item.type)"></ion-icon>
+      </span>
+
+      <div class="toast__body">
+        <strong>
+          <span class="visually-hidden">{{ label(item.type) }}: </span>{{ item.title }}
+        </strong>
+        @if (item.message) {
+          <p>{{ item.message }}</p>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="toast__close"
+        aria-label="Dismiss notification"
+        (click)="service.dismiss(item.id)"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </article>
+  }
+</section>

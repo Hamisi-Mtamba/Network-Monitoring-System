@@ -1,3 +1,4 @@
+import { getSelcomSettings, testSelcomConnection } from '../../controllers/admin/selcomSettings.controller.js';
 // Import Express
 import express from "express";
 
@@ -75,7 +76,9 @@ router.patch(
 // COMPANY PAYMENT SETTINGS
 // =========================================================
 
-// Update authenticated company's Lipa/mobile-money settings
+// Configure company-owned Selcom credentials.
+router.get('/payment-settings', getSelcomSettings);
+router.post('/payment-settings/test', testSelcomConnection);
 router.patch(
     "/payment-settings",
     updateCompanyPaymentSettings

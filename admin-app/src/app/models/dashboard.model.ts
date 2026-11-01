@@ -9,22 +9,20 @@
  * authenticated administrator's company.
  */
 export interface DashboardStats {
+  total_packages: number;
 
-    total_packages: number;
+  total_payments: number;
 
-    total_payments: number;
+  successful_payments: number;
 
-    successful_payments: number;
+  pending_payments: number;
 
-    pending_payments: number;
+  active_sessions: number;
 
-    active_sessions: number;
+  expired_sessions: number;
 
-    expired_sessions: number;
-
-    total_revenue: number | string;
+  total_revenue: number | string;
 }
-
 
 /**
  * Response returned by:
@@ -32,12 +30,10 @@ export interface DashboardStats {
  * GET /api/admin/dashboard
  */
 export interface DashboardResponse {
+  success: boolean;
 
-    success: boolean;
-
-    dashboard: DashboardStats;
+  dashboard: DashboardStats;
 }
-
 
 /* =========================================================
    SUPERADMIN PLATFORM DASHBOARD
@@ -49,43 +45,37 @@ export interface DashboardResponse {
  * These values summarize all companies in the platform.
  */
 export interface PlatformDashboardStats {
+  // Companies
+  total_companies: number;
 
-    // Companies
-    total_companies: number;
+  active_companies: number;
 
-    active_companies: number;
+  suspended_companies: number;
 
-    suspended_companies: number;
+  // Administrators
+  total_company_admins: number;
 
+  total_superadmins: number;
 
-    // Administrators
-    total_company_admins: number;
+  // Packages
+  total_packages: number;
 
-    total_superadmins: number;
+  // Payments
+  total_payments: number;
 
+  successful_payments: number;
 
-    // Packages
-    total_packages: number;
+  pending_payments: number;
 
+  total_revenue: number | string;
 
-    // Payments
-    total_payments: number;
+  // Internet sessions
+  total_sessions: number;
 
-    successful_payments: number;
+  active_sessions: number;
 
-    pending_payments: number;
-
-    total_revenue: number | string;
-
-
-    // Internet sessions
-    total_sessions: number;
-
-    active_sessions: number;
-
-    expired_sessions: number;
+  expired_sessions: number;
 }
-
 
 /* =========================================================
    RECENT COMPANY
@@ -96,24 +86,22 @@ export interface PlatformDashboardStats {
  * Superadmin platform dashboard.
  */
 export interface PlatformRecentCompany {
+  id: number;
 
-    id: number;
+  name: string;
 
-    name: string;
+  slug: string;
 
-    slug: string;
+  logo_url: string | null;
 
-    logo_url: string | null;
+  status: string;
 
-    status: string;
+  created_at: string;
 
-    created_at: string;
+  admin_count: number;
 
-    admin_count: number;
-
-    package_count: number;
+  package_count: number;
 }
-
 
 /* =========================================================
    PLATFORM DASHBOARD RESPONSE
@@ -125,10 +113,9 @@ export interface PlatformRecentCompany {
  * GET /api/platform/dashboard
  */
 export interface PlatformDashboardResponse {
+  success: boolean;
 
-    success: boolean;
+  dashboard: PlatformDashboardStats;
 
-    dashboard: PlatformDashboardStats;
-
-    recent_companies: PlatformRecentCompany[];
+  recent_companies: PlatformRecentCompany[];
 }

@@ -1,67 +1,110 @@
 <ion-content [fullscreen]="true">
   <main class="login-shell">
     <section class="brand-panel" aria-hidden="true">
-      <div class="brand-lockup"><span><ion-icon name="radio-outline"></ion-icon></span><strong>NetControl</strong></div>
+      <div class="brand-lockup">
+        <span><ion-icon name="radio-outline"></ion-icon></span
+        ><strong>NetControl</strong>
+      </div>
       <div class="brand-copy">
         <p>ISP OPERATIONS PLATFORM</p>
         <h1>Your network.<br /><em>Under control.</em></h1>
-        <p class="description">Monitor payments, manage access packages, and keep every internet session visible from one secure workspace.</p>
+        <p class="description">
+          Monitor payments, manage internet access, and keep every internet
+          session visible from one secure workspace.
+        </p>
       </div>
       <div class="signal-card">
         <div class="signal-bars"><i></i><i></i><i></i><i></i><i></i></div>
-        <span><strong>Network health</strong><small>All core services operational</small></span><b>99.9%</b>
+        <span
+          ><strong>Network health</strong
+          ><small>Payments · Access · Companies</small></span
+        ><b>↗</b>
       </div>
       <small class="copyright">© 2026 NetControl · Secure administration</small>
     </section>
 
     <section class="form-panel">
-      <div class="mobile-brand"><span><ion-icon name="radio-outline"></ion-icon></span><strong>NetControl</strong></div>
-      <form
-          [formGroup]="form"
-          (ngSubmit)="submit()"
-          novalidate>
-
+      <div class="mobile-brand">
+        <span><ion-icon name="radio-outline"></ion-icon></span
+        ><strong>NetControl</strong>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="form-heading">
-          <span class="security-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></span>
+          <span class="security-icon"
+            ><ion-icon name="shield-checkmark-outline"></ion-icon
+          ></span>
           <p>ADMINISTRATOR ACCESS</p>
           <h2>Welcome back</h2>
           <small>Sign in to continue to your operations dashboard.</small>
         </div>
 
         <label>Email address</label>
-        <div class="input-wrap" [class.invalid]="form.controls.email.touched && form.controls.email.invalid">
+        <div
+          class="input-wrap"
+          [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
+        >
           <ion-icon name="mail-outline"></ion-icon>
           <ion-input
-              type="email"
-              autocomplete="email"
-              placeholder="admin@example.com"
-              formControlName="email">
-            </ion-input>
+            aria-label="Email address" type="email"
+            autocomplete="email"
+            placeholder="admin@example.com"
+            formControlName="email"
+          >
+          </ion-input>
         </div>
-        @if (form.controls.email.touched && form.controls.email.invalid) { <p class="field-error">Enter a valid email address.</p> }
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p class="field-error">Enter a valid email address.</p>
+        }
 
         <label>Password</label>
-        <div class="input-wrap" [class.invalid]="form.controls.password.touched && form.controls.password.invalid">
+        <div
+          class="input-wrap"
+          [class.invalid]="form.controls.password.touched && form.controls.password.invalid"
+        >
           <ion-icon name="lock-closed-outline"></ion-icon>
-        <ion-input
-          [type]="showPassword() ? 'text' : 'password'"
-          autocomplete="current-password"
-          placeholder="Enter your password"
-          formControlName="password">
-    </ion-input>
-          <ion-button type="button" fill="clear" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
-            <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          <ion-input
+            aria-label="Password" [type]="showPassword() ? 'text' : 'password'"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            formControlName="password"
+          >
+          </ion-input>
+          <ion-button
+            type="button"
+            fill="clear"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            <ion-icon
+              [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"
+            ></ion-icon>
           </ion-button>
         </div>
-        @if (form.controls.password.touched && form.controls.password.invalid) { <p class="field-error">Password must contain at least 6 characters.</p> }
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+        <p class="field-error">Enter your password.</p>
+        }
 
-        <div class="session-note"><ion-checkbox [checked]="true" disabled></ion-checkbox><span>Keep me signed in for this browser session</span></div>
-        @if (errorMessage()) { <div class="form-error" role="alert">{{ errorMessage() }}</div> }
+        <div class="session-note">
+          <ion-checkbox [checked]="true" disabled></ion-checkbox
+          ><span>Keep me signed in for this browser session</span>
+        </div>
+        @if (errorMessage()) {
+        <div class="form-error" role="alert">{{ errorMessage() }}</div>
+        }
 
-        <ion-button class="submit" expand="block" type="submit" [disabled]="loading()">
-          @if (loading()) { <ion-spinner name="crescent"></ion-spinner> } @else { Sign in }
+        <ion-button
+          class="submit"
+          expand="block"
+          type="submit"
+          [disabled]="loading()"
+        >
+          @if (loading()) { <ion-spinner name="crescent"></ion-spinner> } @else
+          { Sign in }
         </ion-button>
-        <p class="help">Access is restricted to authorized administrators.<br />Contact your system owner if you need help.</p>
+        <p class="help">
+          Access is restricted to authorized administrators.<br />Contact your
+          system owner if you need help.
+        </p>
       </form>
     </section>
   </main>

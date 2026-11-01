@@ -3,82 +3,72 @@
 // =========================================================
 
 export interface InternetPackage {
+  id: number;
 
-    id: number;
+  // Company ownership is returned by platform endpoints.
+  // It may be omitted by some normal admin endpoints.
+  company_id?: number;
 
-    // Company ownership is returned by platform endpoints.
-    // It may be omitted by some normal admin endpoints.
-    company_id?: number;
+  name: string;
 
-    name: string;
+  price: number | string;
 
-    price: number | string;
+  duration_minutes: number;
 
-    duration_minutes: number;
+  speed: string;
 
-    speed: string;
+  is_active: boolean;
 
-    is_active: boolean;
+  available_from: string | null;
 
-    available_from: string | null;
-
-    available_until: string | null;
+  available_until: string | null;
 }
-
 
 // =========================================================
 // NORMAL COMPANY ADMIN PAYLOAD
 // =========================================================
 
 export interface PackagePayload {
+  name: string;
 
-    name: string;
+  price: number;
 
-    price: number;
+  duration_minutes: number;
 
-    duration_minutes: number;
+  speed: string;
 
-    speed: string;
-
-    is_active?: boolean;
+  is_active?: boolean;
 }
-
 
 // =========================================================
 // NORMAL PACKAGE RESPONSES
 // =========================================================
 
 export interface PackageListResponse {
+  success: boolean;
 
-    success: boolean;
-
-    packages: InternetPackage[];
+  packages: InternetPackage[];
 }
-
 
 export interface PackageResponse {
+  success: boolean;
 
-    success: boolean;
+  message?: string;
 
-    message?: string;
-
-    package: InternetPackage;
+  package: InternetPackage;
 }
-
 
 // =========================================================
 // PLATFORM COMPANY SUMMARY
 // =========================================================
 
 export interface PackageCompanySummary {
+  id: number;
 
-    id: number;
+  name: string;
 
-    name: string;
-
-    status: string;
+  status: string;
 }
-
 
 // =========================================================
 // SUPERADMIN COMPANY PACKAGE LIST
@@ -90,14 +80,12 @@ export interface PackageCompanySummary {
  * GET /api/platform/companies/:companyId/packages
  */
 export interface CompanyPackagesResponse {
+  success: boolean;
 
-    success: boolean;
+  company: PackageCompanySummary;
 
-    company: PackageCompanySummary;
-
-    packages: InternetPackage[];
+  packages: InternetPackage[];
 }
-
 
 // =========================================================
 // CREATE COMPANY PACKAGE
@@ -109,16 +97,14 @@ export interface CompanyPackagesResponse {
  * POST /api/platform/companies/:companyId/packages
  */
 export interface CreateCompanyPackageRequest {
+  name: string;
 
-    name: string;
+  price: number;
 
-    price: number;
+  duration_minutes: number;
 
-    duration_minutes: number;
-
-    speed: string;
+  speed: string;
 }
-
 
 // =========================================================
 // UPDATE COMPANY PACKAGE
@@ -130,16 +116,14 @@ export interface CreateCompanyPackageRequest {
  * PATCH /api/platform/companies/:companyId/packages/:packageId
  */
 export interface UpdateCompanyPackageRequest {
+  name: string;
 
-    name: string;
+  price: number;
 
-    price: number;
+  duration_minutes: number;
 
-    duration_minutes: number;
-
-    speed: string;
+  speed: string;
 }
-
 
 // =========================================================
 // UPDATE PACKAGE STATUS
@@ -152,10 +136,8 @@ export interface UpdateCompanyPackageRequest {
  * /api/platform/companies/:companyId/packages/:packageId/status
  */
 export interface UpdateCompanyPackageStatusRequest {
-
-    is_active: boolean;
+  is_active: boolean;
 }
-
 
 // =========================================================
 // UPDATE PACKAGE SCHEDULE
@@ -168,12 +150,10 @@ export interface UpdateCompanyPackageStatusRequest {
  * /api/platform/companies/:companyId/packages/:packageId/schedule
  */
 export interface UpdateCompanyPackageScheduleRequest {
+  available_from: string | null;
 
-    available_from: string | null;
-
-    available_until: string | null;
+  available_until: string | null;
 }
-
 
 // =========================================================
 // PLATFORM PACKAGE ACTION RESPONSE
@@ -184,10 +164,9 @@ export interface UpdateCompanyPackageScheduleRequest {
  * activating/deactivating, scheduling, or deleting a package.
  */
 export interface CompanyPackageResponse {
+  success: boolean;
 
-    success: boolean;
+  message: string;
 
-    message: string;
-
-    package: InternetPackage;
+  package: InternetPackage;
 }

@@ -1,3 +1,4 @@
+import { changeSessionStatus } from '../../../services/session-lifecycle.service.js';
 // Import PostgreSQL connection pool
 import { pool } from "../../database/database.js";
 
@@ -190,92 +191,15 @@ const getSessionById = async (req, res) => {
 
 
 // Update the status of one internet session
-const updateSessionStatus = async (req, res) => {
+const updateSessionStatus = async (req,res) => {
     try {
-        // Get trusted company ID
-        const companyId = getRequestCompanyId(req);
-
-        // Get session ID
-        const sessionId = Number(req.params.id);
-
-        // Get requested status
-        const { status } = req.body;
-
-        // Validate session ID
-        if (!Number.isInteger(sessionId) || sessionId <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid session ID"
-            });
-        }
-
-        // Define statuses supported by the current project
-        const allowedStatuses = [
-            "active",
-            "suspended",
-            "expired",
-            "failed",
-            "pending_activation"
-        ];
-
-        // Reject unsupported status
-        if (!allowedStatuses.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid session status"
-            });
-        }
-
-        // Update only a session owned by this company
-        const result = await pool.query(
-            `
-            UPDATE internet_sessions
-            SET status = $1
-            WHERE id = $2
-            AND company_id = $3
-            RETURNING
-                id,
-                company_id,
-                payment_id,
-                package_id,
-                started_at,
-                expires_at,
-                status,
-                created_at
-            `,
-            [
-                status,
-                sessionId,
-                companyId
-            ]
-        );
-
-        // Return 404 if session belongs to another company
-        if (result.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Internet session not found"
-            });
-        }
-
-        // Return updated session
-        res.status(200).json({
-            success: true,
-            message: "Internet session status updated successfully",
-            session: result.rows[0]
-        });
-
-    } catch (error) {
-        // Log actual backend error
-        console.error("Update session status error:", error.message);
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to update internet session"
-        });
-    }
+        const id=Number(req.params.id);
+        if (!Number.isSafeInteger(id) || id<=0) return res.status(400).json({success:false,message:'Invalid session ID'});
+        const session=await changeSessionStatus(getRequestCompanyId(req),id,req.body?.status);
+        return res.json({success:true,session,message:session.router_change_pending
+            ? 'Session change saved; router update is pending' : 'Session and router updated'});
+    } catch(error) {return res.status(error.status || 500).json({success:false,message:error.status ? error.message : 'Unable to change session'});}
 };
-
 
 // Export session controllers
 export {

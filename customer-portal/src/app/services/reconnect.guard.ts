@@ -36,10 +36,10 @@ export const reconnectBeforePurchase: CanActivateFn = route => {
 @Component({
     standalone: true,
     imports: [RouterLink],
-    template: `<section role="status">
+    template: `<section class="state-panel enter" role="status" style="margin:64px auto">
         <h1>{{ suspended ? 'Internet access is suspended' : 'We could not check your internet access' }}</h1>
         <p>{{ suspended ? 'Please contact your Wi-Fi provider to reactivate your package.' : 'Please retry the connection check before buying another package.' }}</p>
-        <a [routerLink]="['/', slug, 'packages']">Retry connection check</a>
+        <a class="button" [routerLink]="['/', slug, 'packages']">Retry connection check</a>
     </section>`
 })
 export class ConnectionCheckPage {

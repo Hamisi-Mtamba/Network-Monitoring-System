@@ -50,9 +50,10 @@ import companyProfileRoutes from "./src/routes/admin/companyProfile.route.js";
 // Import public company routes
 import publicCompanyRoutes from "./src/routes/public/company.route.js";
 
-// Import httpSMS payment gateway webhook routes
-import httpSmsRoutes from "./src/routes/integrations/httpsms.routes.js";
-import { processPendingPaymentSms } from "./services/payment-verification.service.js";
+import selcomRoutes from './src/routes/integrations/selcom.routes.js';
+import { processSelcomOrders } from './services/selcom-payment.service.js';
+import { queueExpiredSessions } from './services/session-lifecycle.service.js';
+import { processHotspotJobs } from './services/payment-fulfillment.service.js';
 
 // Import company upload error handler
 import uploadErrorHandler from "./src/middlewares/uploadError.middleware.js";
@@ -104,8 +105,8 @@ app.use("/api/admin/company", companyProfileRoutes);
 app.use("/api/public", publicCompanyRoutes);
 
 
-// Receive signed httpSMS events from the dedicated payment phone
-app.use("/api/integrations", httpSmsRoutes);
+// Receive signed Selcom Checkout notifications.
+app.use("/api/integrations", selcomRoutes);
 
 // Handle Multer/file upload errors
 app.use(uploadErrorHandler);
@@ -128,15 +129,24 @@ app.get('/', (req, res) => {
     });
 });
 
-connectDB();
-
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-
-        // Retry any SMS that was stored before a restart or transient failure.
-        setInterval(() => {
-            processPendingPaymentSms().catch(error =>
-                console.error('Payment SMS worker error:', error.message)
-            );
-        }, 5000).unref();
-    });
+await connectDB();
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+// Each worker is non-overlapping; DB locks protect multiple backend processes.
+function schedule(name, task, interval) {
+    let running = false;
+    const run = async () => {
+        if (running) return;
+        running = true;
+        try { await task(); } catch (error) {
+            console.error(`${name} worker deferred [${error.code || 'UNKNOWN'}]: ${error.message}`);
+            if (error.code === '42P01' || error.code === '42703') {
+                console.error('Payment database schema is incomplete. Apply backend/src/database/migrations/002_selcom_payments.sql to the configured database; see backend/PAYMENT_SETUP.md.');
+            }
+        }
+        finally { running = false; }
+    };
+    void run();
+    setInterval(run, interval).unref();
+}
+schedule('Selcom orders', processSelcomOrders, 10000);
+schedule('HotSpot sessions', async () => { await queueExpiredSessions(); await processHotspotJobs(); }, 5000);

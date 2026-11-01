@@ -1,5074 +1,2718 @@
+import { SelcomSettingsComponent } from '../../components/selcom-settings/selcom-settings.component';
 import { BrandingImagesComponent } from '../../components/branding-images/branding-images.component';
 // Import Angular component utilities
 import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    inject,
-    signal
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
 } from '@angular/core';
 
-
 // Import Angular common pipes
-import {
-    DatePipe
-} from '@angular/common';
-
+import { DatePipe } from '@angular/common';
 
 // Import Angular forms
-import {
-    FormBuilder,
-    ReactiveFormsModule,
-    Validators
-} from '@angular/forms';
-
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 // Import Angular router utilities
-import {
-    ActivatedRoute,
-    Router
-} from '@angular/router';
-
+import { ActivatedRoute, Router } from '@angular/router';
 
 // Import Ionic standalone components
 import {
-    IonButton,
-    IonIcon,
-    IonInput,
-    IonSpinner
+  IonButton,
+  IonIcon,
+  IonInput,
+  IonSpinner,
 } from '@ionic/angular/standalone';
 
-
 // Import Ionic icon registration
-import {
-    addIcons
-} from 'ionicons';
-
+import { addIcons } from 'ionicons';
 
 // Import icons used on the company workspace
 import {
-    addOutline,
-    arrowBackOutline,
-    businessOutline,
-    cardOutline,
-    checkmarkCircleOutline,
-    closeCircleOutline,
-    colorPaletteOutline,
-    cubeOutline,
-    eyeOutline,
-    imageOutline,
-    keyOutline,
-    peopleOutline,
-    personOutline,
-    refreshOutline,
-    saveOutline,
-    statsChartOutline,
-    timeOutline,
-    trashOutline,
-    walletOutline,
-    wifiOutline
+  addOutline,
+  arrowBackOutline,
+  businessOutline,
+  cardOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  colorPaletteOutline,
+  cubeOutline,
+  eyeOutline,
+  imageOutline,
+  keyOutline,
+  peopleOutline,
+  personOutline,
+  refreshOutline,
+  saveOutline,
+  statsChartOutline,
+  timeOutline,
+  trashOutline,
+  walletOutline,
+  wifiOutline,
 } from 'ionicons/icons';
 
-
 // Import RxJS helper
-import {
-    finalize
-} from 'rxjs';
-
+import { finalize } from 'rxjs';
 
 // Import company models
 import {
-    Company,
-    CompanyBrandingImageType,
-    UpdateCompanyBrandingRequest,
-    UpdateCompanyPaymentSettingsRequest
+  Company,
+  CompanyBrandingImageType,
+  UpdateCompanyBrandingRequest,
 } from '../../models/company.model';
 
-
 // Import administrator models
-import {
-    Admin,
-    CreateCompanyAdminRequest
-} from '../../models/admin.model';
-
+import { Admin, CreateCompanyAdminRequest } from '../../models/admin.model';
 
 // Import package models
 import {
-    CreateCompanyPackageRequest,
-    InternetPackage,
-    UpdateCompanyPackageRequest
+  CreateCompanyPackageRequest,
+  InternetPackage,
+  UpdateCompanyPackageRequest,
 } from '../../models/package.model';
 
-
 // Import payment models
-import {
-    Payment,
-    PaymentInternetSession
-} from '../../models/payment.model';
-
+import { Payment, PaymentInternetSession } from '../../models/payment.model';
 
 // Import session models
-import {
-    InternetSession,
-    SessionStatus
-} from '../../models/session.model';
+import { InternetSession, SessionStatus } from '../../models/session.model';
 
 // Import report models
 import {
-    CompanyPaymentReportItem,
-    CompanyRevenueReportItem,
-    CompanySessionReportItem
+  CompanyPaymentReportItem,
+  CompanyRevenueReportItem,
+  CompanySessionReportItem,
 } from '../../models/report.model';
 
-
 // Import company service
-import {
-    CompanyService
-} from '../../services/company.service';
-
+import { CompanyService } from '../../services/company.service';
 
 // Import company administrator service
-import {
-    AdminService
-} from '../../services/admin.service';
-
+import { AdminService } from '../../services/admin.service';
 
 // Import package service
-import {
-    PackageService
-} from '../../services/package.service';
-
+import { PackageService } from '../../services/package.service';
 
 // Import payment service
-import {
-    PaymentService
-} from '../../services/payment.service';
-
+import { PaymentService } from '../../services/payment.service';
 
 // Import session service
-import {
-    SessionService
-} from '../../services/session.service';
+import { SessionService } from '../../services/session.service';
 
 // Import report service
-import {
-    ReportService
-} from '../../services/report.service';
-
+import { ReportService } from '../../services/report.service';
 
 // Import shared UI service
-import {
-    UiService
-} from '../../services/ui.service';
-
+import { UiService } from '../../services/ui.service';
 
 /* =========================================================
    COMPANY WORKSPACE NAVIGATION MODEL
    ========================================================= */
 
 interface CompanyWorkspaceSection {
+  label: string;
 
-    label: string;
+  key:
+    | 'overview'
+    | 'admins'
+    | 'packages'
+    | 'payments'
+    | 'sessions'
+    | 'reports'
+    | 'branding'
+    | 'payment-settings';
 
-    key:
-        | 'overview'
-        | 'admins'
-        | 'packages'
-        | 'payments'
-        | 'sessions'
-        | 'reports'
-        | 'branding'
-        | 'payment-settings';
-
-    icon: string;
+  icon: string;
 }
-
 
 /* =========================================================
    PLATFORM COMPANY PAGE
    ========================================================= */
 
 @Component({
-    selector: 'app-platform-company',
+  selector: 'app-platform-company',
 
-    standalone: true,
+  standalone: true,
 
-    imports: [
-        BrandingImagesComponent,
-        DatePipe,
-        ReactiveFormsModule,
-        IonButton,
-        IonIcon,
-        IonInput,
-        IonSpinner
-    ],
+  imports: [SelcomSettingsComponent,
+    BrandingImagesComponent,
+    DatePipe,
+    ReactiveFormsModule,
+    IonButton,
+    IonIcon,
+    IonInput,
+    IonSpinner,
+  ],
 
-    templateUrl:
-        './platform-company.page.html',
+  templateUrl: './platform-company.page.html',
 
-    styleUrl:
-        './platform-company.page.scss',
+  styleUrl: './platform-company.page.scss',
 
-    changeDetection:
-        ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlatformCompanyPage {
+  // =====================================================
+  // SERVICES
+  // =====================================================
 
-    // =====================================================
-    // SERVICES
-    // =====================================================
+  private readonly route = inject(ActivatedRoute);
 
-    private readonly route =
-        inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-    private readonly router =
-        inject(Router);
+  private readonly companyService = inject(CompanyService);
 
-    private readonly companyService =
-        inject(CompanyService);
+  private readonly adminService = inject(AdminService);
 
-    private readonly adminService =
-        inject(AdminService);
+  private readonly packageService = inject(PackageService);
 
-    private readonly packageService =
-        inject(PackageService);
+  private readonly paymentService = inject(PaymentService);
 
-    private readonly paymentService =
-        inject(PaymentService);
+  private readonly sessionService = inject(SessionService);
 
-    private readonly sessionService =
-        inject(SessionService);
+  private readonly reportService = inject(ReportService);
 
-    private readonly reportService =
-        inject(ReportService);
+  private readonly ui = inject(UiService);
 
-    private readonly ui =
-        inject(UiService);
+  private readonly fb = inject(FormBuilder);
 
-    private readonly fb =
-        inject(FormBuilder);
+  // =====================================================
+  // COMPANY PAGE STATE
+  // =====================================================
 
+  readonly loading = signal(true);
 
-    // =====================================================
-    // COMPANY PAGE STATE
-    // =====================================================
+  readonly saving = signal(false);
 
-    readonly loading =
-        signal(true);
+  readonly error = signal(false);
 
-    readonly saving =
-        signal(false);
+  readonly errorMessage = signal('');
 
-    readonly error =
-        signal(false);
+  onImagesUpdated(company: Company): void {
+    this.company.set(company);
+    this.populateBrandingForm(company);
+  }
 
-    readonly errorMessage =
-        signal('');
+  readonly company = signal<Company | null>(null);
 
-    onImagesUpdated(company: Company): void {
-        this.company.set(company);
+  readonly activeSection = signal<CompanyWorkspaceSection['key']>('overview');
+
+  // =====================================================
+  // ADMIN MANAGEMENT STATE
+  // =====================================================
+
+  readonly admins = signal<Admin[]>([]);
+
+  readonly adminsLoading = signal(false);
+
+  readonly adminsLoaded = signal(false);
+
+  readonly adminSaving = signal(false);
+
+  readonly adminActionId = signal<number | null>(null);
+
+  readonly adminErrorMessage = signal('');
+
+  readonly showCreateAdminForm = signal(false);
+
+  readonly editingAdmin = signal<Admin | null>(null);
+
+  readonly passwordAdmin = signal<Admin | null>(null);
+
+  // =====================================================
+  // PACKAGE MANAGEMENT STATE
+  // =====================================================
+
+  readonly packages = signal<InternetPackage[]>([]);
+
+  readonly packagesLoading = signal(false);
+
+  readonly packagesLoaded = signal(false);
+
+  readonly packageSaving = signal(false);
+
+  readonly packageActionId = signal<number | null>(null);
+
+  readonly packageErrorMessage = signal('');
+
+  readonly showCreatePackageForm = signal(false);
+
+  readonly editingPackage = signal<InternetPackage | null>(null);
+
+  readonly schedulePackage = signal<InternetPackage | null>(null);
+
+  // =====================================================
+  // PAYMENT MANAGEMENT STATE
+  // =====================================================
+
+  readonly payments = signal<Payment[]>([]);
+
+  readonly paymentsLoading = signal(false);
+
+  readonly paymentsLoaded = signal(false);
+
+  readonly paymentErrorMessage = signal('');
+
+  readonly selectedPayment = signal<Payment | null>(null);
+
+  readonly selectedPaymentSession = signal<PaymentInternetSession | null>(null);
+
+  readonly paymentDetailsLoading = signal(false);
+
+  // =====================================================
+  // SESSION MANAGEMENT STATE
+  // =====================================================
+
+  readonly sessions = signal<InternetSession[]>([]);
+
+  readonly sessionsLoading = signal(false);
+
+  readonly sessionsLoaded = signal(false);
+
+  readonly sessionErrorMessage = signal('');
+
+  readonly selectedSession = signal<InternetSession | null>(null);
+
+  readonly sessionDetailsLoading = signal(false);
+
+  readonly sessionActionId = signal<number | null>(null);
+
+  // =====================================================
+  // REPORT MANAGEMENT STATE
+  // =====================================================
+
+  readonly reportsLoading = signal(false);
+
+  readonly reportsLoaded = signal(false);
+
+  readonly reportErrorMessage = signal('');
+
+  readonly revenueReport = signal<CompanyRevenueReportItem[]>([]);
+
+  readonly paymentReport = signal<CompanyPaymentReportItem[]>([]);
+
+  readonly sessionReport = signal<CompanySessionReportItem[]>([]);
+
+  readonly reportTotalRevenue = signal(0);
+
+  // =====================================================
+  // BRANDING MANAGEMENT STATE
+  // =====================================================
+
+  readonly brandingSaving = signal(false);
+
+  readonly brandingErrorMessage = signal('');
+
+  readonly brandingSuccessMessage = signal('');
+
+  readonly brandingUploading = signal<CompanyBrandingImageType | 'logo' | null>(
+    null,
+  );
+
+  readonly brandingRemoving = signal<CompanyBrandingImageType | 'logo' | null>(
+    null,
+  );
+
+  // =====================================================
+  // COMPANY ID
+  // =====================================================
+
+  readonly companyId = computed(() => {
+    return Number(this.route.snapshot.paramMap.get('companyId'));
+  });
+
+  // =====================================================
+  // WORKSPACE SECTIONS
+  // =====================================================
+
+  readonly sections: CompanyWorkspaceSection[] = [
+    {
+      label: 'Overview',
+      key: 'overview',
+      icon: 'business-outline',
+    },
+
+    {
+      label: 'Admins',
+      key: 'admins',
+      icon: 'people-outline',
+    },
+
+    {
+      label: 'Packages',
+      key: 'packages',
+      icon: 'cube-outline',
+    },
+
+    {
+      label: 'Payments',
+      key: 'payments',
+      icon: 'card-outline',
+    },
+
+    {
+      label: 'Sessions',
+      key: 'sessions',
+      icon: 'wifi-outline',
+    },
+
+    {
+      label: 'Reports',
+      key: 'reports',
+      icon: 'stats-chart-outline',
+    },
+
+    {
+      label: 'Payment Setup',
+      key: 'payment-settings',
+      icon: 'wallet-outline',
+    },
+
+    {
+      label: 'Branding',
+      key: 'branding',
+      icon: 'color-palette-outline',
+    },
+  ];
+
+  // =====================================================
+  // COMPANY FORM
+  // =====================================================
+
+  readonly companyForm = this.fb.nonNullable.group({
+    name: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(200)],
+    ],
+
+    slug: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
+
+    email: ['', [Validators.email]],
+
+    phone: [''],
+
+    address: [''],
+  });
+
+  // =====================================================
+  // CREATE ADMIN FORM
+  // =====================================================
+
+  readonly createAdminForm = this.fb.nonNullable.group({
+    name: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(200)],
+    ],
+
+    email: ['', [Validators.required, Validators.email]],
+
+    password: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  // =====================================================
+  // EDIT ADMIN FORM
+  // =====================================================
+
+  readonly editAdminForm = this.fb.nonNullable.group({
+    name: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(200)],
+    ],
+
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  // =====================================================
+  // CHANGE PASSWORD FORM
+  // =====================================================
+
+  readonly passwordForm = this.fb.nonNullable.group({
+    password: ['', [Validators.required, Validators.minLength(8)]],
+
+    confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  // =====================================================
+  // CREATE PACKAGE FORM
+  // =====================================================
+
+  readonly createPackageForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+
+    price: [0, [Validators.required, Validators.min(1)]],
+
+    duration_minutes: [0, [Validators.required, Validators.min(1)]],
+
+    speed: ['', [Validators.required]],
+  });
+
+  // =====================================================
+  // EDIT PACKAGE FORM
+  // =====================================================
+
+  readonly editPackageForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+
+    price: [0, [Validators.required, Validators.min(1)]],
+
+    duration_minutes: [0, [Validators.required, Validators.min(1)]],
+
+    speed: ['', [Validators.required]],
+  });
+
+  // =====================================================
+  // PACKAGE SCHEDULE FORM
+  // =====================================================
+
+  readonly packageScheduleForm = this.fb.nonNullable.group({
+    available_from: [''],
+
+    available_until: [''],
+  });
+
+  // =====================================================
+  // BRANDING FORM
+  // =====================================================
+
+  readonly brandingForm = this.fb.nonNullable.group({
+    primary_color: [
+      '#F26E01',
+      [
+        Validators.required,
+        Validators.pattern(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
+      ],
+    ],
+
+    secondary_color: [
+      '#9C4300',
+      [
+        Validators.required,
+        Validators.pattern(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
+      ],
+    ],
+
+    accent_color: [
+      '#F26E01',
+      [
+        Validators.required,
+        Validators.pattern(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
+      ],
+    ],
+
+    background_color: [
+      '#FFF1E5',
+      [
+        Validators.required,
+        Validators.pattern(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
+      ],
+    ],
+
+    navbar_color: [
+      '#FFFFFF',
+      [
+        Validators.required,
+        Validators.pattern(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
+      ],
+    ],
+
+    background_image_url: [''],
+
+    login_image_url: [''],
+
+    banner_image_url: [''],
+  });
+
+  // =====================================================
+  // ADMIN COUNTS
+  // =====================================================
+
+  readonly activeAdminCount = computed(() => {
+    return this.admins().filter(
+      (admin) => admin.status === 'active' || admin.is_active === true,
+    ).length;
+  });
+
+  readonly suspendedAdminCount = computed(() => {
+    return this.admins().filter(
+      (admin) => admin.status === 'suspended' || admin.is_active === false,
+    ).length;
+  });
+
+  // =====================================================
+  // PACKAGE COUNTS
+  // =====================================================
+
+  readonly activePackageCount = computed(() => {
+    return this.packages().filter((item) => item.is_active).length;
+  });
+
+  readonly inactivePackageCount = computed(() => {
+    return this.packages().filter((item) => !item.is_active).length;
+  });
+
+  // =====================================================
+  // PAYMENT COUNTS / TOTALS
+  // =====================================================
+
+  readonly successfulPaymentCount = computed(() => {
+    return this.payments().filter((payment) => payment.status === 'successful')
+      .length;
+  });
+
+  readonly pendingPaymentCount = computed(() => {
+    return this.payments().filter((payment) => payment.status === 'pending')
+      .length;
+  });
+
+  readonly failedPaymentCount = computed(() => {
+    return this.payments().filter((payment) => payment.status === 'failed')
+      .length;
+  });
+
+  readonly successfulRevenue = computed(() => {
+    return this.payments()
+      .filter((payment) => payment.status === 'successful')
+      .reduce((total, payment) => total + Number(payment.amount), 0);
+  });
+
+  // =====================================================
+  // SESSION COUNTS
+  // =====================================================
+
+  readonly activeSessionCount = computed(() => {
+    return this.sessions().filter((session) => session.status === 'active')
+      .length;
+  });
+
+  readonly suspendedSessionCount = computed(() => {
+    return this.sessions().filter((session) => session.status === 'suspended')
+      .length;
+  });
+
+  readonly expiredSessionCount = computed(() => {
+    return this.sessions().filter((session) => session.status === 'expired')
+      .length;
+  });
+
+  readonly pendingActivationSessionCount = computed(() => {
+    return this.sessions().filter(
+      (session) => session.status === 'pending_activation',
+    ).length;
+  });
+
+  readonly failedSessionCount = computed(() => {
+    return this.sessions().filter((session) => session.status === 'failed')
+      .length;
+  });
+
+  // =====================================================
+  // REPORT COUNTS / TOTALS
+  // =====================================================
+
+  readonly reportSuccessfulPayments = computed(() => {
+    return (
+      this.paymentReport().find((item) => item.status === 'successful')
+        ?.payment_count ?? 0
+    );
+  });
+
+  readonly reportPendingPayments = computed(() => {
+    return (
+      this.paymentReport().find((item) => item.status === 'pending')
+        ?.payment_count ?? 0
+    );
+  });
+
+  readonly reportFailedPayments = computed(() => {
+    return (
+      this.paymentReport().find((item) => item.status === 'failed')
+        ?.payment_count ?? 0
+    );
+  });
+
+  readonly reportTotalPayments = computed(() => {
+    return this.paymentReport().reduce(
+      (total, item) => total + Number(item.payment_count),
+      0,
+    );
+  });
+
+  readonly reportTotalSessions = computed(() => {
+    return this.sessionReport().reduce(
+      (total, item) => total + Number(item.session_count),
+      0,
+    );
+  });
+
+  readonly reportActiveSessions = computed(() => {
+    return (
+      this.sessionReport().find((item) => item.status === 'active')
+        ?.session_count ?? 0
+    );
+  });
+
+  readonly reportExpiredSessions = computed(() => {
+    return (
+      this.sessionReport().find((item) => item.status === 'expired')
+        ?.session_count ?? 0
+    );
+  });
+
+  readonly latestRevenueDate = computed(() => {
+    return this.revenueReport().at(0)?.date ?? null;
+  });
+
+  // =====================================================
+  // BRANDING PREVIEW VALUES
+  // =====================================================
+
+  readonly logoUrl = computed(() => this.company()?.logo_url ?? null);
+
+  readonly backgroundImageUrl = computed(
+    () => this.company()?.settings?.branding?.background_image_url ?? null,
+  );
+
+  readonly loginImageUrl = computed(
+    () => this.company()?.settings?.branding?.login_image_url ?? null,
+  );
+
+  readonly bannerImageUrl = computed(
+    () => this.company()?.settings?.branding?.banner_image_url ?? null,
+  );
+
+  // =====================================================
+  // CONSTRUCTOR
+  // =====================================================
+
+  constructor() {
+    addIcons({
+      addOutline,
+      arrowBackOutline,
+      businessOutline,
+      cardOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline,
+      colorPaletteOutline,
+      cubeOutline,
+      eyeOutline,
+      imageOutline,
+      keyOutline,
+      peopleOutline,
+      personOutline,
+      refreshOutline,
+      saveOutline,
+      statsChartOutline,
+      timeOutline,
+      trashOutline,
+      walletOutline,
+      wifiOutline,
+    });
+
+    this.loadCompany();
+  }
+
+  // =====================================================
+  // LOAD COMPANY
+  // =====================================================
+
+  loadCompany(): void {
+    const companyId = this.companyId();
+
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      this.error.set(true);
+
+      this.errorMessage.set('The selected company ID is invalid.');
+
+      this.loading.set(false);
+
+      return;
+    }
+
+    this.loading.set(true);
+
+    this.error.set(false);
+
+    this.errorMessage.set('');
+
+    this.companyService
+      .getCompanyById(companyId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.company.set(response.company);
+
+          this.populateForm(response.company);
+
+          this.populateBrandingForm(response.company);
+        },
+
+        error: (error) => {
+          console.error('Failed to load company:', error);
+
+          this.error.set(true);
+
+          this.errorMessage.set(
+            error?.error?.message ||
+              'The selected company could not be loaded.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // CHANGE WORKSPACE SECTION
+  // =====================================================
+
+  selectSection(section: CompanyWorkspaceSection['key']): void {
+    this.activeSection.set(section);
+
+    if (section === 'admins' && !this.adminsLoaded()) {
+      this.loadAdmins();
+    }
+
+    if (section === 'packages' && !this.packagesLoaded()) {
+      this.loadPackages();
+    }
+
+    if (section === 'payments' && !this.paymentsLoaded()) {
+      this.loadPayments();
+    }
+
+    if (section === 'sessions' && !this.sessionsLoaded()) {
+      this.loadSessions();
+    }
+
+    if (section === 'reports' && !this.reportsLoaded()) {
+      this.loadReports();
+    }
+
+    if (section === 'branding') {
+      const company = this.company();
+
+      if (company) {
         this.populateBrandingForm(company);
+      }
     }
 
-    readonly company =
-        signal<Company | null>(null);
-
-    readonly activeSection =
-        signal<CompanyWorkspaceSection['key']>(
-            'overview'
-        );
-
-
-    // =====================================================
-    // ADMIN MANAGEMENT STATE
-    // =====================================================
-
-    readonly admins =
-        signal<Admin[]>([]);
-
-    readonly adminsLoading =
-        signal(false);
-
-    readonly adminsLoaded =
-        signal(false);
-
-    readonly adminSaving =
-        signal(false);
-
-    readonly adminActionId =
-        signal<number | null>(null);
-
-    readonly adminErrorMessage =
-        signal('');
-
-    readonly showCreateAdminForm =
-        signal(false);
-
-    readonly editingAdmin =
-        signal<Admin | null>(null);
-
-    readonly passwordAdmin =
-        signal<Admin | null>(null);
-
-
-    // =====================================================
-    // PACKAGE MANAGEMENT STATE
-    // =====================================================
-
-    readonly packages =
-        signal<InternetPackage[]>([]);
-
-    readonly packagesLoading =
-        signal(false);
-
-    readonly packagesLoaded =
-        signal(false);
-
-    readonly packageSaving =
-        signal(false);
-
-    readonly packageActionId =
-        signal<number | null>(null);
-
-    readonly packageErrorMessage =
-        signal('');
-
-    readonly showCreatePackageForm =
-        signal(false);
-
-    readonly editingPackage =
-        signal<InternetPackage | null>(null);
-
-    readonly schedulePackage =
-        signal<InternetPackage | null>(null);
-
-
-    // =====================================================
-    // PAYMENT MANAGEMENT STATE
-    // =====================================================
-
-    readonly payments =
-        signal<Payment[]>([]);
-
-    readonly paymentsLoading =
-        signal(false);
-
-    readonly paymentsLoaded =
-        signal(false);
-
-    readonly paymentErrorMessage =
-        signal('');
-
-    readonly selectedPayment =
-        signal<Payment | null>(null);
-
-    readonly selectedPaymentSession =
-        signal<PaymentInternetSession | null>(null);
-
-    readonly paymentDetailsLoading =
-        signal(false);
-
-
-    // =====================================================
-    // SESSION MANAGEMENT STATE
-    // =====================================================
-
-    readonly sessions =
-        signal<InternetSession[]>([]);
-
-    readonly sessionsLoading =
-        signal(false);
-
-    readonly sessionsLoaded =
-        signal(false);
-
-    readonly sessionErrorMessage =
-        signal('');
-
-    readonly selectedSession =
-        signal<InternetSession | null>(null);
-
-    readonly sessionDetailsLoading =
-        signal(false);
-
-    readonly sessionActionId =
-        signal<number | null>(null);
-
-
-    // =====================================================
-    // REPORT MANAGEMENT STATE
-    // =====================================================
-
-    readonly reportsLoading =
-        signal(false);
-
-    readonly reportsLoaded =
-        signal(false);
-
-    readonly reportErrorMessage =
-        signal('');
-
-    readonly revenueReport =
-        signal<CompanyRevenueReportItem[]>([]);
-
-    readonly paymentReport =
-        signal<CompanyPaymentReportItem[]>([]);
-
-    readonly sessionReport =
-        signal<CompanySessionReportItem[]>([]);
-
-    readonly reportTotalRevenue =
-        signal(0);
-
-
-    // =====================================================
-    // PAYMENT SETTINGS MANAGEMENT STATE
-    // =====================================================
-
-    readonly paymentSettingsSaving =
-        signal(false);
-
-    readonly paymentSettingsErrorMessage =
-        signal('');
-
-    readonly paymentSettingsSuccessMessage =
-        signal('');
-
-
-    // =====================================================
-    // BRANDING MANAGEMENT STATE
-    // =====================================================
-
-    readonly brandingSaving =
-        signal(false);
-
-    readonly brandingErrorMessage =
-        signal('');
-
-    readonly brandingSuccessMessage =
-        signal('');
-
-    readonly brandingUploading =
-        signal<CompanyBrandingImageType | 'logo' | null>(
-            null
-        );
-
-    readonly brandingRemoving =
-        signal<CompanyBrandingImageType | 'logo' | null>(
-            null
-        );
-
-
-    // =====================================================
-    // COMPANY ID
-    // =====================================================
-
-    readonly companyId =
-        computed(() => {
-
-            return Number(
-                this.route.snapshot.paramMap.get(
-                    'companyId'
-                )
-            );
-        });
-
-
-    // =====================================================
-    // WORKSPACE SECTIONS
-    // =====================================================
-
-    readonly sections:
-        CompanyWorkspaceSection[] = [
-
-        {
-            label: 'Overview',
-            key: 'overview',
-            icon: 'business-outline'
-        },
-
-        {
-            label: 'Admins',
-            key: 'admins',
-            icon: 'people-outline'
-        },
-
-        {
-            label: 'Packages',
-            key: 'packages',
-            icon: 'cube-outline'
-        },
-
-        {
-            label: 'Payments',
-            key: 'payments',
-            icon: 'card-outline'
-        },
-
-        {
-            label: 'Sessions',
-            key: 'sessions',
-            icon: 'wifi-outline'
-        },
-
-        {
-            label: 'Reports',
-            key: 'reports',
-            icon: 'stats-chart-outline'
-        },
-
-        {
-            label: 'Payment Setup',
-            key: 'payment-settings',
-            icon: 'wallet-outline'
-        },
-
-        {
-            label: 'Branding',
-            key: 'branding',
-            icon: 'color-palette-outline'
-        }
-    ];
-
-
-    // =====================================================
-    // COMPANY FORM
-    // =====================================================
-
-    readonly companyForm =
-        this.fb.nonNullable.group({
-
-            name: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2),
-                    Validators.maxLength(200)
-                ]
-            ],
-
-            slug: [
-                '',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^[a-z0-9-]+$/
-                    )
-                ]
-            ],
-
-            email: [
-                '',
-                [
-                    Validators.email
-                ]
-            ],
-
-            phone: [
-                ''
-            ],
-
-            address: [
-                ''
-            ]
-        });
-
-
-    // =====================================================
-    // CREATE ADMIN FORM
-    // =====================================================
-
-    readonly createAdminForm =
-        this.fb.nonNullable.group({
-
-            name: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2),
-                    Validators.maxLength(200)
-                ]
-            ],
-
-            email: [
-                '',
-                [
-                    Validators.required,
-                    Validators.email
-                ]
-            ],
-
-            password: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(8)
-                ]
-            ]
-        });
-
-
-    // =====================================================
-    // EDIT ADMIN FORM
-    // =====================================================
-
-    readonly editAdminForm =
-        this.fb.nonNullable.group({
-
-            name: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2),
-                    Validators.maxLength(200)
-                ]
-            ],
-
-            email: [
-                '',
-                [
-                    Validators.required,
-                    Validators.email
-                ]
-            ]
-        });
-
-
-    // =====================================================
-    // CHANGE PASSWORD FORM
-    // =====================================================
-
-    readonly passwordForm =
-        this.fb.nonNullable.group({
-
-            password: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(8)
-                ]
-            ],
-
-            confirmPassword: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(8)
-                ]
-            ]
-        });
-
-
-    // =====================================================
-    // CREATE PACKAGE FORM
-    // =====================================================
-
-    readonly createPackageForm =
-        this.fb.nonNullable.group({
-
-            name: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2)
-                ]
-            ],
-
-            price: [
-                0,
-                [
-                    Validators.required,
-                    Validators.min(1)
-                ]
-            ],
-
-            duration_minutes: [
-                0,
-                [
-                    Validators.required,
-                    Validators.min(1)
-                ]
-            ],
-
-            speed: [
-                '',
-                [
-                    Validators.required
-                ]
-            ]
-        });
-
-
-    // =====================================================
-    // EDIT PACKAGE FORM
-    // =====================================================
-
-    readonly editPackageForm =
-        this.fb.nonNullable.group({
-
-            name: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2)
-                ]
-            ],
-
-            price: [
-                0,
-                [
-                    Validators.required,
-                    Validators.min(1)
-                ]
-            ],
-
-            duration_minutes: [
-                0,
-                [
-                    Validators.required,
-                    Validators.min(1)
-                ]
-            ],
-
-            speed: [
-                '',
-                [
-                    Validators.required
-                ]
-            ]
-        });
-
-
-    // =====================================================
-    // PACKAGE SCHEDULE FORM
-    // =====================================================
-
-    readonly packageScheduleForm =
-        this.fb.nonNullable.group({
-
-            available_from: [
-                ''
-            ],
-
-            available_until: [
-                ''
-            ]
-        });
-
-
-    // =====================================================
-    // PAYMENT SETTINGS FORM
-    // =====================================================
-
-    readonly paymentSettingsForm =
-        this.fb.nonNullable.group({
-
-            enabled: [
-                true
-            ],
-
-            lipa_number: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(2),
-                    Validators.maxLength(50)
-                ]
-            ],
-
-            account_name: [
-                '',
-                [
-                    Validators.maxLength(120)
-                ]
-            ],
-
-            instructions: [
-                '',
-                [
-                    Validators.maxLength(500)
-                ]
-            ],
-
-            httpsms_owner: [''],
-            payment_phone: [''],
-            device_name: ['Payment phone']
-        });
-
-
-    // =====================================================
-    // BRANDING FORM
-    // =====================================================
-
-    readonly brandingForm =
-        this.fb.nonNullable.group({
-
-            primary_color: [
-                '#2563EB',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-                    )
-                ]
-            ],
-
-            secondary_color: [
-                '#111827',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-                    )
-                ]
-            ],
-
-            accent_color: [
-                '#22C55E',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-                    )
-                ]
-            ],
-
-            background_color: [
-                '#F8FAFC',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-                    )
-                ]
-            ],
-
-            navbar_color: [
-                '#FFFFFF',
-                [
-                    Validators.required,
-                    Validators.pattern(
-                        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-                    )
-                ]
-            ],
-
-            background_image_url: [
-                ''
-            ],
-
-            login_image_url: [
-                ''
-            ],
-
-            banner_image_url: [
-                ''
-            ]
-        });
-
-
-    // =====================================================
-    // ADMIN COUNTS
-    // =====================================================
-
-    readonly activeAdminCount =
-        computed(() => {
-
-            return this.admins()
-                .filter(
-                    (admin) =>
-                        admin.status === 'active' ||
-                        admin.is_active === true
-                )
-                .length;
-        });
-
-
-    readonly suspendedAdminCount =
-        computed(() => {
-
-            return this.admins()
-                .filter(
-                    (admin) =>
-                        admin.status === 'suspended' ||
-                        admin.is_active === false
-                )
-                .length;
-        });
-
-
-    // =====================================================
-    // PACKAGE COUNTS
-    // =====================================================
-
-    readonly activePackageCount =
-        computed(() => {
-
-            return this.packages()
-                .filter(
-                    (item) =>
-                        item.is_active
-                )
-                .length;
-        });
-
-
-    readonly inactivePackageCount =
-        computed(() => {
-
-            return this.packages()
-                .filter(
-                    (item) =>
-                        !item.is_active
-                )
-                .length;
-        });
-
-
-    // =====================================================
-    // PAYMENT COUNTS / TOTALS
-    // =====================================================
-
-    readonly successfulPaymentCount =
-        computed(() => {
-
-            return this.payments()
-                .filter(
-                    (payment) =>
-                        payment.status ===
-                        'successful'
-                )
-                .length;
-        });
-
-
-    readonly pendingPaymentCount =
-        computed(() => {
-
-            return this.payments()
-                .filter(
-                    (payment) =>
-                        payment.status ===
-                        'pending'
-                )
-                .length;
-        });
-
-
-    readonly failedPaymentCount =
-        computed(() => {
-
-            return this.payments()
-                .filter(
-                    (payment) =>
-                        payment.status ===
-                        'failed'
-                )
-                .length;
-        });
-
-
-    readonly successfulRevenue =
-        computed(() => {
-
-            return this.payments()
-                .filter(
-                    (payment) =>
-                        payment.status ===
-                        'successful'
-                )
-                .reduce(
-                    (total, payment) =>
-                        total +
-                        Number(
-                            payment.amount
-                        ),
-                    0
-                );
-        });
-
-
-    // =====================================================
-    // SESSION COUNTS
-    // =====================================================
-
-    readonly activeSessionCount =
-        computed(() => {
-
-            return this.sessions()
-                .filter(
-                    (session) =>
-                        session.status ===
-                        'active'
-                )
-                .length;
-        });
-
-
-    readonly suspendedSessionCount =
-        computed(() => {
-
-            return this.sessions()
-                .filter(
-                    (session) =>
-                        session.status ===
-                        'suspended'
-                )
-                .length;
-        });
-
-
-    readonly expiredSessionCount =
-        computed(() => {
-
-            return this.sessions()
-                .filter(
-                    (session) =>
-                        session.status ===
-                        'expired'
-                )
-                .length;
-        });
-
-
-    readonly pendingActivationSessionCount =
-        computed(() => {
-
-            return this.sessions()
-                .filter(
-                    (session) =>
-                        session.status ===
-                        'pending_activation'
-                )
-                .length;
-        });
-
-
-    readonly failedSessionCount =
-        computed(() => {
-
-            return this.sessions()
-                .filter(
-                    (session) =>
-                        session.status ===
-                        'failed'
-                )
-                .length;
-        });
-
-
-    // =====================================================
-    // REPORT COUNTS / TOTALS
-    // =====================================================
-
-    readonly reportSuccessfulPayments =
-        computed(() => {
-
-            return this.paymentReport()
-                .find(
-                    (item) =>
-                        item.status ===
-                        'successful'
-                )
-                ?.payment_count ?? 0;
-        });
-
-
-    readonly reportPendingPayments =
-        computed(() => {
-
-            return this.paymentReport()
-                .find(
-                    (item) =>
-                        item.status ===
-                        'pending'
-                )
-                ?.payment_count ?? 0;
-        });
-
-
-    readonly reportFailedPayments =
-        computed(() => {
-
-            return this.paymentReport()
-                .find(
-                    (item) =>
-                        item.status ===
-                        'failed'
-                )
-                ?.payment_count ?? 0;
-        });
-
-
-    readonly reportTotalPayments =
-        computed(() => {
-
-            return this.paymentReport()
-                .reduce(
-                    (total, item) =>
-                        total +
-                        Number(
-                            item.payment_count
-                        ),
-                    0
-                );
-        });
-
-
-    readonly reportTotalSessions =
-        computed(() => {
-
-            return this.sessionReport()
-                .reduce(
-                    (total, item) =>
-                        total +
-                        Number(
-                            item.session_count
-                        ),
-                    0
-                );
-        });
-
-
-    readonly reportActiveSessions =
-        computed(() => {
-
-            return this.sessionReport()
-                .find(
-                    (item) =>
-                        item.status ===
-                        'active'
-                )
-                ?.session_count ?? 0;
-        });
-
-
-    readonly reportExpiredSessions =
-        computed(() => {
-
-            return this.sessionReport()
-                .find(
-                    (item) =>
-                        item.status ===
-                        'expired'
-                )
-                ?.session_count ?? 0;
-        });
-
-
-    readonly latestRevenueDate =
-        computed(() => {
-
-            return this.revenueReport()
-                .at(0)
-                ?.date ?? null;
-        });
-
-
-    // =====================================================
-    // BRANDING PREVIEW VALUES
-    // =====================================================
-
-    readonly logoUrl =
-        computed(() =>
-            this.company()?.logo_url ?? null
-        );
-
-    readonly backgroundImageUrl =
-        computed(() =>
-            this.company()
-                ?.settings
-                ?.branding
-                ?.background_image_url ?? null
-        );
-
-    readonly loginImageUrl =
-        computed(() =>
-            this.company()
-                ?.settings
-                ?.branding
-                ?.login_image_url ?? null
-        );
-
-    readonly bannerImageUrl =
-        computed(() =>
-            this.company()
-                ?.settings
-                ?.branding
-                ?.banner_image_url ?? null
-        );
-
-
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
-
-    constructor() {
-
-        addIcons({
-            addOutline,
-            arrowBackOutline,
-            businessOutline,
-            cardOutline,
-            checkmarkCircleOutline,
-            closeCircleOutline,
-            colorPaletteOutline,
-            cubeOutline,
-            eyeOutline,
-            imageOutline,
-            keyOutline,
-            peopleOutline,
-            personOutline,
-            refreshOutline,
-            saveOutline,
-            statsChartOutline,
-            timeOutline,
-            trashOutline,
-            walletOutline,
-            wifiOutline
-        });
-
-
-        this.loadCompany();
+    if (section === 'payment-settings') {
+      const company = this.company();
+
+      if (company) {
+      }
+    }
+  }
+
+  // =====================================================
+  // SAVE COMPANY PROFILE
+  // =====================================================
+
+  saveCompany(): void {
+    const company = this.company();
+
+    if (!company) {
+      return;
     }
 
+    this.errorMessage.set('');
 
-    // =====================================================
-    // LOAD COMPANY
-    // =====================================================
+    if (this.companyForm.invalid) {
+      this.companyForm.markAllAsTouched();
 
-    loadCompany(): void {
-
-        const companyId =
-            this.companyId();
-
-
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-
-            this.error.set(true);
-
-            this.errorMessage.set(
-                'The selected company ID is invalid.'
-            );
-
-            this.loading.set(false);
-
-            return;
-        }
-
-
-        this.loading.set(true);
-
-        this.error.set(false);
-
-        this.errorMessage.set('');
-
-
-        this.companyService
-            .getCompanyById(companyId)
-            .pipe(
-                finalize(
-                    () =>
-                        this.loading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.company.set(
-                        response.company
-                    );
-
-
-                    this.populateForm(
-                        response.company
-                    );
-
-                    this.populateBrandingForm(
-                        response.company
-                    );
-
-                    this.populatePaymentSettingsForm(
-                        response.company
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company:',
-                        error
-                    );
-
-
-                    this.error.set(true);
-
-                    this.errorMessage.set(
-                        error?.error?.message ||
-                        'The selected company could not be loaded.'
-                    );
-                }
-            });
+      return;
     }
 
+    const raw = this.companyForm.getRawValue();
 
-    // =====================================================
-    // CHANGE WORKSPACE SECTION
-    // =====================================================
+    this.saving.set(true);
 
-    selectSection(
-        section:
-            CompanyWorkspaceSection['key']
-    ): void {
+    this.companyService
+      .updateCompany(company.id, {
+        name: raw.name.trim(),
 
-        this.activeSection.set(
-            section
-        );
+        slug: raw.slug.trim().toLowerCase(),
 
+        email: raw.email.trim() || null,
 
-        if (
-            section === 'admins' &&
-            !this.adminsLoaded()
-        ) {
-            this.loadAdmins();
-        }
+        phone: raw.phone.trim() || null,
 
+        address: raw.address.trim() || null,
+      })
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.company.set(response.company);
 
-        if (
-            section === 'packages' &&
-            !this.packagesLoaded()
-        ) {
-            this.loadPackages();
-        }
+          this.populateForm(response.company);
+        },
 
+        error: (error) => {
+          console.error('Failed to update company:', error);
 
-        if (
-            section === 'payments' &&
-            !this.paymentsLoaded()
-        ) {
-            this.loadPayments();
-        }
+          this.errorMessage.set(
+            error?.error?.message || 'The company could not be updated.',
+          );
+        },
+      });
+  }
 
+  // =====================================================
+  // LOAD COMPANY ADMINS
+  // =====================================================
 
-        if (
-            section === 'sessions' &&
-            !this.sessionsLoaded()
-        ) {
-            this.loadSessions();
-        }
+  loadAdmins(): void {
+    const companyId = this.companyId();
 
-
-        if (
-            section === 'reports' &&
-            !this.reportsLoaded()
-        ) {
-            this.loadReports();
-        }
-
-
-        if (
-            section === 'branding'
-        ) {
-
-            const company =
-                this.company();
-
-            if (company) {
-
-                this.populateBrandingForm(
-                    company
-                );
-            }
-        }
-
-
-        if (
-            section === 'payment-settings'
-        ) {
-
-            const company =
-                this.company();
-
-            if (company) {
-
-                this.populatePaymentSettingsForm(
-                    company
-                );
-            }
-        }
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      return;
     }
 
+    this.adminsLoading.set(true);
 
-    // =====================================================
-    // SAVE COMPANY PROFILE
-    // =====================================================
+    this.adminErrorMessage.set('');
 
-    saveCompany(): void {
+    this.adminService
+      .getCompanyAdmins(companyId)
+      .pipe(finalize(() => this.adminsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.admins.set(response.admins);
 
-        const company =
-            this.company();
+          this.adminsLoaded.set(true);
+        },
 
+        error: (error) => {
+          console.error('Failed to load company administrators:', error);
 
-        if (!company) {
-            return;
-        }
+          this.adminErrorMessage.set(
+            error?.error?.message ||
+              'Company administrators could not be loaded.',
+          );
+        },
+      });
+  }
 
+  // =====================================================
+  // CREATE ADMIN FORM
+  // =====================================================
 
-        this.errorMessage.set('');
+  openCreateAdminForm(): void {
+    this.adminErrorMessage.set('');
 
+    this.createAdminForm.reset({
+      name: '',
+      email: '',
+      password: '',
+    });
 
-        if (this.companyForm.invalid) {
+    this.showCreateAdminForm.set(true);
+  }
 
-            this.companyForm.markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.companyForm.getRawValue();
-
-
-        this.saving.set(true);
-
-
-        this.companyService
-            .updateCompany(
-                company.id,
-                {
-                    name:
-                        raw.name.trim(),
-
-                    slug:
-                        raw.slug
-                            .trim()
-                            .toLowerCase(),
-
-                    email:
-                        raw.email.trim() ||
-                        null,
-
-                    phone:
-                        raw.phone.trim() ||
-                        null,
-
-                    address:
-                        raw.address.trim() ||
-                        null
-                }
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.saving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.company.set(
-                        response.company
-                    );
-
-
-                    this.populateForm(
-                        response.company
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update company:',
-                        error
-                    );
-
-
-                    this.errorMessage.set(
-                        error?.error?.message ||
-                        'The company could not be updated.'
-                    );
-                }
-            });
+  closeCreateAdminForm(): void {
+    if (this.adminSaving()) {
+      return;
     }
 
+    this.showCreateAdminForm.set(false);
 
-    // =====================================================
-    // LOAD COMPANY ADMINS
-    // =====================================================
+    this.createAdminForm.reset({
+      name: '',
+      email: '',
+      password: '',
+    });
+  }
 
-    loadAdmins(): void {
+  // =====================================================
+  // CREATE COMPANY ADMIN
+  // =====================================================
 
-        const companyId =
-            this.companyId();
+  createAdmin(): void {
+    if (this.createAdminForm.invalid) {
+      this.createAdminForm.markAllAsTouched();
 
-
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-            return;
-        }
-
-
-        this.adminsLoading.set(true);
-
-        this.adminErrorMessage.set('');
-
-
-        this.adminService
-            .getCompanyAdmins(companyId)
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminsLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.admins.set(
-                        response.admins
-                    );
-
-                    this.adminsLoaded.set(
-                        true
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company administrators:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'Company administrators could not be loaded.'
-                    );
-                }
-            });
+      return;
     }
 
+    const raw = this.createAdminForm.getRawValue();
 
-    // =====================================================
-    // CREATE ADMIN FORM
-    // =====================================================
+    const payload: CreateCompanyAdminRequest = {
+      name: raw.name.trim(),
 
-    openCreateAdminForm(): void {
+      email: raw.email.trim().toLowerCase(),
 
-        this.adminErrorMessage.set('');
+      password: raw.password,
+    };
 
+    this.adminSaving.set(true);
 
-        this.createAdminForm.reset({
+    this.adminErrorMessage.set('');
+
+    this.adminService
+      .createCompanyAdmin(this.companyId(), payload)
+      .pipe(finalize(() => this.adminSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.admins.update((admins) => [...admins, response.admin]);
+
+          this.showCreateAdminForm.set(false);
+
+          this.createAdminForm.reset({
             name: '',
             email: '',
-            password: ''
-        });
-
-
-        this.showCreateAdminForm.set(
-            true
-        );
-    }
-
-
-    closeCreateAdminForm(): void {
-
-        if (this.adminSaving()) {
-            return;
-        }
-
-
-        this.showCreateAdminForm.set(
-            false
-        );
-
-
-        this.createAdminForm.reset({
-            name: '',
-            email: '',
-            password: ''
-        });
-    }
-
-
-    // =====================================================
-    // CREATE COMPANY ADMIN
-    // =====================================================
-
-    createAdmin(): void {
-
-        if (
-            this.createAdminForm.invalid
-        ) {
-
-            this.createAdminForm
-                .markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.createAdminForm
-                .getRawValue();
-
-
-        const payload:
-            CreateCompanyAdminRequest = {
-
-            name:
-                raw.name.trim(),
-
-            email:
-                raw.email
-                    .trim()
-                    .toLowerCase(),
-
-            password:
-                raw.password
-        };
-
-
-        this.adminSaving.set(true);
-
-        this.adminErrorMessage.set('');
-
-
-        this.adminService
-            .createCompanyAdmin(
-                this.companyId(),
-                payload
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminSaving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.admins.update(
-                        (admins) => [
-                            ...admins,
-                            response.admin
-                        ]
-                    );
-
-
-                    this.showCreateAdminForm.set(
-                        false
-                    );
-
-
-                    this.createAdminForm.reset({
-                        name: '',
-                        email: '',
-                        password: ''
-                    });
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to create company administrator:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator could not be created.'
-                    );
-                }
-            });
-    }
-
-
-    // =====================================================
-    // EDIT ADMIN FORM
-    // =====================================================
-
-    openEditAdminForm(
-        admin: Admin
-    ): void {
-
-        this.adminErrorMessage.set('');
-
-        this.editingAdmin.set(
-            admin
-        );
-
-
-        this.editAdminForm.setValue({
-            name:
-                admin.name,
-
-            email:
-                admin.email
-        });
-    }
-
-
-    closeEditAdminForm(): void {
-
-        if (this.adminSaving()) {
-            return;
-        }
-
-
-        this.editingAdmin.set(
-            null
-        );
-    }
-
-
-    // =====================================================
-    // UPDATE COMPANY ADMIN
-    // =====================================================
-
-    updateAdmin(): void {
-
-        const admin =
-            this.editingAdmin();
-
-
-        if (!admin) {
-            return;
-        }
-
-
-        if (
-            this.editAdminForm.invalid
-        ) {
-
-            this.editAdminForm
-                .markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.editAdminForm
-                .getRawValue();
-
-
-        this.adminSaving.set(true);
-
-        this.adminErrorMessage.set('');
-
-
-        this.adminService
-            .updateCompanyAdmin(
-                this.companyId(),
-                admin.id,
-                {
-                    name:
-                        raw.name.trim(),
-
-                    email:
-                        raw.email
-                            .trim()
-                            .toLowerCase()
-                }
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminSaving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.replaceAdmin(
-                        response.admin
-                    );
-
-                    this.editingAdmin.set(
-                        null
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update company administrator:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator could not be updated.'
-                    );
-                }
-            });
-    }
-
-
-    // =====================================================
-    // PASSWORD FORM
-    // =====================================================
-
-    openPasswordForm(
-        admin: Admin
-    ): void {
-
-        this.adminErrorMessage.set('');
-
-        this.passwordAdmin.set(
-            admin
-        );
-
-
-        this.passwordForm.reset({
             password: '',
-            confirmPassword: ''
-        });
+          });
+        },
+
+        error: (error) => {
+          console.error('Failed to create company administrator:', error);
+
+          this.adminErrorMessage.set(
+            error?.error?.message || 'The administrator could not be created.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // EDIT ADMIN FORM
+  // =====================================================
+
+  openEditAdminForm(admin: Admin): void {
+    this.adminErrorMessage.set('');
+
+    this.editingAdmin.set(admin);
+
+    this.editAdminForm.setValue({
+      name: admin.name,
+
+      email: admin.email,
+    });
+  }
+
+  closeEditAdminForm(): void {
+    if (this.adminSaving()) {
+      return;
     }
 
+    this.editingAdmin.set(null);
+  }
 
-    closePasswordForm(): void {
+  // =====================================================
+  // UPDATE COMPANY ADMIN
+  // =====================================================
 
-        if (this.adminSaving()) {
-            return;
-        }
+  updateAdmin(): void {
+    const admin = this.editingAdmin();
 
+    if (!admin) {
+      return;
+    }
 
-        this.passwordAdmin.set(
-            null
-        );
+    if (this.editAdminForm.invalid) {
+      this.editAdminForm.markAllAsTouched();
 
+      return;
+    }
 
-        this.passwordForm.reset({
+    const raw = this.editAdminForm.getRawValue();
+
+    this.adminSaving.set(true);
+
+    this.adminErrorMessage.set('');
+
+    this.adminService
+      .updateCompanyAdmin(this.companyId(), admin.id, {
+        name: raw.name.trim(),
+
+        email: raw.email.trim().toLowerCase(),
+      })
+      .pipe(finalize(() => this.adminSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.replaceAdmin(response.admin);
+
+          this.editingAdmin.set(null);
+        },
+
+        error: (error) => {
+          console.error('Failed to update company administrator:', error);
+
+          this.adminErrorMessage.set(
+            error?.error?.message || 'The administrator could not be updated.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // PASSWORD FORM
+  // =====================================================
+
+  openPasswordForm(admin: Admin): void {
+    this.adminErrorMessage.set('');
+
+    this.passwordAdmin.set(admin);
+
+    this.passwordForm.reset({
+      password: '',
+      confirmPassword: '',
+    });
+  }
+
+  closePasswordForm(): void {
+    if (this.adminSaving()) {
+      return;
+    }
+
+    this.passwordAdmin.set(null);
+
+    this.passwordForm.reset({
+      password: '',
+      confirmPassword: '',
+    });
+  }
+
+  // =====================================================
+  // CHANGE ADMIN PASSWORD
+  // =====================================================
+
+  changeAdminPassword(): void {
+    const admin = this.passwordAdmin();
+
+    if (!admin) {
+      return;
+    }
+
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+
+      return;
+    }
+
+    const raw = this.passwordForm.getRawValue();
+
+    if (raw.password !== raw.confirmPassword) {
+      this.adminErrorMessage.set('The new passwords do not match.');
+
+      return;
+    }
+
+    this.adminSaving.set(true);
+
+    this.adminErrorMessage.set('');
+
+    this.adminService
+      .changeCompanyAdminPassword(this.companyId(), admin.id, {
+        password: raw.password,
+      })
+      .pipe(finalize(() => this.adminSaving.set(false)))
+      .subscribe({
+        next: () => {
+          this.passwordAdmin.set(null);
+
+          this.passwordForm.reset({
             password: '',
-            confirmPassword: ''
-        });
+            confirmPassword: '',
+          });
+        },
+
+        error: (error) => {
+          console.error('Failed to change administrator password:', error);
+
+          this.adminErrorMessage.set(
+            error?.error?.message ||
+              'The administrator password could not be changed.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // SUSPEND ADMIN
+  // =====================================================
+
+  async suspendAdmin(admin: Admin): Promise<void> {
+    const confirmed = await this.ui.confirm(
+      'Suspend administrator?',
+      `${admin.name} will no longer be able to access this company administration area.`,
+      'Suspend',
+    );
+
+    if (!confirmed) {
+      return;
     }
 
+    this.adminActionId.set(admin.id);
 
-    // =====================================================
-    // CHANGE ADMIN PASSWORD
-    // =====================================================
+    this.adminErrorMessage.set('');
 
-    changeAdminPassword(): void {
+    this.adminService
+      .suspendCompanyAdmin(this.companyId(), admin.id)
+      .pipe(finalize(() => this.adminActionId.set(null)))
+      .subscribe({
+        next: (response) => {
+          this.replaceAdmin(response.admin);
+        },
 
-        const admin =
-            this.passwordAdmin();
+        error: (error) => {
+          console.error('Failed to suspend administrator:', error);
 
+          this.adminErrorMessage.set(
+            error?.error?.message ||
+              'The administrator could not be suspended.',
+          );
+        },
+      });
+  }
 
-        if (!admin) {
-            return;
-        }
+  // =====================================================
+  // ACTIVATE ADMIN
+  // =====================================================
 
+  async activateAdmin(admin: Admin): Promise<void> {
+    const confirmed = await this.ui.confirm(
+      'Activate administrator?',
+      `${admin.name} will be allowed to access the company administration area again.`,
+      'Activate',
+    );
 
-        if (
-            this.passwordForm.invalid
-        ) {
-
-            this.passwordForm
-                .markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.passwordForm
-                .getRawValue();
-
-
-        if (
-            raw.password !==
-            raw.confirmPassword
-        ) {
-
-            this.adminErrorMessage.set(
-                'The new passwords do not match.'
-            );
-
-            return;
-        }
-
-
-        this.adminSaving.set(true);
-
-        this.adminErrorMessage.set('');
-
-
-        this.adminService
-            .changeCompanyAdminPassword(
-                this.companyId(),
-                admin.id,
-                {
-                    password:
-                        raw.password
-                }
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminSaving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: () => {
-
-                    this.passwordAdmin.set(
-                        null
-                    );
-
-
-                    this.passwordForm.reset({
-                        password: '',
-                        confirmPassword: ''
-                    });
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to change administrator password:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator password could not be changed.'
-                    );
-                }
-            });
+    if (!confirmed) {
+      return;
     }
 
+    this.adminActionId.set(admin.id);
 
-    // =====================================================
-    // SUSPEND ADMIN
-    // =====================================================
+    this.adminErrorMessage.set('');
 
-    async suspendAdmin(
-        admin: Admin
-    ): Promise<void> {
+    this.adminService
+      .activateCompanyAdmin(this.companyId(), admin.id)
+      .pipe(finalize(() => this.adminActionId.set(null)))
+      .subscribe({
+        next: (response) => {
+          this.replaceAdmin(response.admin);
+        },
 
-        const confirmed =
-            await this.ui.confirm(
-                'Suspend administrator?',
-                `${admin.name} will no longer be able to access this company administration area.`,
-                'Suspend'
-            );
+        error: (error) => {
+          console.error('Failed to activate administrator:', error);
 
+          this.adminErrorMessage.set(
+            error?.error?.message ||
+              'The administrator could not be activated.',
+          );
+        },
+      });
+  }
 
-        if (!confirmed) {
-            return;
-        }
+  // =====================================================
+  // DELETE ADMIN
+  // =====================================================
 
+  async deleteAdmin(admin: Admin): Promise<void> {
+    const confirmed = await this.ui.confirm(
+      'Delete administrator?',
+      `${admin.name} will be permanently removed from this company.`,
+      'Delete',
+    );
 
-        this.adminActionId.set(
-            admin.id
-        );
-
-        this.adminErrorMessage.set('');
-
-
-        this.adminService
-            .suspendCompanyAdmin(
-                this.companyId(),
-                admin.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminActionId.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.replaceAdmin(
-                        response.admin
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to suspend administrator:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator could not be suspended.'
-                    );
-                }
-            });
+    if (!confirmed) {
+      return;
     }
 
+    this.adminActionId.set(admin.id);
 
-    // =====================================================
-    // ACTIVATE ADMIN
-    // =====================================================
+    this.adminErrorMessage.set('');
 
-    async activateAdmin(
-        admin: Admin
-    ): Promise<void> {
+    this.adminService
+      .deleteCompanyAdmin(this.companyId(), admin.id)
+      .pipe(finalize(() => this.adminActionId.set(null)))
+      .subscribe({
+        next: () => {
+          this.admins.update((admins) =>
+            admins.filter((item) => item.id !== admin.id),
+          );
+        },
 
-        const confirmed =
-            await this.ui.confirm(
-                'Activate administrator?',
-                `${admin.name} will be allowed to access the company administration area again.`,
-                'Activate'
-            );
+        error: (error) => {
+          console.error('Failed to delete administrator:', error);
 
+          this.adminErrorMessage.set(
+            error?.error?.message || 'The administrator could not be deleted.',
+          );
+        },
+      });
+  }
 
-        if (!confirmed) {
-            return;
-        }
+  // =====================================================
+  // ADMIN STATUS HELPERS
+  // =====================================================
 
+  adminIsActive(admin: Admin): boolean {
+    return admin.status === 'active' || admin.is_active === true;
+  }
 
-        this.adminActionId.set(
-            admin.id
-        );
+  adminStatusLabel(admin: Admin): string {
+    return this.adminIsActive(admin) ? 'Active' : 'Suspended';
+  }
 
-        this.adminErrorMessage.set('');
+  adminStatusClass(admin: Admin): string {
+    return this.adminIsActive(admin) ? 'status--active' : 'status--suspended';
+  }
 
+  // =====================================================
+  // LOAD COMPANY PACKAGES
+  // =====================================================
 
-        this.adminService
-            .activateCompanyAdmin(
-                this.companyId(),
-                admin.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminActionId.set(null)
-                )
-            )
-            .subscribe({
+  loadPackages(): void {
+    const companyId = this.companyId();
 
-                next: (response) => {
-
-                    this.replaceAdmin(
-                        response.admin
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to activate administrator:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator could not be activated.'
-                    );
-                }
-            });
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      return;
     }
 
+    this.packagesLoading.set(true);
 
-    // =====================================================
-    // DELETE ADMIN
-    // =====================================================
+    this.packageErrorMessage.set('');
 
-    async deleteAdmin(
-        admin: Admin
-    ): Promise<void> {
+    this.packageService
+      .getCompanyPackages(companyId)
+      .pipe(finalize(() => this.packagesLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.packages.set(response.packages);
 
-        const confirmed =
-            await this.ui.confirm(
-                'Delete administrator?',
-                `${admin.name} will be permanently removed from this company.`,
-                'Delete'
-            );
+          this.packagesLoaded.set(true);
+        },
 
+        error: (error) => {
+          console.error('Failed to load company packages:', error);
 
-        if (!confirmed) {
-            return;
-        }
+          this.packageErrorMessage.set(
+            error?.error?.message || 'Company packages could not be loaded.',
+          );
+        },
+      });
+  }
 
+  // =====================================================
+  // CREATE PACKAGE FORM
+  // =====================================================
 
-        this.adminActionId.set(
-            admin.id
-        );
+  openCreatePackageForm(): void {
+    this.packageErrorMessage.set('');
 
-        this.adminErrorMessage.set('');
+    this.createPackageForm.reset({
+      name: '',
+      price: 0,
+      duration_minutes: 0,
+      speed: '',
+    });
 
+    this.showCreatePackageForm.set(true);
+  }
 
-        this.adminService
-            .deleteCompanyAdmin(
-                this.companyId(),
-                admin.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.adminActionId.set(null)
-                )
-            )
-            .subscribe({
-
-                next: () => {
-
-                    this.admins.update(
-                        (admins) =>
-                            admins.filter(
-                                (item) =>
-                                    item.id !==
-                                    admin.id
-                            )
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to delete administrator:',
-                        error
-                    );
-
-
-                    this.adminErrorMessage.set(
-                        error?.error?.message ||
-                        'The administrator could not be deleted.'
-                    );
-                }
-            });
+  closeCreatePackageForm(): void {
+    if (this.packageSaving()) {
+      return;
     }
 
+    this.showCreatePackageForm.set(false);
 
-    // =====================================================
-    // ADMIN STATUS HELPERS
-    // =====================================================
+    this.createPackageForm.reset({
+      name: '',
+      price: 0,
+      duration_minutes: 0,
+      speed: '',
+    });
+  }
 
-    adminIsActive(
-        admin: Admin
-    ): boolean {
+  // =====================================================
+  // CREATE COMPANY PACKAGE
+  // =====================================================
 
-        return (
-            admin.status === 'active' ||
-            admin.is_active === true
-        );
+  createCompanyPackage(): void {
+    if (this.createPackageForm.invalid) {
+      this.createPackageForm.markAllAsTouched();
+
+      return;
     }
 
+    const raw = this.createPackageForm.getRawValue();
 
-    adminStatusLabel(
-        admin: Admin
-    ): string {
+    const payload: CreateCompanyPackageRequest = {
+      name: raw.name.trim(),
 
-        return this.adminIsActive(admin)
-            ? 'Active'
-            : 'Suspended';
-    }
+      price: Number(raw.price),
 
+      duration_minutes: Number(raw.duration_minutes),
 
-    adminStatusClass(
-        admin: Admin
-    ): string {
+      speed: raw.speed.trim(),
+    };
 
-        return this.adminIsActive(admin)
-            ? 'status--active'
-            : 'status--suspended';
-    }
+    this.packageSaving.set(true);
 
+    this.packageErrorMessage.set('');
 
-    // =====================================================
-    // LOAD COMPANY PACKAGES
-    // =====================================================
+    this.packageService
+      .createCompanyPackage(this.companyId(), payload)
+      .pipe(finalize(() => this.packageSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.packages.update((packages) =>
+            [...packages, response.package].sort(
+              (a, b) => Number(a.price) - Number(b.price),
+            ),
+          );
 
-    loadPackages(): void {
+          this.showCreatePackageForm.set(false);
 
-        const companyId =
-            this.companyId();
-
-
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-            return;
-        }
-
-
-        this.packagesLoading.set(
-            true
-        );
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.packageService
-            .getCompanyPackages(
-                companyId
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packagesLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.packages.set(
-                        response.packages
-                    );
-
-                    this.packagesLoaded.set(
-                        true
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company packages:',
-                        error
-                    );
-
-
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'Company packages could not be loaded.'
-                    );
-                }
-            });
-    }
-
-
-    // =====================================================
-    // CREATE PACKAGE FORM
-    // =====================================================
-
-    openCreatePackageForm(): void {
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.createPackageForm.reset({
+          this.createPackageForm.reset({
             name: '',
             price: 0,
             duration_minutes: 0,
-            speed: ''
-        });
+            speed: '',
+          });
+        },
 
+        error: (error) => {
+          console.error('Failed to create company package:', error);
 
-        this.showCreatePackageForm.set(
-            true
-        );
+          this.packageErrorMessage.set(
+            error?.error?.message || 'The package could not be created.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // EDIT PACKAGE FORM
+  // =====================================================
+
+  openEditPackageForm(item: InternetPackage): void {
+    this.packageErrorMessage.set('');
+
+    this.editingPackage.set(item);
+
+    this.editPackageForm.setValue({
+      name: item.name,
+
+      price: Number(item.price),
+
+      duration_minutes: item.duration_minutes,
+
+      speed: item.speed,
+    });
+  }
+
+  closeEditPackageForm(): void {
+    if (this.packageSaving()) {
+      return;
     }
 
+    this.editingPackage.set(null);
+  }
 
-    closeCreatePackageForm(): void {
+  // =====================================================
+  // UPDATE COMPANY PACKAGE
+  // =====================================================
 
-        if (this.packageSaving()) {
-            return;
-        }
+  updateCompanyPackage(): void {
+    const item = this.editingPackage();
 
-
-        this.showCreatePackageForm.set(
-            false
-        );
-
-
-        this.createPackageForm.reset({
-            name: '',
-            price: 0,
-            duration_minutes: 0,
-            speed: ''
-        });
+    if (!item) {
+      return;
     }
 
+    if (this.editPackageForm.invalid) {
+      this.editPackageForm.markAllAsTouched();
 
-    // =====================================================
-    // CREATE COMPANY PACKAGE
-    // =====================================================
-
-    createCompanyPackage(): void {
-
-        if (
-            this.createPackageForm.invalid
-        ) {
-
-            this.createPackageForm
-                .markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.createPackageForm
-                .getRawValue();
-
-
-        const payload:
-            CreateCompanyPackageRequest = {
-
-            name:
-                raw.name.trim(),
-
-            price:
-                Number(raw.price),
-
-            duration_minutes:
-                Number(
-                    raw.duration_minutes
-                ),
-
-            speed:
-                raw.speed.trim()
-        };
-
-
-        this.packageSaving.set(
-            true
-        );
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.packageService
-            .createCompanyPackage(
-                this.companyId(),
-                payload
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packageSaving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.packages.update(
-                        (packages) =>
-                            [
-                                ...packages,
-                                response.package
-                            ]
-                                .sort(
-                                    (a, b) =>
-                                        Number(a.price) -
-                                        Number(b.price)
-                                )
-                    );
-
-
-                    this.showCreatePackageForm.set(
-                        false
-                    );
-
-
-                    this.createPackageForm.reset({
-                        name: '',
-                        price: 0,
-                        duration_minutes: 0,
-                        speed: ''
-                    });
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to create company package:',
-                        error
-                    );
-
-
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'The package could not be created.'
-                    );
-                }
-            });
+      return;
     }
 
+    const raw = this.editPackageForm.getRawValue();
 
-    // =====================================================
-    // EDIT PACKAGE FORM
-    // =====================================================
+    const payload: UpdateCompanyPackageRequest = {
+      name: raw.name.trim(),
 
-    openEditPackageForm(
-        item: InternetPackage
-    ): void {
+      price: Number(raw.price),
 
-        this.packageErrorMessage.set(
-            ''
-        );
+      duration_minutes: Number(raw.duration_minutes),
 
+      speed: raw.speed.trim(),
+    };
 
-        this.editingPackage.set(
-            item
-        );
+    this.packageSaving.set(true);
 
+    this.packageErrorMessage.set('');
 
-        this.editPackageForm.setValue({
+    this.packageService
+      .updateCompanyPackage(this.companyId(), item.id, payload)
+      .pipe(finalize(() => this.packageSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.replacePackage(response.package);
 
-            name:
-                item.name,
+          this.sortPackages();
 
-            price:
-                Number(item.price),
+          this.editingPackage.set(null);
+        },
 
-            duration_minutes:
-                item.duration_minutes,
+        error: (error) => {
+          console.error('Failed to update company package:', error);
 
-            speed:
-                item.speed
-        });
+          this.packageErrorMessage.set(
+            error?.error?.message || 'The package could not be updated.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // PACKAGE SCHEDULE FORM
+  // =====================================================
+
+  openPackageScheduleForm(item: InternetPackage): void {
+    this.packageErrorMessage.set('');
+
+    this.schedulePackage.set(item);
+
+    this.packageScheduleForm.setValue({
+      available_from: this.toDateTimeLocal(item.available_from),
+
+      available_until: this.toDateTimeLocal(item.available_until),
+    });
+  }
+
+  closePackageScheduleForm(): void {
+    if (this.packageSaving()) {
+      return;
     }
 
+    this.schedulePackage.set(null);
 
-    closeEditPackageForm(): void {
+    this.packageScheduleForm.reset({
+      available_from: '',
+      available_until: '',
+    });
+  }
 
-        if (this.packageSaving()) {
-            return;
-        }
+  // =====================================================
+  // UPDATE PACKAGE SCHEDULE
+  // =====================================================
 
+  updatePackageSchedule(): void {
+    const item = this.schedulePackage();
 
-        this.editingPackage.set(
-            null
-        );
+    if (!item) {
+      return;
     }
 
+    const raw = this.packageScheduleForm.getRawValue();
 
-    // =====================================================
-    // UPDATE COMPANY PACKAGE
-    // =====================================================
+    const availableFrom = raw.available_from
+      ? new Date(raw.available_from).toISOString()
+      : null;
 
-    updateCompanyPackage(): void {
+    const availableUntil = raw.available_until
+      ? new Date(raw.available_until).toISOString()
+      : null;
 
-        const item =
-            this.editingPackage();
+    if (
+      availableFrom &&
+      availableUntil &&
+      new Date(availableUntil) <= new Date(availableFrom)
+    ) {
+      this.packageErrorMessage.set(
+        'Availability end must be after availability start.',
+      );
 
-
-        if (!item) {
-            return;
-        }
-
-
-        if (
-            this.editPackageForm.invalid
-        ) {
-
-            this.editPackageForm
-                .markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.editPackageForm
-                .getRawValue();
-
-
-        const payload:
-            UpdateCompanyPackageRequest = {
-
-            name:
-                raw.name.trim(),
-
-            price:
-                Number(raw.price),
-
-            duration_minutes:
-                Number(
-                    raw.duration_minutes
-                ),
-
-            speed:
-                raw.speed.trim()
-        };
-
-
-        this.packageSaving.set(
-            true
-        );
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.packageService
-            .updateCompanyPackage(
-                this.companyId(),
-                item.id,
-                payload
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packageSaving.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.replacePackage(
-                        response.package
-                    );
-
-                    this.sortPackages();
-
-                    this.editingPackage.set(
-                        null
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update company package:',
-                        error
-                    );
-
-
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'The package could not be updated.'
-                    );
-                }
-            });
+      return;
     }
 
+    this.packageSaving.set(true);
 
-    // =====================================================
-    // PACKAGE SCHEDULE FORM
-    // =====================================================
+    this.packageErrorMessage.set('');
 
-    openPackageScheduleForm(
-        item: InternetPackage
-    ): void {
+    this.packageService
+      .setCompanyPackageSchedule(
+        this.companyId(),
+        item.id,
+        availableFrom,
+        availableUntil,
+      )
+      .pipe(finalize(() => this.packageSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.replacePackage(response.package);
 
-        this.packageErrorMessage.set(
-            ''
-        );
+          this.schedulePackage.set(null);
 
-
-        this.schedulePackage.set(
-            item
-        );
-
-
-        this.packageScheduleForm.setValue({
-
-            available_from:
-                this.toDateTimeLocal(
-                    item.available_from
-                ),
-
-            available_until:
-                this.toDateTimeLocal(
-                    item.available_until
-                )
-        });
-    }
-
-
-    closePackageScheduleForm(): void {
-
-        if (this.packageSaving()) {
-            return;
-        }
-
-
-        this.schedulePackage.set(
-            null
-        );
-
-
-        this.packageScheduleForm.reset({
+          this.packageScheduleForm.reset({
             available_from: '',
-            available_until: ''
-        });
+            available_until: '',
+          });
+        },
+
+        error: (error) => {
+          console.error('Failed to update package schedule:', error);
+
+          this.packageErrorMessage.set(
+            error?.error?.message ||
+              'The package schedule could not be updated.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // ACTIVATE / DEACTIVATE PACKAGE
+  // =====================================================
+
+  async togglePackageStatus(item: InternetPackage): Promise<void> {
+    const nextStatus = !item.is_active;
+
+    const confirmed = await this.ui.confirm(
+      nextStatus ? 'Activate package?' : 'Deactivate package?',
+      nextStatus
+        ? `${item.name} will become available as an active company package.`
+        : `${item.name} will be disabled and should no longer be offered as an active package.`,
+      nextStatus ? 'Activate' : 'Deactivate',
+    );
+
+    if (!confirmed) {
+      return;
     }
 
+    this.packageActionId.set(item.id);
 
-    // =====================================================
-    // UPDATE PACKAGE SCHEDULE
-    // =====================================================
+    this.packageErrorMessage.set('');
 
-    updatePackageSchedule(): void {
+    this.packageService
+      .setCompanyPackageStatus(this.companyId(), item.id, nextStatus)
+      .pipe(finalize(() => this.packageActionId.set(null)))
+      .subscribe({
+        next: (response) => {
+          this.replacePackage(response.package);
+        },
 
-        const item =
-            this.schedulePackage();
+        error: (error) => {
+          console.error('Failed to update package status:', error);
 
+          this.packageErrorMessage.set(
+            error?.error?.message || 'The package status could not be updated.',
+          );
+        },
+      });
+  }
 
-        if (!item) {
-            return;
-        }
+  // =====================================================
+  // DELETE COMPANY PACKAGE
+  // =====================================================
 
+  async deletePackage(item: InternetPackage): Promise<void> {
+    const confirmed = await this.ui.confirm(
+      'Delete package?',
+      `${item.name} will be permanently removed. Packages with related historical records may not be deletable.`,
+      'Delete',
+    );
 
-        const raw =
-            this.packageScheduleForm
-                .getRawValue();
+    if (!confirmed) {
+      return;
+    }
 
+    this.packageActionId.set(item.id);
 
-        const availableFrom =
-            raw.available_from
-                ? new Date(
-                    raw.available_from
-                ).toISOString()
-                : null;
+    this.packageErrorMessage.set('');
 
+    this.packageService
+      .deleteCompanyPackage(this.companyId(), item.id)
+      .pipe(finalize(() => this.packageActionId.set(null)))
+      .subscribe({
+        next: () => {
+          this.packages.update((packages) =>
+            packages.filter((packageItem) => packageItem.id !== item.id),
+          );
+        },
 
-        const availableUntil =
-            raw.available_until
-                ? new Date(
-                    raw.available_until
-                ).toISOString()
-                : null;
+        error: (error) => {
+          console.error('Failed to delete company package:', error);
 
+          this.packageErrorMessage.set(
+            error?.error?.message || 'The package could not be deleted.',
+          );
+        },
+      });
+  }
 
-        if (
-            availableFrom &&
-            availableUntil &&
-            new Date(availableUntil) <=
-                new Date(availableFrom)
-        ) {
+  // =====================================================
+  // PACKAGE DISPLAY HELPERS
+  // =====================================================
 
-            this.packageErrorMessage.set(
-                'Availability end must be after availability start.'
-            );
+  packageStatusLabel(item: InternetPackage): string {
+    return item.is_active ? 'Active' : 'Inactive';
+  }
 
-            return;
-        }
+  packageStatusClass(item: InternetPackage): string {
+    return item.is_active ? 'status--active' : 'status--suspended';
+  }
 
+  packagePrice(item: InternetPackage): string {
+    return Number(item.price).toLocaleString('en-TZ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
 
-        this.packageSaving.set(
-            true
-        );
+  packageDuration(minutes: number): string {
+    if (minutes % 1440 === 0) {
+      const days = minutes / 1440;
 
-        this.packageErrorMessage.set(
-            ''
-        );
+      return days === 1 ? '1 day' : `${days} days`;
+    }
 
+    if (minutes % 60 === 0) {
+      const hours = minutes / 60;
 
-        this.packageService
-            .setCompanyPackageSchedule(
-                this.companyId(),
-                item.id,
-                availableFrom,
-                availableUntil
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packageSaving.set(false)
-                )
-            )
-            .subscribe({
+      return hours === 1 ? '1 hour' : `${hours} hours`;
+    }
 
-                next: (response) => {
+    return `${minutes} min`;
+  }
 
-                    this.replacePackage(
-                        response.package
-                    );
+  // =====================================================
+  // LOAD COMPANY PAYMENTS
+  // =====================================================
 
+  loadPayments(): void {
+    const companyId = this.companyId();
 
-                    this.schedulePackage.set(
-                        null
-                    );
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      return;
+    }
 
+    this.paymentsLoading.set(true);
 
-                    this.packageScheduleForm.reset({
-                        available_from: '',
-                        available_until: ''
-                    });
-                },
+    this.paymentErrorMessage.set('');
 
+    this.paymentService
+      .getCompanyPayments(companyId)
+      .pipe(finalize(() => this.paymentsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.payments.set(response.payments);
 
-                error: (error) => {
+          this.paymentsLoaded.set(true);
+        },
 
-                    console.error(
-                        'Failed to update package schedule:',
-                        error
-                    );
+        error: (error) => {
+          console.error('Failed to load company payments:', error);
 
+          this.paymentErrorMessage.set(
+            error?.error?.message || 'Company payments could not be loaded.',
+          );
+        },
+      });
+  }
 
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'The package schedule could not be updated.'
-                    );
-                }
+  // =====================================================
+  // OPEN PAYMENT DETAILS
+  // =====================================================
+
+  openPaymentDetails(payment: Payment): void {
+    this.paymentErrorMessage.set('');
+
+    this.paymentDetailsLoading.set(true);
+
+    this.selectedPayment.set(payment);
+
+    this.selectedPaymentSession.set(null);
+
+    this.paymentService
+      .getCompanyPayment(this.companyId(), payment.id)
+      .pipe(finalize(() => this.paymentDetailsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.selectedPayment.set(response.payment);
+
+          this.selectedPaymentSession.set(response.session);
+        },
+
+        error: (error) => {
+          console.error('Failed to load payment details:', error);
+
+          this.paymentErrorMessage.set(
+            error?.error?.message || 'Payment details could not be loaded.',
+          );
+
+          this.selectedPayment.set(null);
+
+          this.selectedPaymentSession.set(null);
+        },
+      });
+  }
+
+  // =====================================================
+  // CLOSE PAYMENT DETAILS
+  // =====================================================
+
+  closePaymentDetails(): void {
+    if (this.paymentDetailsLoading()) {
+      return;
+    }
+
+    this.selectedPayment.set(null);
+
+    this.selectedPaymentSession.set(null);
+  }
+
+  // =====================================================
+  // PAYMENT DISPLAY HELPERS
+  // =====================================================
+
+  paymentAmount(payment: Payment): string {
+    return Number(payment.amount).toLocaleString('en-TZ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  formatMoney(amount: number | string): string {
+    return Number(amount).toLocaleString('en-TZ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  paymentStatusLabel(payment: Payment): string {
+    if (payment.status === 'successful') {
+      return 'Successful';
+    }
+
+    if (payment.status === 'pending') {
+      return 'Pending';
+    }
+
+    if (payment.status === 'failed') {
+      return 'Failed';
+    }
+
+    return payment.status;
+  }
+
+  paymentStatusClass(payment: Payment): string {
+    if (payment.status === 'successful') {
+      return 'status--active';
+    }
+
+    if (payment.status === 'pending') {
+      return 'status--pending';
+    }
+
+    return 'status--suspended';
+  }
+
+  paymentMethodLabel(method: string): string {
+    if (!method) {
+      return '—';
+    }
+
+    return method
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  sessionStatusLabel(session: PaymentInternetSession | null): string {
+    if (!session || !session.status) {
+      return 'No session';
+    }
+
+    return this.humanizeStatus(String(session.status));
+  }
+
+  // =====================================================
+  // LOAD COMPANY SESSIONS
+  // =====================================================
+
+  loadSessions(): void {
+    const companyId = this.companyId();
+
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      return;
+    }
+
+    this.sessionsLoading.set(true);
+
+    this.sessionErrorMessage.set('');
+
+    this.sessionService
+      .getCompanySessions(companyId)
+      .pipe(finalize(() => this.sessionsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.sessions.set(response.sessions);
+
+          this.sessionsLoaded.set(true);
+        },
+
+        error: (error) => {
+          console.error('Failed to load company sessions:', error);
+
+          this.sessionErrorMessage.set(
+            error?.error?.message ||
+              'Company internet sessions could not be loaded.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // OPEN SESSION DETAILS
+  // =====================================================
+
+  openSessionDetails(session: InternetSession): void {
+    this.sessionErrorMessage.set('');
+
+    this.sessionDetailsLoading.set(true);
+
+    this.selectedSession.set(session);
+
+    this.sessionService
+      .getCompanySession(this.companyId(), session.id)
+      .pipe(finalize(() => this.sessionDetailsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.selectedSession.set(response.session);
+        },
+
+        error: (error) => {
+          console.error('Failed to load session details:', error);
+
+          this.sessionErrorMessage.set(
+            error?.error?.message ||
+              'Internet session details could not be loaded.',
+          );
+
+          this.selectedSession.set(null);
+        },
+      });
+  }
+
+  // =====================================================
+  // CLOSE SESSION DETAILS
+  // =====================================================
+
+  closeSessionDetails(): void {
+    if (this.sessionDetailsLoading() || this.sessionActionId() !== null) {
+      return;
+    }
+
+    this.selectedSession.set(null);
+  }
+
+  // =====================================================
+  // CHANGE SESSION STATUS
+  // =====================================================
+
+  async changeSessionStatus(
+    session: InternetSession,
+    status: SessionStatus,
+  ): Promise<void> {
+    if (session.status === status) {
+      return;
+    }
+
+    const actionLabel = this.sessionActionLabel(status);
+
+    const confirmed = await this.ui.confirm(
+      `${actionLabel} session?`,
+      `Session #${session.id} will be changed from ${this.sessionStatusText(session.status)} to ${this.sessionStatusText(status)}.`,
+      actionLabel,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.sessionActionId.set(session.id);
+
+    this.sessionErrorMessage.set('');
+
+    this.sessionService
+      .changeCompanySessionStatus(this.companyId(), session.id, status)
+      .pipe(finalize(() => this.sessionActionId.set(null)))
+      .subscribe({
+        next: (response) => {
+          /*
+           * The PATCH endpoint returns only the core
+           * session fields. Merge them with the existing
+           * joined package/payment fields instead of
+           * replacing the whole object.
+           */
+          this.replaceSession(response.session);
+
+          const selected = this.selectedSession();
+
+          if (selected && selected.id === response.session.id) {
+            this.selectedSession.set({
+              ...selected,
+              ...response.session,
             });
+          }
+        },
+
+        error: (error) => {
+          console.error('Failed to update internet session status:', error);
+
+          this.sessionErrorMessage.set(
+            error?.error?.message ||
+              'The internet session status could not be updated.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // SESSION DISPLAY HELPERS
+  // =====================================================
+
+  internetSessionStatusLabel(session: InternetSession): string {
+    return this.sessionStatusText(session.status);
+  }
+
+  internetSessionStatusClass(session: InternetSession): string {
+    if (session.status === 'active') {
+      return 'status--active';
     }
 
-
-    // =====================================================
-    // ACTIVATE / DEACTIVATE PACKAGE
-    // =====================================================
-
-    async togglePackageStatus(
-        item: InternetPackage
-    ): Promise<void> {
-
-        const nextStatus =
-            !item.is_active;
-
-
-        const confirmed =
-            await this.ui.confirm(
-                nextStatus
-                    ? 'Activate package?'
-                    : 'Deactivate package?',
-                nextStatus
-                    ? `${item.name} will become available as an active company package.`
-                    : `${item.name} will be disabled and should no longer be offered as an active package.`,
-                nextStatus
-                    ? 'Activate'
-                    : 'Deactivate'
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        this.packageActionId.set(
-            item.id
-        );
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.packageService
-            .setCompanyPackageStatus(
-                this.companyId(),
-                item.id,
-                nextStatus
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packageActionId.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.replacePackage(
-                        response.package
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update package status:',
-                        error
-                    );
-
-
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'The package status could not be updated.'
-                    );
-                }
-            });
+    if (session.status === 'pending_activation') {
+      return 'status--pending';
     }
 
-
-    // =====================================================
-    // DELETE COMPANY PACKAGE
-    // =====================================================
-
-    async deletePackage(
-        item: InternetPackage
-    ): Promise<void> {
-
-        const confirmed =
-            await this.ui.confirm(
-                'Delete package?',
-                `${item.name} will be permanently removed. Packages with related historical records may not be deletable.`,
-                'Delete'
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        this.packageActionId.set(
-            item.id
-        );
-
-        this.packageErrorMessage.set(
-            ''
-        );
-
-
-        this.packageService
-            .deleteCompanyPackage(
-                this.companyId(),
-                item.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.packageActionId.set(null)
-                )
-            )
-            .subscribe({
-
-                next: () => {
-
-                    this.packages.update(
-                        (packages) =>
-                            packages.filter(
-                                (packageItem) =>
-                                    packageItem.id !==
-                                    item.id
-                            )
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to delete company package:',
-                        error
-                    );
-
-
-                    this.packageErrorMessage.set(
-                        error?.error?.message ||
-                        'The package could not be deleted.'
-                    );
-                }
-            });
+    if (session.status === 'expired') {
+      return 'status--expired';
     }
 
+    return 'status--suspended';
+  }
 
-    // =====================================================
-    // PACKAGE DISPLAY HELPERS
-    // =====================================================
+  sessionStatusText(status: SessionStatus): string {
+    return this.humanizeStatus(status);
+  }
 
-    packageStatusLabel(
-        item: InternetPackage
-    ): string {
-
-        return item.is_active
-            ? 'Active'
-            : 'Inactive';
+  sessionAmount(session: InternetSession): string {
+    if (session.amount === undefined || session.amount === null) {
+      return '—';
     }
 
+    return Number(session.amount).toLocaleString('en-TZ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  }
 
-    packageStatusClass(
-        item: InternetPackage
-    ): string {
-
-        return item.is_active
-            ? 'status--active'
-            : 'status--suspended';
+  sessionDuration(session: InternetSession): string {
+    if (session.duration_minutes === undefined) {
+      return '—';
     }
 
+    return this.packageDuration(session.duration_minutes);
+  }
 
-    packagePrice(
-        item: InternetPackage
-    ): string {
-
-        return Number(
-            item.price
-        ).toLocaleString(
-            'en-TZ',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }
-        );
+  sessionRemainingLabel(session: InternetSession): string {
+    if (session.status === 'expired') {
+      return 'Expired';
     }
 
-
-    packageDuration(
-        minutes: number
-    ): string {
-
-        if (
-            minutes % 1440 === 0
-        ) {
-
-            const days =
-                minutes / 1440;
-
-
-            return days === 1
-                ? '1 day'
-                : `${days} days`;
-        }
-
-
-        if (
-            minutes % 60 === 0
-        ) {
-
-            const hours =
-                minutes / 60;
-
-
-            return hours === 1
-                ? '1 hour'
-                : `${hours} hours`;
-        }
-
-
-        return `${minutes} min`;
+    if (!session.expires_at) {
+      return '—';
     }
 
+    const expiresAt = new Date(session.expires_at).getTime();
 
-    // =====================================================
-    // LOAD COMPANY PAYMENTS
-    // =====================================================
-
-    loadPayments(): void {
-
-        const companyId =
-            this.companyId();
-
-
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-            return;
-        }
-
-
-        this.paymentsLoading.set(
-            true
-        );
-
-        this.paymentErrorMessage.set(
-            ''
-        );
-
-
-        this.paymentService
-            .getCompanyPayments(
-                companyId
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.paymentsLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.payments.set(
-                        response.payments
-                    );
-
-                    this.paymentsLoaded.set(
-                        true
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company payments:',
-                        error
-                    );
-
-
-                    this.paymentErrorMessage.set(
-                        error?.error?.message ||
-                        'Company payments could not be loaded.'
-                    );
-                }
-            });
+    if (Number.isNaN(expiresAt)) {
+      return '—';
     }
 
+    const difference = expiresAt - Date.now();
 
-    // =====================================================
-    // OPEN PAYMENT DETAILS
-    // =====================================================
-
-    openPaymentDetails(
-        payment: Payment
-    ): void {
-
-        this.paymentErrorMessage.set(
-            ''
-        );
-
-        this.paymentDetailsLoading.set(
-            true
-        );
-
-        this.selectedPayment.set(
-            payment
-        );
-
-        this.selectedPaymentSession.set(
-            null
-        );
-
-
-        this.paymentService
-            .getCompanyPayment(
-                this.companyId(),
-                payment.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.paymentDetailsLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.selectedPayment.set(
-                        response.payment
-                    );
-
-                    this.selectedPaymentSession.set(
-                        response.session
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load payment details:',
-                        error
-                    );
-
-
-                    this.paymentErrorMessage.set(
-                        error?.error?.message ||
-                        'Payment details could not be loaded.'
-                    );
-
-
-                    this.selectedPayment.set(
-                        null
-                    );
-
-                    this.selectedPaymentSession.set(
-                        null
-                    );
-                }
-            });
+    if (difference <= 0) {
+      return 'Expired';
     }
 
+    const totalMinutes = Math.ceil(difference / 60000);
 
-    // =====================================================
-    // CLOSE PAYMENT DETAILS
-    // =====================================================
+    if (totalMinutes >= 1440) {
+      const days = Math.floor(totalMinutes / 1440);
 
-    closePaymentDetails(): void {
+      const hours = Math.floor((totalMinutes % 1440) / 60);
 
-        if (
-            this.paymentDetailsLoading()
-        ) {
-            return;
-        }
-
-
-        this.selectedPayment.set(
-            null
-        );
-
-        this.selectedPaymentSession.set(
-            null
-        );
+      return hours > 0 ? `${days}d ${hours}h remaining` : `${days}d remaining`;
     }
 
+    if (totalMinutes >= 60) {
+      const hours = Math.floor(totalMinutes / 60);
 
-    // =====================================================
-    // PAYMENT DISPLAY HELPERS
-    // =====================================================
+      const minutes = totalMinutes % 60;
 
-    paymentAmount(
-        payment: Payment
-    ): string {
-
-        return Number(
-            payment.amount
-        ).toLocaleString(
-            'en-TZ',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }
-        );
+      return minutes > 0
+        ? `${hours}h ${minutes}m remaining`
+        : `${hours}h remaining`;
     }
 
+    return `${totalMinutes}m remaining`;
+  }
 
-    formatMoney(
-        amount: number | string
-    ): string {
+  sessionCanActivate(session: InternetSession): boolean {
+    return session.status !== 'active' && session.status !== 'expired';
+  }
 
-        return Number(
-            amount
-        ).toLocaleString(
-            'en-TZ',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }
-        );
+  sessionCanSuspend(session: InternetSession): boolean {
+    return (
+      session.status === 'active' || session.status === 'pending_activation'
+    );
+  }
+
+  // =====================================================
+  // LOAD COMPANY REPORTS
+  // =====================================================
+
+  loadReports(): void {
+    const companyId = this.companyId();
+
+    if (!Number.isInteger(companyId) || companyId <= 0) {
+      return;
     }
 
+    this.reportsLoading.set(true);
 
-    paymentStatusLabel(
-        payment: Payment
-    ): string {
+    this.reportErrorMessage.set('');
 
-        if (
-            payment.status ===
-            'successful'
-        ) {
-            return 'Successful';
-        }
+    this.reportService
+      .getCompanyReports(companyId)
+      .pipe(finalize(() => this.reportsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.reportTotalRevenue.set(Number(response.revenue.total_revenue));
 
+          this.revenueReport.set(response.revenue.report);
 
-        if (
-            payment.status ===
-            'pending'
-        ) {
-            return 'Pending';
-        }
+          this.paymentReport.set(response.payments.report);
 
+          this.sessionReport.set(response.sessions.report);
 
-        if (
-            payment.status ===
-            'failed'
-        ) {
-            return 'Failed';
-        }
+          this.reportsLoaded.set(true);
+        },
 
+        error: (error) => {
+          console.error('Failed to load company reports:', error);
 
-        return payment.status;
+          this.reportErrorMessage.set(
+            error?.error?.message || 'Company reports could not be loaded.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // REPORT DISPLAY HELPERS
+  // =====================================================
+
+  reportStatusLabel(status: string): string {
+    return this.humanizeStatus(status);
+  }
+
+  reportStatusClass(status: string): string {
+    if (status === 'successful' || status === 'active') {
+      return 'status--active';
     }
 
-
-    paymentStatusClass(
-        payment: Payment
-    ): string {
-
-        if (
-            payment.status ===
-            'successful'
-        ) {
-            return 'status--active';
-        }
-
-
-        if (
-            payment.status ===
-            'pending'
-        ) {
-            return 'status--pending';
-        }
-
-
-        return 'status--suspended';
+    if (status === 'pending' || status === 'pending_activation') {
+      return 'status--pending';
     }
 
-
-    paymentMethodLabel(
-        method: string
-    ): string {
-
-        if (!method) {
-            return '—';
-        }
-
-
-        return method
-            .replace(
-                /[_-]+/g,
-                ' '
-            )
-            .replace(
-                /\b\w/g,
-                (character) =>
-                    character.toUpperCase()
-            );
+    if (status === 'expired') {
+      return 'status--expired';
     }
 
+    return 'status--suspended';
+  }
 
-    sessionStatusLabel(
-        session:
-            PaymentInternetSession | null
-    ): string {
+  reportRevenueAmount(amount: number | string): string {
+    return this.formatMoney(amount);
+  }
 
-        if (
-            !session ||
-            !session.status
-        ) {
-            return 'No session';
-        }
+  reportPaymentAmount(item: CompanyPaymentReportItem): string {
+    return this.formatMoney(item.total_amount);
+  }
 
+  // =====================================================
 
-        return this.humanizeStatus(
-            String(session.status)
-        );
+  saveBranding(): void {
+    const company = this.company();
+
+    if (!company) {
+      return;
     }
 
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-    // =====================================================
-    // LOAD COMPANY SESSIONS
-    // =====================================================
+    if (this.brandingForm.invalid) {
+      this.brandingForm.markAllAsTouched();
 
-    loadSessions(): void {
-
-        const companyId =
-            this.companyId();
-
-
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-            return;
-        }
-
-
-        this.sessionsLoading.set(
-            true
-        );
-
-        this.sessionErrorMessage.set(
-            ''
-        );
-
-
-        this.sessionService
-            .getCompanySessions(
-                companyId
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.sessionsLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.sessions.set(
-                        response.sessions
-                    );
-
-                    this.sessionsLoaded.set(
-                        true
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company sessions:',
-                        error
-                    );
-
-
-                    this.sessionErrorMessage.set(
-                        error?.error?.message ||
-                        'Company internet sessions could not be loaded.'
-                    );
-                }
-            });
+      return;
     }
 
+    const raw = this.brandingForm.getRawValue();
 
-    // =====================================================
-    // OPEN SESSION DETAILS
-    // =====================================================
+    const payload: UpdateCompanyBrandingRequest = {
+      branding: {
+        primary_color: raw.primary_color.trim(),
 
-    openSessionDetails(
-        session: InternetSession
-    ): void {
+        secondary_color: raw.secondary_color.trim(),
 
-        this.sessionErrorMessage.set(
-            ''
-        );
+        accent_color: raw.accent_color.trim(),
 
-        this.sessionDetailsLoading.set(
-            true
-        );
+        background_color: raw.background_color.trim(),
 
-        this.selectedSession.set(
-            session
-        );
+        navbar_color: raw.navbar_color.trim(),
 
+        background_image_url: raw.background_image_url.trim() || null,
 
-        this.sessionService
-            .getCompanySession(
-                this.companyId(),
-                session.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.sessionDetailsLoading.set(false)
-                )
-            )
-            .subscribe({
+        login_image_url: raw.login_image_url.trim() || null,
 
-                next: (response) => {
+        banner_image_url: raw.banner_image_url.trim() || null,
+      },
+    };
 
-                    this.selectedSession.set(
-                        response.session
-                    );
-                },
+    this.brandingSaving.set(true);
 
+    this.companyService
+      .updateCompanyBranding(company.id, payload)
+      .pipe(finalize(() => this.brandingSaving.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.company.set(response.company);
 
-                error: (error) => {
+          this.populateBrandingForm(response.company);
 
-                    console.error(
-                        'Failed to load session details:',
-                        error
-                    );
+          this.brandingSuccessMessage.set(
+            response.message || 'Company branding saved successfully.',
+          );
+        },
 
+        error: (error) => {
+          console.error('Failed to update company branding:', error);
 
-                    this.sessionErrorMessage.set(
-                        error?.error?.message ||
-                        'Internet session details could not be loaded.'
-                    );
+          this.brandingErrorMessage.set(
+            error?.error?.message || 'Company branding could not be updated.',
+          );
+        },
+      });
+  }
 
+  // =====================================================
+  // RESET BRANDING FORM
+  // =====================================================
 
-                    this.selectedSession.set(
-                        null
-                    );
-                }
-            });
+  resetBrandingForm(): void {
+    const company = this.company();
+
+    if (!company) {
+      return;
     }
 
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-    // =====================================================
-    // CLOSE SESSION DETAILS
-    // =====================================================
+    this.populateBrandingForm(company);
+  }
 
-    closeSessionDetails(): void {
+  // =====================================================
+  // BRANDING FILE SELECTION
+  // =====================================================
 
-        if (
-            this.sessionDetailsLoading() ||
-            this.sessionActionId() !== null
-        ) {
-            return;
-        }
+  onLogoFileSelected(event: Event): void {
+    const file = this.extractSelectedFile(event);
 
-
-        this.selectedSession.set(
-            null
-        );
+    if (!file) {
+      return;
     }
 
+    this.uploadLogo(file);
+  }
 
-    // =====================================================
-    // CHANGE SESSION STATUS
-    // =====================================================
+  onBrandingFileSelected(
+    event: Event,
+    imageType: CompanyBrandingImageType,
+  ): void {
+    const file = this.extractSelectedFile(event);
 
-    async changeSessionStatus(
-        session: InternetSession,
-        status: SessionStatus
-    ): Promise<void> {
-
-        if (
-            session.status === status
-        ) {
-            return;
-        }
-
-
-        const actionLabel =
-            this.sessionActionLabel(
-                status
-            );
-
-
-        const confirmed =
-            await this.ui.confirm(
-                `${actionLabel} session?`,
-                `Session #${session.id} will be changed from ${this.sessionStatusText(session.status)} to ${this.sessionStatusText(status)}.`,
-                actionLabel
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        this.sessionActionId.set(
-            session.id
-        );
-
-        this.sessionErrorMessage.set(
-            ''
-        );
-
-
-        this.sessionService
-            .changeCompanySessionStatus(
-                this.companyId(),
-                session.id,
-                status
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.sessionActionId.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    /*
-                     * The PATCH endpoint returns only the core
-                     * session fields. Merge them with the existing
-                     * joined package/payment fields instead of
-                     * replacing the whole object.
-                     */
-                    this.replaceSession(
-                        response.session
-                    );
-
-
-                    const selected =
-                        this.selectedSession();
-
-
-                    if (
-                        selected &&
-                        selected.id ===
-                        response.session.id
-                    ) {
-
-                        this.selectedSession.set({
-                            ...selected,
-                            ...response.session
-                        });
-                    }
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update internet session status:',
-                        error
-                    );
-
-
-                    this.sessionErrorMessage.set(
-                        error?.error?.message ||
-                        'The internet session status could not be updated.'
-                    );
-                }
-            });
+    if (!file) {
+      return;
     }
 
+    this.uploadBrandingImage(imageType, file);
+  }
 
-    // =====================================================
-    // SESSION DISPLAY HELPERS
-    // =====================================================
+  // =====================================================
+  // UPLOAD LOGO
+  // =====================================================
 
-    internetSessionStatusLabel(
-        session: InternetSession
-    ): string {
+  uploadLogo(file: File): void {
+    const validationMessage = this.validateImageFile(file);
 
-        return this.sessionStatusText(
-            session.status
-        );
+    if (validationMessage) {
+      this.brandingErrorMessage.set(validationMessage);
+
+      return;
     }
 
+    this.brandingUploading.set('logo');
 
-    internetSessionStatusClass(
-        session: InternetSession
-    ): string {
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-        if (
-            session.status ===
-            'active'
-        ) {
-            return 'status--active';
-        }
+    this.companyService
+      .uploadCompanyLogo(this.companyId(), file)
+      .pipe(finalize(() => this.brandingUploading.set(null)))
+      .subscribe({
+        next: (response) => {
+          if (response.company) {
+            this.company.set(response.company);
 
+            this.populateBrandingForm(response.company);
+          }
 
-        if (
-            session.status ===
-            'pending_activation'
-        ) {
-            return 'status--pending';
-        }
+          this.brandingSuccessMessage.set(
+            response.message || 'Company logo uploaded successfully.',
+          );
+        },
 
+        error: (error) => {
+          console.error('Failed to upload company logo:', error);
 
-        if (
-            session.status ===
-            'expired'
-        ) {
-            return 'status--expired';
-        }
+          this.brandingErrorMessage.set(
+            error?.error?.message || 'Company logo could not be uploaded.',
+          );
+        },
+      });
+  }
 
+  // =====================================================
+  // REMOVE LOGO
+  // =====================================================
 
-        return 'status--suspended';
+  async removeLogo(): Promise<void> {
+    const company = this.company();
+
+    if (!company || !company.logo_url) {
+      return;
     }
 
+    const confirmed = await this.ui.confirm(
+      'Remove company logo?',
+      'The current logo will be removed from this company.',
+      'Remove',
+    );
 
-    sessionStatusText(
-        status: SessionStatus
-    ): string {
-
-        return this.humanizeStatus(
-            status
-        );
+    if (!confirmed) {
+      return;
     }
 
+    this.brandingRemoving.set('logo');
 
-    sessionAmount(
-        session: InternetSession
-    ): string {
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-        if (
-            session.amount === undefined ||
-            session.amount === null
-        ) {
-            return '—';
-        }
+    this.companyService
+      .removeCompanyLogo(company.id)
+      .pipe(finalize(() => this.brandingRemoving.set(null)))
+      .subscribe({
+        next: (response) => {
+          this.company.set(response.company);
 
+          this.populateBrandingForm(response.company);
 
-        return Number(
-            session.amount
-        ).toLocaleString(
-            'en-TZ',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }
-        );
+          this.brandingSuccessMessage.set(
+            response.message || 'Company logo removed successfully.',
+          );
+        },
+
+        error: (error) => {
+          console.error('Failed to remove company logo:', error);
+
+          this.brandingErrorMessage.set(
+            error?.error?.message || 'Company logo could not be removed.',
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // UPLOAD BRANDING IMAGE
+  // =====================================================
+
+  uploadBrandingImage(imageType: CompanyBrandingImageType, file: File): void {
+    const validationMessage = this.validateImageFile(file);
+
+    if (validationMessage) {
+      this.brandingErrorMessage.set(validationMessage);
+
+      return;
     }
 
+    this.brandingUploading.set(imageType);
 
-    sessionDuration(
-        session: InternetSession
-    ): string {
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-        if (
-            session.duration_minutes === undefined
-        ) {
-            return '—';
-        }
+    this.companyService
+      .uploadCompanyBrandingImage(this.companyId(), imageType, file)
+      .pipe(finalize(() => this.brandingUploading.set(null)))
+      .subscribe({
+        next: (response) => {
+          if (response.company) {
+            this.company.set(response.company);
 
+            this.populateBrandingForm(response.company);
+          }
 
-        return this.packageDuration(
-            session.duration_minutes
-        );
+          this.brandingSuccessMessage.set(
+            response.message ||
+              `${this.brandingImageLabel(imageType)} uploaded successfully.`,
+          );
+        },
+
+        error: (error) => {
+          console.error('Failed to upload branding image:', error);
+
+          this.brandingErrorMessage.set(
+            error?.error?.message ||
+              `${this.brandingImageLabel(imageType)} could not be uploaded.`,
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // REMOVE BRANDING IMAGE
+  // =====================================================
+
+  async removeBrandingImage(
+    imageType: CompanyBrandingImageType,
+  ): Promise<void> {
+    const company = this.company();
+
+    if (!company) {
+      return;
     }
 
+    const currentUrl = this.getBrandingImageUrl(imageType);
 
-    sessionRemainingLabel(
-        session: InternetSession
-    ): string {
-
-        if (
-            session.status ===
-            'expired'
-        ) {
-            return 'Expired';
-        }
-
-
-        if (!session.expires_at) {
-            return '—';
-        }
-
-
-        const expiresAt =
-            new Date(
-                session.expires_at
-            ).getTime();
-
-
-        if (
-            Number.isNaN(expiresAt)
-        ) {
-            return '—';
-        }
-
-
-        const difference =
-            expiresAt -
-            Date.now();
-
-
-        if (
-            difference <= 0
-        ) {
-            return 'Expired';
-        }
-
-
-        const totalMinutes =
-            Math.ceil(
-                difference /
-                60000
-            );
-
-
-        if (
-            totalMinutes >= 1440
-        ) {
-
-            const days =
-                Math.floor(
-                    totalMinutes /
-                    1440
-                );
-
-
-            const hours =
-                Math.floor(
-                    (
-                        totalMinutes %
-                        1440
-                    ) /
-                    60
-                );
-
-
-            return hours > 0
-                ? `${days}d ${hours}h remaining`
-                : `${days}d remaining`;
-        }
-
-
-        if (
-            totalMinutes >= 60
-        ) {
-
-            const hours =
-                Math.floor(
-                    totalMinutes /
-                    60
-                );
-
-
-            const minutes =
-                totalMinutes %
-                60;
-
-
-            return minutes > 0
-                ? `${hours}h ${minutes}m remaining`
-                : `${hours}h remaining`;
-        }
-
-
-        return `${totalMinutes}m remaining`;
+    if (!currentUrl) {
+      return;
     }
 
+    const label = this.brandingImageLabel(imageType);
 
-    sessionCanActivate(
-        session: InternetSession
-    ): boolean {
+    const confirmed = await this.ui.confirm(
+      `Remove ${label.toLowerCase()}?`,
+      `The current ${label.toLowerCase()} will be removed from this company.`,
+      'Remove',
+    );
 
-        return (
-            session.status !== 'active' &&
-            session.status !== 'expired'
-        );
+    if (!confirmed) {
+      return;
     }
 
+    this.brandingRemoving.set(imageType);
 
-    sessionCanSuspend(
-        session: InternetSession
-    ): boolean {
+    this.brandingErrorMessage.set('');
+    this.brandingSuccessMessage.set('');
 
-        return (
-            session.status === 'active' ||
-            session.status ===
-                'pending_activation'
-        );
+    this.companyService
+      .removeCompanyBrandingImage(company.id, imageType)
+      .pipe(finalize(() => this.brandingRemoving.set(null)))
+      .subscribe({
+        next: (response) => {
+          this.company.set(response.company);
+
+          this.populateBrandingForm(response.company);
+
+          this.brandingSuccessMessage.set(
+            response.message || `${label} removed successfully.`,
+          );
+        },
+
+        error: (error) => {
+          console.error('Failed to remove branding image:', error);
+
+          this.brandingErrorMessage.set(
+            error?.error?.message || `${label} could not be removed.`,
+          );
+        },
+      });
+  }
+
+  // =====================================================
+  // BRANDING DISPLAY HELPERS
+  // =====================================================
+
+  brandingImageLabel(imageType: CompanyBrandingImageType): string {
+    if (imageType === 'background') {
+      return 'Background image';
     }
 
+    if (imageType === 'login') {
+      return 'Login image';
+    }
 
-    // =====================================================
-    // LOAD COMPANY REPORTS
-    // =====================================================
+    return 'Banner image';
+  }
 
-    loadReports(): void {
+  getBrandingImageUrl(imageType: CompanyBrandingImageType): string | null {
+    if (imageType === 'background') {
+      return this.backgroundImageUrl();
+    }
 
-        const companyId =
-            this.companyId();
+    if (imageType === 'login') {
+      return this.loginImageUrl();
+    }
 
+    return this.bannerImageUrl();
+  }
 
-        if (
-            !Number.isInteger(companyId) ||
-            companyId <= 0
-        ) {
-            return;
+  publicImageUrl(value: string | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    if (
+      value.startsWith('http://') ||
+      value.startsWith('https://') ||
+      value.startsWith('data:') ||
+      value.startsWith('blob:')
+    ) {
+      return value;
+    }
+
+    return value;
+  }
+
+  // =====================================================
+  // BACK TO COMPANIES
+  // =====================================================
+
+  goBack(): void {
+    void this.router.navigate(['/platform', 'companies']);
+  }
+
+  // =====================================================
+  // COMPANY STATUS HELPERS
+  // =====================================================
+
+  statusLabel(): string {
+    const company = this.company();
+
+    if (!company) {
+      return '';
+    }
+
+    if (company.status === 'active') {
+      return 'Active';
+    }
+
+    if (company.status === 'suspended') {
+      return 'Suspended';
+    }
+
+    return company.status;
+  }
+
+  statusClass(): string {
+    const company = this.company();
+
+    return company?.status === 'active'
+      ? 'status--active'
+      : 'status--suspended';
+  }
+
+  // =====================================================
+  // PRIVATE ADMIN HELPER
+  // =====================================================
+
+  private replaceAdmin(updatedAdmin: Admin): void {
+    this.admins.update((admins) =>
+      admins.map((admin) => {
+        if (admin.id !== updatedAdmin.id) {
+          return admin;
         }
 
-
-        this.reportsLoading.set(
-            true
-        );
-
-        this.reportErrorMessage.set(
-            ''
-        );
-
-
-        this.reportService
-            .getCompanyReports(
-                companyId
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.reportsLoading.set(false)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.reportTotalRevenue.set(
-                        Number(
-                            response.revenue.total_revenue
-                        )
-                    );
-
-
-                    this.revenueReport.set(
-                        response.revenue.report
-                    );
-
-
-                    this.paymentReport.set(
-                        response.payments.report
-                    );
-
-
-                    this.sessionReport.set(
-                        response.sessions.report
-                    );
-
-
-                    this.reportsLoaded.set(
-                        true
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to load company reports:',
-                        error
-                    );
-
-
-                    this.reportErrorMessage.set(
-                        error?.error?.message ||
-                        'Company reports could not be loaded.'
-                    );
-                }
-            });
-    }
-
-
-    // =====================================================
-    // REPORT DISPLAY HELPERS
-    // =====================================================
-
-    reportStatusLabel(
-        status: string
-    ): string {
-
-        return this.humanizeStatus(
-            status
-        );
-    }
-
-
-    reportStatusClass(
-        status: string
-    ): string {
-
-        if (
-            status === 'successful' ||
-            status === 'active'
-        ) {
-            return 'status--active';
-        }
-
-
-        if (
-            status === 'pending' ||
-            status === 'pending_activation'
-        ) {
-            return 'status--pending';
-        }
-
-
-        if (
-            status === 'expired'
-        ) {
-            return 'status--expired';
-        }
-
-
-        return 'status--suspended';
-    }
-
-
-    reportRevenueAmount(
-        amount: number | string
-    ): string {
-
-        return this.formatMoney(
-            amount
-        );
-    }
-
-
-    reportPaymentAmount(
-        item: CompanyPaymentReportItem
-    ): string {
-
-        return this.formatMoney(
-            item.total_amount
-        );
-    }
-
-
-    // =====================================================
-    // SAVE COMPANY BRANDING
-    // =====================================================
-    // SAVE PAYMENT SETTINGS
-    // =====================================================
-
-    savePaymentSettings(): void {
-
-        const company =
-            this.company();
-
-        if (!company) {
-            return;
-        }
-
-        this.paymentSettingsErrorMessage.set('');
-        this.paymentSettingsSuccessMessage.set('');
-
-        if (this.paymentSettingsForm.invalid) {
-            this.paymentSettingsForm.markAllAsTouched();
-            return;
-        }
-
-        const raw =
-            this.paymentSettingsForm.getRawValue();
-
-        const payload:
-            UpdateCompanyPaymentSettingsRequest = {
-            payment: {
-                enabled:
-                    raw.enabled,
-                lipa_number:
-                    raw.lipa_number.trim(),
-                account_name:
-                    raw.account_name.trim() ||
-                    null,
-                instructions:
-                    raw.instructions.trim() ||
-                    null,
-                httpsms_owner:
-                    raw.httpsms_owner.trim() ||
-                    null,
-                payment_phone:
-                    raw.payment_phone.trim() ||
-                    null,
-                device_name:
-                    raw.device_name.trim() ||
-                    null
-            }
+        return {
+          ...admin,
+          ...updatedAdmin,
         };
+      }),
+    );
+  }
 
-        this.paymentSettingsSaving.set(true);
+  // =====================================================
+  // PRIVATE PACKAGE HELPERS
+  // =====================================================
 
-        this.companyService
-            .updateCompanyPaymentSettings(
-                company.id,
-                payload
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.paymentSettingsSaving.set(false)
-                )
-            )
-            .subscribe({
-                next: (response) => {
-                    this.company.set(
-                        response.company
-                    );
-                    this.populatePaymentSettingsForm(
-                        response.company
-                    );
-                    this.paymentSettingsSuccessMessage.set(
-                        response.message ||
-                        'Payment settings saved successfully.'
-                    );
-                },
-                error: (error) => {
-                    console.error(
-                        'Failed to update payment settings:',
-                        error
-                    );
-                    this.paymentSettingsErrorMessage.set(
-                        error?.error?.message ||
-                        'Payment settings could not be updated.'
-                    );
-                }
-            });
-    }
-
-
-    resetPaymentSettingsForm(): void {
-
-        const company =
-            this.company();
-
-        if (!company) {
-            return;
+  private replacePackage(updatedPackage: InternetPackage): void {
+    this.packages.update((packages) =>
+      packages.map((item) => {
+        if (item.id !== updatedPackage.id) {
+          return item;
         }
 
-        this.paymentSettingsErrorMessage.set('');
-        this.paymentSettingsSuccessMessage.set('');
-
-        this.populatePaymentSettingsForm(
-            company
-        );
-    }
-
-
-    // =====================================================
-
-    saveBranding(): void {
-
-        const company =
-            this.company();
-
-
-        if (!company) {
-            return;
-        }
-
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-
-        if (
-            this.brandingForm.invalid
-        ) {
-
-            this.brandingForm.markAllAsTouched();
-
-            return;
-        }
-
-
-        const raw =
-            this.brandingForm.getRawValue();
-
-
-        const payload:
-            UpdateCompanyBrandingRequest = {
-
-            branding: {
-
-                primary_color:
-                    raw.primary_color.trim(),
-
-                secondary_color:
-                    raw.secondary_color.trim(),
-
-                accent_color:
-                    raw.accent_color.trim(),
-
-                background_color:
-                    raw.background_color.trim(),
-
-                navbar_color:
-                    raw.navbar_color.trim(),
-
-                background_image_url:
-                    raw.background_image_url.trim() ||
-                    null,
-
-                login_image_url:
-                    raw.login_image_url.trim() ||
-                    null,
-
-                banner_image_url:
-                    raw.banner_image_url.trim() ||
-                    null
-            }
+        return {
+          ...item,
+          ...updatedPackage,
         };
+      }),
+    );
+  }
 
+  private sortPackages(): void {
+    this.packages.update((packages) =>
+      [...packages].sort((a, b) => Number(a.price) - Number(b.price)),
+    );
+  }
 
-        this.brandingSaving.set(true);
+  // =====================================================
+  // PRIVATE SESSION HELPERS
+  // =====================================================
 
+  private replaceSession(updatedSession: InternetSession): void {
+    this.sessions.update((sessions) =>
+      sessions.map((session) => {
+        if (session.id !== updatedSession.id) {
+          return session;
+        }
 
-        this.companyService
-            .updateCompanyBranding(
-                company.id,
-                payload
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.brandingSaving.set(false)
-                )
-            )
-            .subscribe({
+        return {
+          ...session,
+          ...updatedSession,
+        };
+      }),
+    );
+  }
 
-                next: (response) => {
-
-                    this.company.set(
-                        response.company
-                    );
-
-                    this.populateBrandingForm(
-                        response.company
-                    );
-
-                    this.brandingSuccessMessage.set(
-                        response.message ||
-                        'Company branding saved successfully.'
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to update company branding:',
-                        error
-                    );
-
-                    this.brandingErrorMessage.set(
-                        error?.error?.message ||
-                        'Company branding could not be updated.'
-                    );
-                }
-            });
+  private sessionActionLabel(status: SessionStatus): string {
+    if (status === 'active') {
+      return 'Activate';
     }
 
-
-    // =====================================================
-    // RESET BRANDING FORM
-    // =====================================================
-
-    resetBrandingForm(): void {
-
-        const company =
-            this.company();
-
-
-        if (!company) {
-            return;
-        }
-
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-        this.populateBrandingForm(
-            company
-        );
+    if (status === 'suspended') {
+      return 'Suspend';
     }
 
-
-    // =====================================================
-    // BRANDING FILE SELECTION
-    // =====================================================
-
-    onLogoFileSelected(
-        event: Event
-    ): void {
-
-        const file =
-            this.extractSelectedFile(
-                event
-            );
-
-
-        if (!file) {
-            return;
-        }
-
-
-        this.uploadLogo(
-            file
-        );
+    if (status === 'expired') {
+      return 'Expire';
     }
 
-
-    onBrandingFileSelected(
-        event: Event,
-        imageType:
-            CompanyBrandingImageType
-    ): void {
-
-        const file =
-            this.extractSelectedFile(
-                event
-            );
-
-
-        if (!file) {
-            return;
-        }
-
-
-        this.uploadBrandingImage(
-            imageType,
-            file
-        );
+    if (status === 'failed') {
+      return 'Mark failed';
     }
 
+    return 'Set pending';
+  }
 
-    // =====================================================
-    // UPLOAD LOGO
-    // =====================================================
-
-    uploadLogo(
-        file: File
-    ): void {
-
-        const validationMessage =
-            this.validateImageFile(
-                file
-            );
-
-
-        if (validationMessage) {
-
-            this.brandingErrorMessage.set(
-                validationMessage
-            );
-
-            return;
-        }
-
-
-        this.brandingUploading.set(
-            'logo'
-        );
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-
-        this.companyService
-            .uploadCompanyLogo(
-                this.companyId(),
-                file
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.brandingUploading.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    if (response.company) {
-
-                        this.company.set(
-                            response.company
-                        );
-
-                        this.populateBrandingForm(
-                            response.company
-                        );
-                    }
-
-
-                    this.brandingSuccessMessage.set(
-                        response.message ||
-                        'Company logo uploaded successfully.'
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to upload company logo:',
-                        error
-                    );
-
-                    this.brandingErrorMessage.set(
-                        error?.error?.message ||
-                        'Company logo could not be uploaded.'
-                    );
-                }
-            });
+  private humanizeStatus(status: string): string {
+    if (!status) {
+      return '—';
     }
 
+    return status
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
 
-    // =====================================================
-    // REMOVE LOGO
-    // =====================================================
-
-    async removeLogo():
-        Promise<void> {
-
-        const company =
-            this.company();
-
-
-        if (
-            !company ||
-            !company.logo_url
-        ) {
-            return;
-        }
-
-
-        const confirmed =
-            await this.ui.confirm(
-                'Remove company logo?',
-                'The current logo will be removed from this company.',
-                'Remove'
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        this.brandingRemoving.set(
-            'logo'
-        );
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-
-        this.companyService
-            .removeCompanyLogo(
-                company.id
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.brandingRemoving.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.company.set(
-                        response.company
-                    );
-
-                    this.populateBrandingForm(
-                        response.company
-                    );
-
-                    this.brandingSuccessMessage.set(
-                        response.message ||
-                        'Company logo removed successfully.'
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to remove company logo:',
-                        error
-                    );
-
-                    this.brandingErrorMessage.set(
-                        error?.error?.message ||
-                        'Company logo could not be removed.'
-                    );
-                }
-            });
+  private toDateTimeLocal(value: string | null): string {
+    if (!value) {
+      return '';
     }
 
+    const date = new Date(value);
 
-    // =====================================================
-    // UPLOAD BRANDING IMAGE
-    // =====================================================
-
-    uploadBrandingImage(
-        imageType:
-            CompanyBrandingImageType,
-        file: File
-    ): void {
-
-        const validationMessage =
-            this.validateImageFile(
-                file
-            );
-
-
-        if (validationMessage) {
-
-            this.brandingErrorMessage.set(
-                validationMessage
-            );
-
-            return;
-        }
-
-
-        this.brandingUploading.set(
-            imageType
-        );
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-
-        this.companyService
-            .uploadCompanyBrandingImage(
-                this.companyId(),
-                imageType,
-                file
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.brandingUploading.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    if (response.company) {
-
-                        this.company.set(
-                            response.company
-                        );
-
-                        this.populateBrandingForm(
-                            response.company
-                        );
-                    }
-
-
-                    this.brandingSuccessMessage.set(
-                        response.message ||
-                        `${this.brandingImageLabel(imageType)} uploaded successfully.`
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to upload branding image:',
-                        error
-                    );
-
-                    this.brandingErrorMessage.set(
-                        error?.error?.message ||
-                        `${this.brandingImageLabel(imageType)} could not be uploaded.`
-                    );
-                }
-            });
+    if (Number.isNaN(date.getTime())) {
+      return '';
     }
 
+    const localDate = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000,
+    );
 
-    // =====================================================
-    // REMOVE BRANDING IMAGE
-    // =====================================================
+    return localDate.toISOString().slice(0, 16);
+  }
 
-    async removeBrandingImage(
-        imageType:
-            CompanyBrandingImageType
-    ): Promise<void> {
+  private populateBrandingForm(company: Company): void {
+    const branding = company.settings?.branding;
 
-        const company =
-            this.company();
+    this.brandingForm.setValue({
+      primary_color: branding?.primary_color || '#F26E01',
 
+      secondary_color: branding?.secondary_color || '#9C4300',
 
-        if (!company) {
-            return;
-        }
+      accent_color: branding?.accent_color || '#F26E01',
 
+      background_color: branding?.background_color || '#FFF1E5',
 
-        const currentUrl =
-            this.getBrandingImageUrl(
-                imageType
-            );
+      navbar_color: branding?.navbar_color || '#FFFFFF',
 
+      background_image_url: branding?.background_image_url ?? '',
 
-        if (!currentUrl) {
-            return;
-        }
+      login_image_url: branding?.login_image_url ?? '',
 
+      banner_image_url: branding?.banner_image_url ?? '',
+    });
+  }
 
-        const label =
-            this.brandingImageLabel(
-                imageType
-            );
+  private extractSelectedFile(event: Event): File | null {
+    const input = event.target as HTMLInputElement | null;
 
-
-        const confirmed =
-            await this.ui.confirm(
-                `Remove ${label.toLowerCase()}?`,
-                `The current ${label.toLowerCase()} will be removed from this company.`,
-                'Remove'
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        this.brandingRemoving.set(
-            imageType
-        );
-
-        this.brandingErrorMessage.set('');
-        this.brandingSuccessMessage.set('');
-
-
-        this.companyService
-            .removeCompanyBrandingImage(
-                company.id,
-                imageType
-            )
-            .pipe(
-                finalize(
-                    () =>
-                        this.brandingRemoving.set(null)
-                )
-            )
-            .subscribe({
-
-                next: (response) => {
-
-                    this.company.set(
-                        response.company
-                    );
-
-                    this.populateBrandingForm(
-                        response.company
-                    );
-
-                    this.brandingSuccessMessage.set(
-                        response.message ||
-                        `${label} removed successfully.`
-                    );
-                },
-
-
-                error: (error) => {
-
-                    console.error(
-                        'Failed to remove branding image:',
-                        error
-                    );
-
-                    this.brandingErrorMessage.set(
-                        error?.error?.message ||
-                        `${label} could not be removed.`
-                    );
-                }
-            });
+    if (!input || !input.files || input.files.length === 0) {
+      return null;
     }
 
+    const file = input.files[0];
 
-    // =====================================================
-    // BRANDING DISPLAY HELPERS
-    // =====================================================
+    input.value = '';
 
-    brandingImageLabel(
-        imageType:
-            CompanyBrandingImageType
-    ): string {
+    return file;
+  }
 
-        if (
-            imageType === 'background'
-        ) {
-            return 'Background image';
-        }
+  private validateImageFile(file: File): string | null {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-
-        if (
-            imageType === 'login'
-        ) {
-            return 'Login image';
-        }
-
-
-        return 'Banner image';
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPG, PNG, and WEBP images are allowed.';
     }
 
-
-    getBrandingImageUrl(
-        imageType:
-            CompanyBrandingImageType
-    ): string | null {
-
-        if (
-            imageType === 'background'
-        ) {
-            return this.backgroundImageUrl();
-        }
-
-
-        if (
-            imageType === 'login'
-        ) {
-            return this.loginImageUrl();
-        }
-
-
-        return this.bannerImageUrl();
+    if (file.size > 5 * 1024 * 1024) {
+      return 'Images must be 5 MB or smaller.';
     }
 
+    return null;
+  }
 
-    publicImageUrl(
-        value:
-            string |
-            null |
-            undefined
-    ): string {
+  // =====================================================
+  // PRIVATE COMPANY FORM HELPER
+  // =====================================================
 
-        if (!value) {
-            return '';
-        }
+  private populateForm(company: Company): void {
+    this.companyForm.setValue({
+      name: company.name,
 
+      slug: company.slug,
 
-        if (
-            value.startsWith('http://') ||
-            value.startsWith('https://') ||
-            value.startsWith('data:') ||
-            value.startsWith('blob:')
-        ) {
-            return value;
-        }
+      email: company.email ?? '',
 
+      phone: company.phone ?? '',
 
-        return value;
-    }
-
-
-    // =====================================================
-    // BACK TO COMPANIES
-    // =====================================================
-
-    goBack(): void {
-
-        void this.router.navigate(
-            [
-                '/platform',
-                'companies'
-            ]
-        );
-    }
-
-
-    // =====================================================
-    // COMPANY STATUS HELPERS
-    // =====================================================
-
-    statusLabel(): string {
-
-        const company =
-            this.company();
-
-
-        if (!company) {
-            return '';
-        }
-
-
-        if (
-            company.status ===
-            'active'
-        ) {
-            return 'Active';
-        }
-
-
-        if (
-            company.status ===
-            'suspended'
-        ) {
-            return 'Suspended';
-        }
-
-
-        return company.status;
-    }
-
-
-    statusClass(): string {
-
-        const company =
-            this.company();
-
-
-        return company?.status ===
-            'active'
-                ? 'status--active'
-                : 'status--suspended';
-    }
-
-
-    // =====================================================
-    // PRIVATE ADMIN HELPER
-    // =====================================================
-
-    private replaceAdmin(
-        updatedAdmin: Admin
-    ): void {
-
-        this.admins.update(
-            (admins) =>
-                admins.map(
-                    (admin) => {
-
-                        if (
-                            admin.id !==
-                            updatedAdmin.id
-                        ) {
-                            return admin;
-                        }
-
-
-                        return {
-                            ...admin,
-                            ...updatedAdmin
-                        };
-                    }
-                )
-        );
-    }
-
-
-    // =====================================================
-    // PRIVATE PACKAGE HELPERS
-    // =====================================================
-
-    private replacePackage(
-        updatedPackage: InternetPackage
-    ): void {
-
-        this.packages.update(
-            (packages) =>
-                packages.map(
-                    (item) => {
-
-                        if (
-                            item.id !==
-                            updatedPackage.id
-                        ) {
-                            return item;
-                        }
-
-
-                        return {
-                            ...item,
-                            ...updatedPackage
-                        };
-                    }
-                )
-        );
-    }
-
-
-    private sortPackages(): void {
-
-        this.packages.update(
-            (packages) =>
-                [...packages]
-                    .sort(
-                        (a, b) =>
-                            Number(a.price) -
-                            Number(b.price)
-                    )
-        );
-    }
-
-
-    // =====================================================
-    // PRIVATE SESSION HELPERS
-    // =====================================================
-
-    private replaceSession(
-        updatedSession: InternetSession
-    ): void {
-
-        this.sessions.update(
-            (sessions) =>
-                sessions.map(
-                    (session) => {
-
-                        if (
-                            session.id !==
-                            updatedSession.id
-                        ) {
-                            return session;
-                        }
-
-
-                        return {
-                            ...session,
-                            ...updatedSession
-                        };
-                    }
-                )
-        );
-    }
-
-
-    private sessionActionLabel(
-        status: SessionStatus
-    ): string {
-
-        if (
-            status ===
-            'active'
-        ) {
-            return 'Activate';
-        }
-
-
-        if (
-            status ===
-            'suspended'
-        ) {
-            return 'Suspend';
-        }
-
-
-        if (
-            status ===
-            'expired'
-        ) {
-            return 'Expire';
-        }
-
-
-        if (
-            status ===
-            'failed'
-        ) {
-            return 'Mark failed';
-        }
-
-
-        return 'Set pending';
-    }
-
-
-    private humanizeStatus(
-        status: string
-    ): string {
-
-        if (!status) {
-            return '—';
-        }
-
-
-        return status
-            .replace(
-                /[_-]+/g,
-                ' '
-            )
-            .replace(
-                /\b\w/g,
-                (character) =>
-                    character.toUpperCase()
-            );
-    }
-
-
-    private toDateTimeLocal(
-        value: string | null
-    ): string {
-
-        if (!value) {
-            return '';
-        }
-
-
-        const date =
-            new Date(value);
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-            return '';
-        }
-
-
-        const localDate =
-            new Date(
-                date.getTime() -
-                date.getTimezoneOffset() *
-                60000
-            );
-
-
-        return localDate
-            .toISOString()
-            .slice(
-                0,
-                16
-            );
-    }
-
-
-    // =====================================================
-    // PRIVATE BRANDING HELPERS
-    // =====================================================
-
-    private populatePaymentSettingsForm(
-        company: Company
-    ): void {
-
-        const payment =
-            company.settings
-                ?.payment ??
-            {};
-
-        this.paymentSettingsForm.reset({
-            enabled:
-                payment.enabled !== false,
-            lipa_number:
-                payment.lipa_number ??
-                '',
-            account_name:
-                payment.account_name ??
-                '',
-            instructions:
-                payment.instructions ??
-                '',
-            httpsms_owner:
-                payment.httpsms_owner ??
-                '',
-            payment_phone:
-                payment.payment_phone ??
-                '',
-            device_name:
-                payment.device_name ??
-                'Payment phone'
-        });
-    }
-
-
-    private populateBrandingForm(
-        company: Company
-    ): void {
-
-        const branding =
-            company.settings
-                ?.branding;
-
-
-        this.brandingForm.setValue({
-
-            primary_color:
-                branding?.primary_color ||
-                '#2563EB',
-
-            secondary_color:
-                branding?.secondary_color ||
-                '#111827',
-
-            accent_color:
-                branding?.accent_color ||
-                '#22C55E',
-
-            background_color:
-                branding?.background_color ||
-                '#F8FAFC',
-
-            navbar_color:
-                branding?.navbar_color ||
-                '#FFFFFF',
-
-            background_image_url:
-                branding?.background_image_url ??
-                '',
-
-            login_image_url:
-                branding?.login_image_url ??
-                '',
-
-            banner_image_url:
-                branding?.banner_image_url ??
-                ''
-        });
-    }
-
-
-    private extractSelectedFile(
-        event: Event
-    ): File | null {
-
-        const input =
-            event.target as
-                HTMLInputElement | null;
-
-
-        if (
-            !input ||
-            !input.files ||
-            input.files.length === 0
-        ) {
-            return null;
-        }
-
-
-        const file =
-            input.files[0];
-
-
-        input.value =
-            '';
-
-
-        return file;
-    }
-
-
-    private validateImageFile(
-        file: File
-    ): string | null {
-
-        const allowedTypes = [
-            'image/jpeg',
-            'image/png',
-            'image/webp'
-        ];
-
-
-        if (
-            !allowedTypes.includes(
-                file.type
-            )
-        ) {
-
-            return 'Only JPG, PNG, and WEBP images are allowed.';
-        }
-
-
-        if (
-            file.size >
-            5 * 1024 * 1024
-        ) {
-
-            return 'Images must be 5 MB or smaller.';
-        }
-
-
-        return null;
-    }
-
-
-    // =====================================================
-    // PRIVATE COMPANY FORM HELPER
-    // =====================================================
-
-    private populateForm(
-        company: Company
-    ): void {
-
-        this.companyForm.setValue({
-
-            name:
-                company.name,
-
-            slug:
-                company.slug,
-
-            email:
-                company.email ?? '',
-
-            phone:
-                company.phone ?? '',
-
-            address:
-                company.address ?? ''
-        });
-    }
+      address: company.address ?? '',
+    });
+  }
 }

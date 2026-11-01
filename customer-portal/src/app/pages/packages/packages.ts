@@ -56,7 +56,6 @@ import { getPublicFileUrl } from '../../config/api.config';
     standalone: true,
 
     imports: [
-        LoadingSpinnerComponent,
         PackageCardComponent
     ],
 

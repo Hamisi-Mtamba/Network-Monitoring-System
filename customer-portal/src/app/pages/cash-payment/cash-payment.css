@@ -20,10 +20,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.84rem;
+    font-size:1rem;
     font-weight: 650;
 
     text-decoration: none;
@@ -35,7 +35,7 @@
 .back-link:hover {
     color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 }
 
@@ -56,10 +56,10 @@
 .cash-label {
     color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
-    font-size: 0.72rem;
+    font-size:1rem;
     font-weight: 740;
 
     letter-spacing: 0.09em;
@@ -72,7 +72,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
     font-size: clamp(
@@ -93,7 +93,7 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
     line-height: 1.6;
@@ -120,7 +120,7 @@
 .cash-card {
     border: 1px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
     border-radius: 16px;
@@ -132,10 +132,7 @@
 
     box-shadow:
         0 10px 30px
-        rgba(
-            15,
-            23,
-            42,
+        rgba(64, 41, 25,
             0.055
         );
 }
@@ -153,10 +150,10 @@
 .package-summary__label {
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.7rem;
+    font-size:1rem;
     font-weight: 720;
 
     letter-spacing: 0.08em;
@@ -169,7 +166,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
     font-size: 1.1rem;
@@ -186,7 +183,7 @@
 
     color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     font-size: 1.8rem;
@@ -195,7 +192,7 @@
 
 
 .package-summary__price span {
-    font-size: 0.7rem;
+    font-size:1rem;
     font-weight: 700;
 }
 
@@ -218,17 +215,17 @@
 
     border-bottom: 1px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
-    font-size: 0.84rem;
+    font-size:1rem;
 }
 
 
 .package-summary dt {
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 }
 
@@ -238,7 +235,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
     font-weight: 700;
@@ -274,7 +271,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
     font-size: 1.1rem;
@@ -287,10 +284,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.84rem;
+    font-size:1rem;
     line-height: 1.5;
 }
 
@@ -311,7 +308,7 @@
             in srgb,
             var(
                 --company-primary,
-                #2563eb
+                var(--company-primary)
             )
             10%,
             white
@@ -319,7 +316,7 @@
 
     color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     font-size: 1.25rem;
@@ -338,10 +335,10 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
-    font-size: 0.85rem;
+    font-size:1rem;
     font-weight: 680;
 }
 
@@ -354,7 +351,7 @@
 
     overflow: hidden;
 
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--company-background);
 
     border-radius: 10px;
 
@@ -369,7 +366,7 @@
 .phone-input-wrap:focus-within {
     border-color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     box-shadow:
@@ -378,7 +375,7 @@
             in srgb,
             var(
                 --company-primary,
-                #2563eb
+                var(--company-primary)
             )
             12%,
             transparent
@@ -396,17 +393,17 @@
 
     border-right: 1px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
-    background: #f8fafc;
+    background: #FFFFFF;
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.84rem;
+    font-size:1rem;
     font-weight: 700;
 }
 
@@ -425,7 +422,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
     font: inherit;
@@ -437,10 +434,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.78rem;
+    font-size:1rem;
     line-height: 1.5;
 }
 
@@ -450,7 +447,7 @@
 
     color: #b42318;
 
-    font-size: 0.78rem;
+    font-size:1rem;
     font-weight: 620;
 }
 
@@ -466,12 +463,12 @@
 
     border: 1px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
     border-radius: 12px;
 
-    background: #f8fafc;
+    background: #FFFFFF;
 }
 
 
@@ -482,10 +479,10 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 
-    font-size: 0.85rem;
+    font-size:1rem;
     font-weight: 700;
 }
 
@@ -495,10 +492,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.8rem;
+    font-size:1rem;
     line-height: 1.55;
 }
 
@@ -515,12 +512,12 @@
 .button--primary {
     border: 1px solid var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     background: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     color: #ffffff;
@@ -564,7 +561,7 @@
 
     color: #b42318;
 
-    font-size: 0.82rem;
+    font-size:1rem;
     line-height: 1.5;
 }
 
@@ -579,7 +576,7 @@
 
     color: var(
         --company-secondary,
-        #0f172a
+        var(--company-text)
     );
 }
 
@@ -587,7 +584,7 @@
 .cash-card--error p {
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 }
 

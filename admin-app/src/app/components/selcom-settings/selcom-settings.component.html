@@ -1,0 +1,21 @@
+<section class="selcom-panel">
+  <header><div><span class="eyebrow">PAYMENT CONNECTION</span><h2>Selcom Checkout</h2><p>Automatic mobile-money payments for this company.</p></div><span class="connection-state">{{saved()?.enabled ? 'Enabled' : 'Disabled'}}</span></header>
+  @if(loading()){<p role="status">Loading payment settings…</p>}
+  @else if(!saved()){<p role="alert">{{error()}}</p><button type="button" (click)="load()">Try again</button>}
+  @else {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="busy()">
+      <label class="switch"><input type="checkbox" formControlName="enabled"> Enable mobile-money checkout</label>
+      <div class="fields">
+        <label>Vendor ID<input formControlName="vendor" autocomplete="off" placeholder="Your Selcom vendor ID"></label>
+        <label>Buyer email<input type="email" formControlName="buyer_email" autocomplete="off" placeholder="payments@yourcompany.com"></label>
+        <label>API key <small>{{saved()?.api_key_present ? 'Saved · leave blank to keep' : 'Required for initial setup'}}</small><input type="password" formControlName="api_key" autocomplete="new-password"></label>
+        <label>API secret <small>{{saved()?.api_secret_present ? 'Saved · leave blank to keep' : 'Required for initial setup'}}</small><input type="password" formControlName="api_secret" autocomplete="new-password"></label>
+      </div>
+      <p class="hint">Use your Selcom Checkout credentials. Saved credentials are never displayed. Cash requests remain available separately.</p>
+      @if(error()){<p class="error" role="alert">{{error()}}</p>}
+      @if(message()){<p class="success" role="status">{{message()}}</p>}
+      <div class="actions"><button type="submit">{{busy() ? 'Please wait…' : 'Save settings'}}</button><button type="button" class="secondary" (click)="test()" [disabled]="!saved()?.api_key_present || form.dirty">Test saved connection</button><button type="button" class="secondary" (click)="load()">Reload</button></div>
+    </fieldset>
+  </form>}
+</section>

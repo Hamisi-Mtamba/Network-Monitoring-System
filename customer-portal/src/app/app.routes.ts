@@ -8,6 +8,7 @@ import {
 
 // Define all customer portal routes
 export const routes: Routes = [
+    {path: ':companySlug/payment-status/:reference', canActivate:[captureWifiContext], loadComponent:()=>import('./pages/payment-status/payment-status').then(m=>m.PaymentStatusPageComponent), title:'Payment status'},
 
     { path: ':companySlug/connection-check', component: ConnectionCheckPage, canActivate: [captureWifiContext] },
 
@@ -93,10 +94,10 @@ export const routes: Routes = [
         runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
-            import('./pages/payment-success/payment-success')
+            import('./pages/payment-status/payment-status')
                 .then(
                     (module) =>
-                        module.PaymentSuccessPageComponent
+                        module.PaymentStatusPageComponent
                 ),
 
         title: 'Payment Successful'
@@ -162,10 +163,10 @@ export const routes: Routes = [
         runGuardsAndResolvers: 'paramsOrQueryParamsChange',
 
         loadComponent: () =>
-            import('./pages/cash-payment-status/cash-payment-status')
+            import('./pages/payment-status/payment-status')
                 .then(
                     (module) =>
-                        module.CashPaymentStatusPageComponent
+                        module.PaymentStatusPageComponent
                 ),
 
         title: 'Cash Payment Status'

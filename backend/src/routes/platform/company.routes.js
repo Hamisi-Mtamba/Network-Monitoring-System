@@ -1,3 +1,4 @@
+import { getSelcomSettings, testSelcomConnection } from '../../controllers/admin/selcomSettings.controller.js';
 // Import Express to create platform routes
 import express from "express";
 
@@ -607,4 +608,6 @@ router.delete(
 
 router.patch('/companies/:companyId/profile/branding/:imageType', platformCompanyContext, updateBrandingImageRole);
 
+router.get('/companies/:companyId/payment-settings', platformCompanyContext, getSelcomSettings);
+router.post('/companies/:companyId/payment-settings/test', platformCompanyContext, testSelcomConnection);
 export default router;

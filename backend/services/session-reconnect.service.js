@@ -17,7 +17,7 @@ export const reconnectSession = async ({ pool, restoreAccess }, { companySlug, m
     try {
         await client.query('BEGIN');
         const mapping = await client.query(`
-            SELECT r.id, r.company_id, r.public_id, r.host
+            SELECT r.*
             FROM mikrotik_routers r
             JOIN companies c ON c.id = r.company_id
             WHERE c.slug = $1 AND c.status = 'active'
@@ -38,6 +38,7 @@ export const reconnectSession = async ({ pool, restoreAccess }, { companySlug, m
             ORDER BY expires_at DESC, id DESC LIMIT 1 FOR UPDATE
         `, identity);
         const session = result.rows[0];
+        if (session) await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`hotspot:${target.id}:${mac.toUpperCase()}`]);
         if (!session) {
             const suspended = await client.query(`
                 SELECT id FROM internet_sessions WHERE company_id = $1 AND router_id = $2

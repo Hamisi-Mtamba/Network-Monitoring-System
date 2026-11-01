@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import https from 'node:https';
 import { EventEmitter } from 'node:events';
-import { restoreHotspotAccess } from '../services/mikrotik.service.js';
+import { restoreHotspotAccess, revokeHotspotAccess } from '../services/mikrotik.service.js';
 
 const mac = 'BA:37:45:61:1A:54';
 const router = { host: '192.168.88.1', public_id: 'NMS-LOCAL-ROUTER-001' };
@@ -19,7 +19,7 @@ function mockRest(t, { verified = true, active = [] } = {}) {
     });
     const calls = [];
     t.mock.method(https, 'request', (options, callback) => {
-        const call = { path: options.path, method: options.method };
+        const call = { path: options.path, method: options.method, port:options.port };
         calls.push(call);
         const request = new EventEmitter();
         request.setTimeout = () => request;
@@ -64,4 +64,11 @@ test('unverified MAC/IP is rejected without router mutations', async t => {
     const calls = mockRest(t, { verified: false });
     await assert.rejects(restoreHotspotAccess({ router, macAddress: mac, ipAddress: '192.168.88.252', getRemainingSeconds: async () => 61 }), /verified/);
     assert.ok(calls.every(call => call.method === 'GET'));
+});
+
+test('suspension removes the login user, live session and host; native API port is not used for REST',async t=>{
+    const calls=mockRest(t,{active:[{'.id':'*3','mac-address':mac}]});
+    await revokeHotspotAccess({router:{...router,api_port:8728},macAddress:mac});
+    for(const resource of ['user','active','host']) assert.ok(calls.some(call=>call.method==='DELETE' && call.path.includes('/'+resource+'/')));
+    assert.ok(calls.every(call=>call.port===443));
 });

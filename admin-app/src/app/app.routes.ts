@@ -1,16 +1,12 @@
 // Import Angular routing types
-import {
-    Routes
-} from '@angular/router';
-
+import { Routes } from '@angular/router';
 
 // Import authentication and role guards
 import {
-    companyAdminGuard,
-    guestGuard,
-    superAdminGuard
+  companyAdminGuard,
+  guestGuard,
+  superAdminGuard,
 } from './guards/auth.guard';
-
 
 /* =========================================================
    ADMIN APPLICATION ROUTES
@@ -30,322 +26,238 @@ import {
  * ========================================================= */
 
 export const routes: Routes = [
+  // =========================================================
+  // LOGIN
+  // =========================================================
 
-    // =========================================================
-    // LOGIN
-    // =========================================================
+  {
+    path: 'login',
 
-    {
-        path: 'login',
+    canActivate: [guestGuard],
 
-        canActivate: [
-            guestGuard
-        ],
+    loadComponent: () =>
+      import('./pages/login/login.page').then((module) => module.LoginPage),
+
+    title: 'Admin Login',
+  },
+
+  // =========================================================
+  // SUPERADMIN PLATFORM
+  // =========================================================
+
+  {
+    path: 'platform',
+
+    canActivate: [superAdminGuard],
+
+    loadComponent: () =>
+      import('./layout/admin-layout/admin-layout.component').then(
+        (module) => module.AdminLayoutComponent,
+      ),
+
+    children: [
+      // -------------------------------------------------
+      // PLATFORM DASHBOARD
+      // -------------------------------------------------
+
+      {
+        path: 'dashboard',
 
         loadComponent: () =>
-            import('./pages/login/login.page')
-                .then(
-                    (module) =>
-                        module.LoginPage
-                ),
+          import('./pages/platform-dashboard/platform-dashboard.page').then(
+            (module) => module.PlatformDashboardPage,
+          ),
 
-        title: 'Admin Login'
-    },
+        title: 'Platform Dashboard',
+      },
 
+      // -------------------------------------------------
+      // PLATFORM COMPANIES
+      // -------------------------------------------------
 
-    // =========================================================
-    // SUPERADMIN PLATFORM
-    // =========================================================
-
-    {
-        path: 'platform',
-
-        canActivate: [
-            superAdminGuard
-        ],
+      {
+        path: 'companies',
 
         loadComponent: () =>
-            import(
-                './layout/admin-layout/admin-layout.component'
-            )
-                .then(
-                    (module) =>
-                        module.AdminLayoutComponent
-                ),
+          import('./pages/platform-companies/platform-companies.page').then(
+            (module) => module.PlatformCompaniesPage,
+          ),
 
-        children: [
+        title: 'Companies',
+      },
 
-            // -------------------------------------------------
-            // PLATFORM DASHBOARD
-            // -------------------------------------------------
+      // -------------------------------------------------
+      // SELECTED COMPANY WORKSPACE
+      // -------------------------------------------------
 
-            {
-                path: 'dashboard',
+      {
+        path: 'companies/:companyId',
 
-                loadComponent: () =>
-                    import(
-                        './pages/platform-dashboard/platform-dashboard.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PlatformDashboardPage
-                        ),
+        loadComponent: () =>
+          import('./pages/platform-company/platform-company.page').then(
+            (module) => module.PlatformCompanyPage,
+          ),
 
-                title: 'Platform Dashboard'
-            },
+        title: 'Manage Company',
+      },
 
+      // -------------------------------------------------
+      // PLATFORM ROOT
+      // -------------------------------------------------
 
-            // -------------------------------------------------
-            // PLATFORM COMPANIES
-            // -------------------------------------------------
-
-            {
-                path: 'companies',
-
-                loadComponent: () =>
-                    import(
-                        './pages/platform-companies/platform-companies.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PlatformCompaniesPage
-                        ),
-
-                title: 'Companies'
-            },
-
-
-            // -------------------------------------------------
-            // SELECTED COMPANY WORKSPACE
-            // -------------------------------------------------
-
-            {
-                path: 'companies/:companyId',
-
-                loadComponent: () =>
-                    import(
-                        './pages/platform-company/platform-company.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PlatformCompanyPage
-                        ),
-
-                title: 'Manage Company'
-            },
-
-
-            // -------------------------------------------------
-            // PLATFORM ROOT
-            // -------------------------------------------------
-
-            {
-                path: '',
-
-                pathMatch: 'full',
-
-                redirectTo: 'dashboard'
-            }
-        ]
-    },
-
-
-    // =========================================================
-    // COMPANY ADMINISTRATION
-    // =========================================================
-
-    {
+      {
         path: '',
 
-        canActivate: [
-            companyAdminGuard
-        ],
+        pathMatch: 'full',
+
+        redirectTo: 'dashboard',
+      },
+    ],
+  },
+
+  // =========================================================
+  // COMPANY ADMINISTRATION
+  // =========================================================
+
+  {
+    path: '',
+
+    canActivate: [companyAdminGuard],
+
+    loadComponent: () =>
+      import('./layout/admin-layout/admin-layout.component').then(
+        (module) => module.AdminLayoutComponent,
+      ),
+
+    children: [
+      // -------------------------------------------------
+      // DASHBOARD
+      // -------------------------------------------------
+
+      {
+        path: 'dashboard',
 
         loadComponent: () =>
-            import(
-                './layout/admin-layout/admin-layout.component'
-            )
-                .then(
-                    (module) =>
-                        module.AdminLayoutComponent
-                ),
+          import('./pages/dashboard/dashboard.page').then(
+            (module) => module.DashboardPage,
+          ),
 
-        children: [
+        title: 'Dashboard',
+      },
 
-            // -------------------------------------------------
-            // DASHBOARD
-            // -------------------------------------------------
+      // -------------------------------------------------
+      // PACKAGES
+      // -------------------------------------------------
 
-            {
-                path: 'dashboard',
+      {
+        path: 'packages',
+        loadComponent: () => import('./pages/packages/packages.page').then(module => module.PackagesPage),
+        title: 'Packages',
+      },
 
-                loadComponent: () =>
-                    import(
-                        './pages/dashboard/dashboard.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.DashboardPage
-                        ),
+      // -------------------------------------------------
+      // PAYMENTS
+      // -------------------------------------------------
 
-                title: 'Dashboard'
-            },
+      {
+        path: 'payments',
 
+        loadComponent: () =>
+          import('./pages/payments/payments.page').then(
+            (module) => module.PaymentsPage,
+          ),
 
-            // -------------------------------------------------
-            // PACKAGES
-            // -------------------------------------------------
+        title: 'Payments',
+      },
 
-            {
-                path: 'packages',
+      {
+        path: 'payments/:id',
 
-                loadComponent: () =>
-                    import(
-                        './pages/packages/packages.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PackagesPage
-                        ),
+        loadComponent: () =>
+          import('./pages/payment-details/payment-details.page').then(
+            (module) => module.PaymentDetailsPage,
+          ),
 
-                title: 'Internet Packages'
-            },
+        title: 'Payment Details',
+      },
 
+      // -------------------------------------------------
+      // SESSIONS
+      // -------------------------------------------------
 
-            // -------------------------------------------------
-            // PAYMENTS
-            // -------------------------------------------------
+      {
+        path: 'sessions',
 
-            {
-                path: 'payments',
+        loadComponent: () =>
+          import('./pages/sessions/sessions.page').then(
+            (module) => module.SessionsPage,
+          ),
 
-                loadComponent: () =>
-                    import(
-                        './pages/payments/payments.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PaymentsPage
-                        ),
+        title: 'Internet Sessions',
+      },
 
-                title: 'Payments'
-            },
+      {
+        path: 'sessions/:id',
 
+        loadComponent: () =>
+          import('./pages/session-details/session-details.page').then(
+            (module) => module.SessionDetailsPage,
+          ),
 
-            {
-                path: 'payments/:id',
+        title: 'Session Details',
+      },
 
-                loadComponent: () =>
-                    import(
-                        './pages/payment-details/payment-details.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.PaymentDetailsPage
-                        ),
+      // -------------------------------------------------
+      // REPORTS
+      // -------------------------------------------------
 
-                title: 'Payment Details'
-            },
+      {
+        path: 'reports',
 
+        loadComponent: () =>
+          import('./pages/reports/reports.page').then(
+            (module) => module.ReportsPage,
+          ),
 
-            // -------------------------------------------------
-            // SESSIONS
-            // -------------------------------------------------
+        title: 'Reports',
+      },
 
-            {
-                path: 'sessions',
+      // -------------------------------------------------
+      // SETTINGS
+      // -------------------------------------------------
 
-                loadComponent: () =>
-                    import(
-                        './pages/sessions/sessions.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.SessionsPage
-                        ),
+      {
+        path: 'settings',
 
-                title: 'Internet Sessions'
-            },
+        loadComponent: () =>
+          import('./pages/settings/settings.page').then(
+            (module) => module.SettingsPage,
+          ),
 
+        title: 'Settings',
+      },
 
-            {
-                path: 'sessions/:id',
+      // -------------------------------------------------
+      // COMPANY ADMIN ROOT
+      // -------------------------------------------------
 
-                loadComponent: () =>
-                    import(
-                        './pages/session-details/session-details.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.SessionDetailsPage
-                        ),
+      {
+        path: '',
 
-                title: 'Session Details'
-            },
+        pathMatch: 'full',
 
+        redirectTo: 'dashboard',
+      },
+    ],
+  },
 
-            // -------------------------------------------------
-            // REPORTS
-            // -------------------------------------------------
+  // =========================================================
+  // INVALID ROUTES
+  // =========================================================
 
-            {
-                path: 'reports',
+  {
+    path: '**',
 
-                loadComponent: () =>
-                    import(
-                        './pages/reports/reports.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.ReportsPage
-                        ),
-
-                title: 'Reports'
-            },
-
-
-            // -------------------------------------------------
-            // SETTINGS
-            // -------------------------------------------------
-
-            {
-                path: 'settings',
-
-                loadComponent: () =>
-                    import(
-                        './pages/settings/settings.page'
-                    )
-                        .then(
-                            (module) =>
-                                module.SettingsPage
-                        ),
-
-                title: 'Settings'
-            },
-
-
-            // -------------------------------------------------
-            // COMPANY ADMIN ROOT
-            // -------------------------------------------------
-
-            {
-                path: '',
-
-                pathMatch: 'full',
-
-                redirectTo: 'dashboard'
-            }
-        ]
-    },
-
-
-    // =========================================================
-    // INVALID ROUTES
-    // =========================================================
-
-    {
-        path: '**',
-
-        redirectTo: ''
-    }
+    redirectTo: '',
+  },
 ];

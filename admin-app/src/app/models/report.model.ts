@@ -3,154 +3,127 @@
 // =========================================================
 
 export interface NamedCount {
+  name?: string;
 
-    name?: string;
+  status?: string;
 
-    status?: string;
+  payment_method?: string;
 
-    payment_method?: string;
+  package_name?: string;
 
-    package_name?: string;
-
-    count: number | string;
+  count: number | string;
 }
-
 
 export interface RevenueByDate {
+  date: string;
 
-    date: string;
-
-    revenue: number | string;
+  revenue: number | string;
 }
-
 
 /* =========================================================
    EXISTING NORMAL ADMIN REPORT MODELS
    ========================================================= */
 
 export interface RevenueReport {
+  total_revenue: number | string;
 
-    total_revenue: number | string;
-
-    revenue_by_date: RevenueByDate[];
+  revenue_by_date: RevenueByDate[];
 }
-
 
 export interface PaymentReport {
+  by_status: NamedCount[];
 
-    by_status: NamedCount[];
-
-    by_payment_method: NamedCount[];
+  by_payment_method: NamedCount[];
 }
-
 
 export interface SessionReport {
+  active_sessions: number;
 
-    active_sessions: number;
+  expired_sessions: number;
 
-    expired_sessions: number;
+  by_status: NamedCount[];
 
-    by_status: NamedCount[];
-
-    by_package: NamedCount[];
+  by_package: NamedCount[];
 }
-
 
 /* =========================================================
    EXISTING NORMAL ADMIN RESPONSES
    ========================================================= */
 
 export interface RevenueReportResponse {
+  success: boolean;
 
-    success: boolean;
+  report?: RevenueReport;
 
-    report?: RevenueReport;
-
-    revenue?: RevenueReport;
+  revenue?: RevenueReport;
 }
-
 
 export interface PaymentReportResponse {
+  success: boolean;
 
-    success: boolean;
+  report?: PaymentReport;
 
-    report?: PaymentReport;
-
-    payments?: PaymentReport;
+  payments?: PaymentReport;
 }
-
 
 export interface SessionReportResponse {
+  success: boolean;
 
-    success: boolean;
+  report?: SessionReport;
 
-    report?: SessionReport;
-
-    sessions?: SessionReport;
+  sessions?: SessionReport;
 }
-
 
 /* =========================================================
    PLATFORM COMPANY REVENUE REPORT
    ========================================================= */
 
 export interface CompanyRevenueReportItem {
+  date: string;
 
-    date: string;
+  successful_payments: number;
 
-    successful_payments: number;
-
-    revenue: number;
+  revenue: number;
 }
-
 
 export interface CompanyRevenueReportResponse {
+  success: boolean;
 
-    success: boolean;
+  total_revenue: number;
 
-    total_revenue: number;
-
-    report: CompanyRevenueReportItem[];
+  report: CompanyRevenueReportItem[];
 }
-
 
 /* =========================================================
    PLATFORM COMPANY PAYMENT REPORT
    ========================================================= */
 
 export interface CompanyPaymentReportItem {
+  status: string;
 
-    status: string;
+  payment_count: number;
 
-    payment_count: number;
-
-    total_amount: number;
+  total_amount: number;
 }
-
 
 export interface CompanyPaymentReportResponse {
+  success: boolean;
 
-    success: boolean;
-
-    report: CompanyPaymentReportItem[];
+  report: CompanyPaymentReportItem[];
 }
-
 
 /* =========================================================
    PLATFORM COMPANY SESSION REPORT
    ========================================================= */
 
 export interface CompanySessionReportItem {
+  status: string;
 
-    status: string;
-
-    session_count: number;
+  session_count: number;
 }
 
-
 export interface CompanySessionReportResponse {
+  success: boolean;
 
-    success: boolean;
-
-    report: CompanySessionReportItem[];
+  report: CompanySessionReportItem[];
 }

@@ -1,0 +1,15 @@
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting,HttpTestingController } from '@angular/common/http/testing';
+import { SelcomSettingsComponent } from './selcom-settings.component';
+describe('Selcom company settings',()=>{
+ let fixture:ComponentFixture<SelcomSettingsComponent>,c:SelcomSettingsComponent,http:HttpTestingController;
+ const saved={enabled:true,vendor:'VENDOR1',buyer_email:'pay@example.test',api_key_present:true,api_secret_present:true};
+ beforeEach(()=>{TestBed.configureTestingModule({imports:[SelcomSettingsComponent],providers:[provideHttpClient(),provideHttpClientTesting()]});fixture=TestBed.createComponent(SelcomSettingsComponent);c=fixture.componentInstance;http=TestBed.inject(HttpTestingController);});
+ afterEach(()=>{http.verify();fixture.destroy();});
+ it('loads company credentials metadata without exposing secrets',()=>{fixture.detectChanges();http.expectOne('/api/admin/company/payment-settings').flush({success:true,payment:saved});expect(c.form.controls.api_secret.value).toBe('');expect(c.saved()?.api_key_present).toBeTrue();});
+ it('preserves saved credentials when password fields are blank',()=>{fixture.detectChanges();http.expectOne('/api/admin/company/payment-settings').flush({success:true,payment:saved});c.save();const req=http.expectOne('/api/admin/company/payment-settings');expect(req.request.method).toBe('PATCH');expect(req.request.body.payment.api_key).toBeUndefined();expect(req.request.body.payment.api_secret).toBeUndefined();req.flush({success:true,payment:saved});});
+ it('requires both credentials for first setup',()=>{fixture.detectChanges();http.expectOne('/api/admin/company/payment-settings').flush({success:true,payment:{...saved,api_key_present:false,api_secret_present:false}});c.save();http.expectNone(r=>r.method==='PATCH');expect(c.error()).toContain('both');});
+ it('scopes Superadmin changes to the selected company',()=>{fixture.componentRef.setInput('companyId',7);fixture.detectChanges();http.expectOne('/api/platform/companies/7/payment-settings').flush({success:true,payment:saved});c.form.controls.api_secret.setValue('replacement-secret');c.save();const req=http.expectOne('/api/platform/companies/7/payment-settings');expect(req.request.body.payment.api_secret).toBe('replacement-secret');req.flush({success:true,payment:saved});expect(c.form.controls.api_secret.value).toBe('');});
+ it('clears state on tenant change',()=>{fixture.componentRef.setInput('companyId',7);fixture.detectChanges();http.expectOne('/api/platform/companies/7/payment-settings').flush({success:true,payment:saved});c.form.controls.api_secret.setValue('unsaved-secret');fixture.componentRef.setInput('companyId',8);fixture.detectChanges();expect(c.saved()).toBeNull();expect(c.form.controls.api_secret.value).toBe('');http.expectOne('/api/platform/companies/8/payment-settings').flush({success:true,payment:{...saved,vendor:'OTHER'}});});
+});

@@ -14,10 +14,10 @@
 
     color: var(
         --text-muted,
-        #64748b
+        var(--company-accent)
     );
 
-    font-size: 0.86rem;
+    font-size:1rem;
     font-weight: 650;
 
     text-align: center;
@@ -45,12 +45,12 @@
 
     border: 3px solid var(
         --border,
-        #e2e8f0
+        var(--company-background)
     );
 
     border-top-color: var(
         --company-primary,
-        #2563eb
+        var(--company-primary)
     );
 
     border-radius: 50%;

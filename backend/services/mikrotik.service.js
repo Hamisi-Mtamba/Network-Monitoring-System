@@ -121,7 +121,8 @@ const mikrotikRequest = (
 
             const port =
                 Number(
-                    router.api_port ||
+                    router.rest_port ||
+                    (![8728,8729].includes(Number(router.api_port)) ? router.api_port : null) ||
                     router.port ||
                     DEFAULT_MIKROTIK_PORT
                 );
@@ -1004,3 +1005,10 @@ export const parseRouterDuration =
             0
         );
     };
+
+// Revocation must remove the user as well as the current connection.
+export async function revokeHotspotAccess({router,macAddress}) {
+    await deleteExistingHotspotUser(router,macAddress);
+    await removeExistingActiveHotspotSession(router,macAddress);
+    await removeExistingHotspotHost(router,macAddress);
+}

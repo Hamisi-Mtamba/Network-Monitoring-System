@@ -1,43 +1,5 @@
-<article
-    class="package-card"
-    [class.package-card--selected]="isSelected()"
-    [attr.aria-busy]="isSelected()"
-    (click)="choosePackage()"
->
-    <div class="package-card__content">
-        <div class="package-card__heading">
-            <span class="package-card__duration">
-                {{ packageService.formatDuration(packageItem().duration_minutes) }}
-            </span>
-        </div>
-
-        <h2>{{ packageItem().name }}</h2>
-
-        <p class="package-card__price">
-            <span>TZS</span>
-            {{ packageItem().price.toLocaleString() }}
-        </p>
-
-        <div class="package-card__details" aria-label="Package details">
-            <div>
-                <span>Access time</span>
-                <strong>{{ packageService.formatDuration(packageItem().duration_minutes) }}</strong>
-            </div>
-
-            <div>
-                <span>Activation</span>
-                <strong>After payment approval</strong>
-            </div>
-        </div>
-    </div>
-
-    <button
-        type="button"
-        class="package-card__button"
-        [disabled]="disabled()"
-        (click)="$event.stopPropagation(); choosePackage()"
-    >
-        {{ isSelected() ? 'Selected — opening payment…' : 'Choose package' }}
-        <span aria-hidden="true">→</span>
-    </button>
+<article class="package-row" [class.is-selected]="isSelected()">
+  <div class="package-description"><h2>{{ packageService.formatDuration(packageItem().duration_minutes) }}</h2>@if (packageItem().name !== packageService.formatDuration(packageItem().duration_minutes)) { <p>{{ packageItem().name }}</p> }</div>
+  <div class="package-price"><span>TZS</span><strong>{{ packageItem().price.toLocaleString('en-TZ') }}</strong></div>
+  <button type="button" [disabled]="disabled()" (click)="choosePackage()" [attr.aria-label]="'Pay TZS ' + packageItem().price + ' for ' + packageService.formatDuration(packageItem().duration_minutes)">{{ isSelected() ? 'Opening?' : 'Pay' }} <span aria-hidden="true">?</span></button>
 </article>

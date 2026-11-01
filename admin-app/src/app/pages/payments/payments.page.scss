@@ -3,53 +3,50 @@
    ========================================================= */
 
 .filter-panel {
-    margin-bottom: 15px;
-    padding: 13px;
+  margin-bottom: 15px;
+  padding: 13px;
 
-    display: grid;
+  display: grid;
 
-    grid-template-columns:
-        minmax(240px, 1fr)
-        180px
-        190px
-        auto;
+  grid-template-columns:
+    minmax(240px, 1fr)
+    180px
+    190px
+    auto;
 
-    align-items: center;
+  align-items: center;
 
-    gap: 11px;
+  gap: 11px;
 
-    border: 1px solid #e5eaf1;
+  border: 1px solid var(--company-background);
 
-    border-radius: 14px;
+  border-radius: 14px;
 
-    background: #ffffff;
+  background: var(--surface);
 }
-
 
 .filter-panel ion-select {
-    min-height: 48px;
+  min-height: 48px;
 
-    --padding-start: 12px;
-    --padding-end: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
 
-    border: 1px solid #e3e8ef;
+  border: 1px solid var(--company-background);
 
-    border-radius: 9px;
+  border-radius: 9px;
 
-    background: #fafbfd;
+  background: #fafbfd;
 
-    font-size: 11px;
+  font-size:14px;
 }
-
 
 .result-count {
-    color: #7e8fa2;
+  color: var(--brand-ink);
 
-    font-size: 10px;
+  font-size:14px;
 
-    text-align: right;
+  text-align: right;
 }
-
 
 /* =========================================================
    PAYMENT TABLE
@@ -57,645 +54,531 @@
 
 .data-panel td:first-child strong,
 .data-panel td:first-child small {
-    display: block;
+  display: block;
 }
-
 
 .data-panel td:first-child small {
-    margin-top: 3px;
+  margin-top: 3px;
 
-    color: #9ba8b6;
+  color: var(--brand-ink);
 
-    font-size: 9px;
+  font-size:14px;
 }
-
 
 .data-panel a {
-    color: #75879a;
+  color: var(--company-primary);
 
-    font-size: 18px;
+  font-size: 18px;
 
-    text-decoration: none;
+  text-decoration: none;
 
-    transition:
-        color 0.15s ease,
-        transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
 }
-
 
 .data-panel a:hover {
-    color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
 
-    transform: translateX(2px);
+  transform: translateX(2px);
 }
-
 
 /* =========================================================
    PAYMENT METHOD BADGE
    ========================================================= */
 
 .method-badge {
-    display: inline-flex;
+  display: inline-flex;
 
-    align-items: center;
+  align-items: center;
 
-    padding: 5px 8px;
+  padding: 5px 8px;
 
-    border-radius: 7px;
+  border-radius: 7px;
 
-    color: #31526f;
+  color: var(--company-text);
 
-    background: #edf4f8;
+  background: #FFFFFF;
 
-    font-size: 9px;
+  font-size:14px;
 
-    font-weight: 750;
+  font-weight: 750;
 
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
-
 
 /* =========================================================
    PAYMENT VIEW SWITCH
    ========================================================= */
 
 .payment-view-switch {
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  align-items: center;
 
-    gap: 8px;
+  gap: 8px;
 
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 
-    padding: 4px;
+  padding: 4px;
 
-    width: fit-content;
+  width: fit-content;
 
-    border: 1px solid #e4eaf1;
+  border: 1px solid var(--company-background);
 
-    border-radius: 11px;
+  border-radius: 11px;
 
-    background: #ffffff;
+  background: var(--surface);
 }
-
 
 .payment-view-switch button {
-    position: relative;
+  position: relative;
 
-    min-height: 38px;
+  min-height: 38px;
 
-    padding: 8px 14px;
+  padding: 8px 14px;
 
-    display: inline-flex;
+  display: inline-flex;
 
-    align-items: center;
+  align-items: center;
 
-    justify-content: center;
+  justify-content: center;
 
-    gap: 7px;
+  gap: 7px;
 
-    border: 1px solid transparent;
+  border: 1px solid transparent;
 
-    border-radius: 8px;
+  border-radius: 8px;
 
-    color: #62768a;
+  color: var(--company-primary);
 
-    background: transparent;
+  background: transparent;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    font-size: 11px;
+  font-size:14px;
 
-    font-weight: 700;
+  font-weight: 700;
 
-    transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
-
 
 .payment-view-switch button:hover {
-    background: #f4f7fa;
+  background: #FFFFFF;
 
-    color: #173451;
+  color: var(--ink);
 }
-
 
 .payment-view-switch button.active {
-    border-color: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
 
-    color: #ffffff;
+  color: var(--surface);
 
-    background: var(--ion-color-primary);
+  background: var(--ion-color-primary);
 }
-
 
 /* =========================================================
    CASH REQUEST COUNT BADGE
    ========================================================= */
 
 .view-count-badge {
-    min-width: 20px;
+  min-width: 20px;
 
-    height: 20px;
+  height: 20px;
 
-    padding: 0 6px;
+  padding: 0 6px;
 
-    display: inline-flex;
+  display: inline-flex;
 
-    align-items: center;
+  align-items: center;
 
-    justify-content: center;
+  justify-content: center;
 
-    border-radius: 10px;
+  border-radius: 10px;
 
-    color: #7a4b00;
+  color: #7a4b00;
 
-    background: #fff3cd;
+  background: #fff3cd;
 
-    font-size: 9px;
+  font-size:14px;
 
-    font-weight: 800;
+  font-weight: 800;
 
-    line-height: 1;
+  line-height: 1;
 }
-
 
 .payment-view-switch button.active .view-count-badge {
-    color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
 
-    background: #ffffff;
+  background: var(--surface);
 }
-
 
 /* =========================================================
    CASH HEADER
    ========================================================= */
 
 .cash-header {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  align-items: center;
 
-    justify-content: space-between;
+  justify-content: space-between;
 
-    gap: 20px;
+  gap: 20px;
 }
-
 
 .cash-header p {
-    margin: 0;
+  margin: 0;
 
-    color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
 
-    font-size: 10px;
+  font-size:14px;
 
-    font-weight: 800;
+  font-weight: 800;
 
-    letter-spacing: 0.08em;
+  letter-spacing: 0.08em;
 }
-
 
 .cash-header h2 {
-    margin: 4px 0 5px;
+  margin: 4px 0 5px;
 
-    color: #173451;
+  color: var(--ink);
 
-    font-size: 20px;
+  font-size: 20px;
 }
-
 
 .cash-header span {
-    color: #75879b;
+  color: var(--company-primary);
 
-    font-size: 11px;
+  font-size:14px;
 }
-
 
 /* =========================================================
    CASH SUMMARY
    ========================================================= */
 
 .cash-summary-grid {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 
-    display: grid;
+  display: grid;
 
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    gap: 12px;
+  gap: 12px;
 }
-
 
 .cash-summary-card {
-    padding: 16px;
+  padding: 16px;
 
-    display: flex;
+  display: flex;
 
-    flex-direction: column;
+  flex-direction: column;
 
-    gap: 7px;
+  gap: 7px;
 
-    border: 1px solid #e4eaf1;
+  border: 1px solid var(--company-background);
 
-    border-radius: 12px;
+  border-radius: 12px;
 
-    background: #ffffff;
+  background: var(--surface);
 }
-
 
 .cash-summary-card span {
-    color: #7e8fa2;
+  color: var(--brand-ink);
 
-    font-size: 10px;
+  font-size:14px;
 
-    font-weight: 600;
+  font-weight: 600;
 }
-
 
 .cash-summary-card strong {
-    color: #173451;
+  color: var(--ink);
 
-    font-size: 17px;
+  font-size: 17px;
 
-    font-weight: 800;
+  font-weight: 800;
 }
-
 
 /* =========================================================
    CASH STATUS
    ========================================================= */
 
 .cash-pending {
-    color: #8a5a00;
+  color: #8a5a00;
 
-    background: #fff7dd;
+  background: #fff7dd;
 }
-
 
 .confirmed-label {
-    font-size: 10px;
+  font-size:14px;
 
-    font-weight: 700;
+  font-weight: 700;
 
-    color: var(--ion-color-success);
+  color: var(--ion-color-success);
 }
-
 
 /* =========================================================
    CASH CONFIRM BUTTON
    ========================================================= */
 
 .cash-confirm-button {
-    margin-top: 14px;
+  margin-top: 14px;
 }
-
 
 .cash-confirm-button ion-spinner {
-    width: 16px;
+  width: 16px;
 
-    height: 16px;
+  height: 16px;
 }
-
 
 /* =========================================================
    CASH RECORD DETAILS
    ========================================================= */
 
 .cash-record {
-    border-color: #e3e9ef;
+  border-color: var(--company-background);
 }
-
 
 .cash-record__speed {
-    margin-top: -5px !important;
+  margin-top: -5px !important;
 
-    color: #92a0ae !important;
+  color: var(--brand-soft) !important;
 
-    font-size: 9px !important;
+  font-size:14px !important;
 }
-
 
 /* =========================================================
    STATUS BADGES
    ========================================================= */
 
 .status-badge {
-    display: inline-flex;
+  display: inline-flex;
 
-    align-items: center;
+  align-items: center;
 
-    justify-content: center;
+  justify-content: center;
 
-    min-height: 24px;
+  min-height: 24px;
 
-    padding: 4px 8px;
+  padding: 4px 8px;
 
-    border-radius: 7px;
+  border-radius: 7px;
 
-    color: #7b5b00;
+  color: #7b5b00;
 
-    background: #fff4cf;
+  background: #fff4cf;
 
-    font-size: 9px;
+  font-size:14px;
 
-    font-weight: 750;
+  font-weight: 750;
 
-    white-space: nowrap;
+  white-space: nowrap;
 }
-
 
 .status-badge.status--successful,
 .status-badge.success {
-    color: #17643a;
+  color: var(--company-text);
 
-    background: #e8f7ee;
+  background: #FFFFFF;
 }
-
 
 .status-badge.status--pending {
-    color: #805700;
+  color: #805700;
 
-    background: #fff3cd;
+  background: #fff3cd;
 }
-
 
 .status-badge.status--failed,
 .status-badge.failed {
-    color: #9f2f36;
+  color: #9f2f36;
 
-    background: #fdecef;
+  background: #fdecef;
 }
-
 
 /* =========================================================
    MOBILE CARDS
    ========================================================= */
 
 .mobile-cards {
-    display: none;
+  display: none;
 }
-
 
 .record-card {
-    color: inherit;
+  color: inherit;
 
-    text-decoration: none;
+  text-decoration: none;
 }
-
 
 /* =========================================================
    RESPONSIVE - TABLET
    ========================================================= */
 
-@media (
-    max-width: 900px
-) {
+@media (max-width: 900px) {
+  .filter-panel {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
 
-    .filter-panel {
-        grid-template-columns:
-            1fr
-            1fr;
-    }
+  .result-count {
+    text-align: left;
+  }
 
+  .desktop-table {
+    display: none;
+  }
 
-    .result-count {
-        text-align: left;
-    }
+  .mobile-cards {
+    display: grid;
 
+    gap: 10px;
+  }
 
-    .desktop-table {
-        display: none;
-    }
+  .record-card {
+    padding: 16px;
 
+    display: block;
 
-    .mobile-cards {
-        display: grid;
+    border: 1px solid var(--company-background);
 
-        gap: 10px;
-    }
+    border-radius: 13px;
 
+    color: inherit;
 
-    .record-card {
-        padding: 16px;
+    background: var(--surface);
 
-        display: block;
+    text-decoration: none;
+  }
 
-        border: 1px solid #e4eaf1;
+  .record-card > div,
+  .record-card footer {
+    display: flex;
 
-        border-radius: 13px;
+    align-items: center;
 
-        color: inherit;
+    justify-content: space-between;
 
-        background: #ffffff;
+    gap: 10px;
+  }
 
-        text-decoration: none;
-    }
+  .record-card > div > strong {
+    min-width: 0;
 
+    overflow: hidden;
 
-    .record-card > div,
-    .record-card footer {
-        display: flex;
+    color: var(--ink);
 
-        align-items: center;
+    font-size:14px;
 
-        justify-content: space-between;
+    text-overflow: ellipsis;
 
-        gap: 10px;
-    }
+    white-space: nowrap;
+  }
 
+  .record-card p {
+    margin: 12px 0;
 
-    .record-card > div > strong {
-        min-width: 0;
+    color: var(--company-primary);
 
-        overflow: hidden;
+    font-size:14px;
 
-        color: #173451;
+    line-height: 1.5;
+  }
 
-        font-size: 11px;
+  .record-card footer {
+    padding-top: 11px;
 
-        text-overflow: ellipsis;
+    border-top: 1px solid #FFFFFF;
+  }
 
-        white-space: nowrap;
-    }
+  .record-card footer b {
+    color: var(--ink);
 
+    font-size:14px;
+  }
 
-    .record-card p {
-        margin: 12px 0;
+  .record-card footer span {
+    color: var(--brand-ink);
 
-        color: #75879b;
+    font-size:14px;
+  }
 
-        font-size: 10px;
-
-        line-height: 1.5;
-    }
-
-
-    .record-card footer {
-        padding-top: 11px;
-
-        border-top: 1px solid #edf1f5;
-    }
-
-
-    .record-card footer b {
-        color: #173451;
-
-        font-size: 12px;
-    }
-
-
-    .record-card footer span {
-        color: #96a3b1;
-
-        font-size: 9px;
-    }
-
-
-    .cash-summary-grid {
-        grid-template-columns:
-            1fr
-            1fr;
-    }
+  .cash-summary-grid {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
 }
-
 
 /* =========================================================
    RESPONSIVE - MOBILE
    ========================================================= */
 
-@media (
-    max-width: 560px
-) {
+@media (max-width: 560px) {
+  .filter-panel {
+    grid-template-columns: 1fr;
+  }
 
-    .filter-panel {
-        grid-template-columns:
-            1fr;
-    }
+  .filter-panel .search-control {
+    grid-column: auto;
+  }
 
+  .payment-view-switch {
+    width: 100%;
+  }
 
-    .filter-panel .search-control {
-        grid-column: auto;
-    }
+  .payment-view-switch button {
+    flex: 1;
 
+    padding-left: 10px;
 
-    .payment-view-switch {
-        width: 100%;
-    }
+    padding-right: 10px;
+  }
 
+  .cash-header {
+    align-items: flex-start;
 
-    .payment-view-switch button {
-        flex: 1;
+    flex-direction: column;
+  }
 
-        padding-left: 10px;
+  .cash-summary-grid {
+    grid-template-columns: 1fr;
+  }
 
-        padding-right: 10px;
-    }
+  .cash-summary-card {
+    padding: 14px;
+  }
 
+  .record-card {
+    padding: 14px;
+  }
 
-    .cash-header {
-        align-items: flex-start;
+  .record-card > div {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-        flex-direction: column;
-    }
+  .record-card > div > strong {
+    max-width: 100%;
+    word-break: break-all;
+  }
 
+  .record-card footer {
+    align-items: flex-start;
 
-    .cash-summary-grid {
-        grid-template-columns:
-            1fr;
-    }
+    flex-direction: column;
+    gap: 4px;
+  }
 
-
-    .cash-summary-card {
-        padding: 14px;
-    }
-
-
-    .record-card {
-        padding: 14px;
-    }
-
-
-    .record-card > div {
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-
-    .record-card > div > strong {
-        max-width: 100%;
-        word-break: break-all;
-    }
-
-
-    .record-card footer {
-        align-items: flex-start;
-
-        flex-direction: column;
-        gap: 4px;
-    }
-
-
-    .cash-confirm-button {
-        margin-top: 12px;
-        min-height: 38px;
-    }
+  .cash-confirm-button {
+    margin-top: 12px;
+    min-height: 38px;
+  }
 }
 /* Automatic mobile-money SMS review */
-.sms-review-list {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.sms-review-card {
-    border: 1px solid var(--ion-color-light-shade, #d7d8da);
-    border-radius: 14px;
-    padding: 1rem;
-    background: var(--ion-background-color, #fff);
-}
-
-.sms-review-card__top,
-.sms-review-actions,
-.sms-facts {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
-
-.sms-review-card__top small,
-.sms-facts span {
-    display: block;
-    opacity: .65;
-    margin-top: .2rem;
-}
-
-.sms-raw {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    padding: .85rem;
-    border-radius: 10px;
-    background: rgba(127, 127, 127, .08);
-    line-height: 1.5;
-}
-
-.sms-facts > div {
-    min-width: 150px;
-}
-
-.sms-review-error {
-    font-weight: 600;
-}
-
-.sms-review-actions ion-select {
-    min-width: min(100%, 360px);
-    flex: 1;
-}

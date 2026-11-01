@@ -1,62 +1,210 @@
 <div class="page-container">
   <header class="page-heading">
-    <div><p>PRODUCT CATALOG</p><h1>Internet packages</h1><span>Create and control the offers customers can purchase.</span></div>
-    <ion-button (click)="openCreate()"><ion-icon slot="start" name="add-outline"></ion-icon>New package</ion-button>
+    <div>
+      <p>PRODUCT CATALOG</p>
+      <h1>Internet packages</h1>
+      <span>Create and control the offers customers can purchase.</span>
+    </div>
+    <ion-button (click)="openCreate()"
+      ><ion-icon slot="start" name="add-outline"></ion-icon>New
+      package</ion-button
+    >
   </header>
 
   <section class="toolbar-card">
-    <div class="search-control"><ion-icon name="search-outline"></ion-icon><ion-input placeholder="Search by package name or speed" (ionInput)="search.set($any($event.target).value || '')"></ion-input></div>
-    <span>{{ filtered().length }} package{{ filtered().length === 1 ? '' : 's' }}</span>
+    <div class="search-control">
+      <ion-icon name="search-outline"></ion-icon
+      ><ion-input
+        placeholder="Search by package name or speed"
+        (ionInput)="search.set($any($event.target).value || '')"
+      ></ion-input>
+    </div>
+    <span
+      >{{ filtered().length }} package{{ filtered().length === 1 ? '' : 's'
+      }}</span
+    >
   </section>
 
-  @if (loading()) { <div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Loading packages…</p></div> }
-  @else if (error()) { <div class="state-card error-state"><h2>Packages unavailable</h2><p>Check the API connection and try again.</p><ion-button (click)="load()">Try again</ion-button></div> }
-  @else if (filtered().length === 0) { <div class="state-card"><span class="empty-icon"><ion-icon name="wifi-outline"></ion-icon></span><h2>No packages available</h2><p>Create an internet package to get started.</p><ion-button (click)="openCreate()">Create package</ion-button></div> }
-  @else {
-    <section class="package-grid">
-      @for (item of filtered(); track item.id) {
-        <article class="package-card" [class.inactive]="!item.is_active">
-          <div class="package-top"><span class="package-icon"><ion-icon name="wifi-outline"></ion-icon></span><span class="status-badge" [class.success]="item.is_active">{{ item.is_active ? 'Active' : 'Inactive' }}</span></div>
-          <p>{{ item.speed }}</p><h2>{{ item.name }}</h2><strong>{{ money(item.price) }}</strong>
-          <div class="meta"><span><ion-icon name="time-outline"></ion-icon>{{ duration(item.duration_minutes) }}</span><span><ion-icon name="calendar-outline"></ion-icon>{{ item.available_from ? 'Scheduled' : 'Always available' }}</span></div>
-          @if (item.available_from && item.available_until) {
-            <div class="schedule-note"><b>Temporary availability</b><span>{{ item.available_from | date:'medium' }} — {{ item.available_until | date:'medium' }}</span></div>
-          }
-          <div class="package-actions">
-            <ion-button fill="outline" size="small" (click)="openEdit(item)"><ion-icon slot="start" name="create-outline"></ion-icon>Edit</ion-button>
-            <ion-button fill="clear" size="small" (click)="openSchedule(item)"><ion-icon slot="start" name="calendar-outline"></ion-icon>Schedule</ion-button>
-          </div>
-          <div class="status-row"><span>Customer availability</span><ion-toggle [checked]="item.is_active" (ionChange)="toggleStatus(item, $event.detail.checked)"></ion-toggle></div>
-        </article>
+  @if (loading()) {
+  <div class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading packages…</p>
+  </div>
+  } @else if (error()) {
+  <div class="state-card error-state">
+    <h2>Packages unavailable</h2>
+    <p>Check the API connection and try again.</p>
+    <ion-button (click)="load()">Try again</ion-button>
+  </div>
+  } @else if (filtered().length === 0) {
+  <div class="state-card">
+    <span class="empty-icon"><ion-icon name="wifi-outline"></ion-icon></span>
+    <h2>No packages available</h2>
+    <p>Create an internet package to get started.</p>
+    <ion-button (click)="openCreate()">Create package</ion-button>
+  </div>
+  } @else {
+  <section class="package-grid">
+    @for (item of filtered(); track item.id) {
+    <article class="package-card" [class.inactive]="!item.is_active">
+      <div class="package-top">
+        <span class="package-icon"
+          ><ion-icon name="wifi-outline"></ion-icon></span
+        ><span class="status-badge" [class.success]="item.is_active"
+          >{{ item.is_active ? 'Active' : 'Inactive' }}</span
+        >
+      </div>
+      <h2>{{ item.name }}</h2>
+      <strong>{{ money(item.price) }}</strong>
+      <div class="meta">
+        <span
+          ><ion-icon name="time-outline"></ion-icon>{{
+          duration(item.duration_minutes) }}</span
+        ><span
+          ><ion-icon name="calendar-outline"></ion-icon>{{ item.available_from ?
+          'Scheduled' : 'Always available' }}</span
+        >
+      </div>
+      @if (item.available_from && item.available_until) {
+      <div class="schedule-note">
+        <b>Temporary availability</b
+        ><span
+          >{{ item.available_from | date:'medium' }} — {{ item.available_until |
+          date:'medium' }}</span
+        >
+      </div>
       }
-    </section>
+      <div class="package-actions">
+        <ion-button fill="clear" color="danger" size="small" [disabled]="deleting() !== null" (click)="deletePackage(item)">
+          {{ deleting() === item.id ? 'Deleting…' : 'Delete' }}
+        </ion-button>
+        <ion-button fill="outline" size="small" (click)="openEdit(item)"
+          ><ion-icon slot="start" name="create-outline"></ion-icon
+          >Edit</ion-button
+        >
+        <ion-button fill="clear" size="small" (click)="openSchedule(item)"
+          ><ion-icon slot="start" name="calendar-outline"></ion-icon
+          >Schedule</ion-button
+        >
+      </div>
+      <div class="status-row">
+        <span>Customer availability</span
+        ><ion-toggle
+          [checked]="item.is_active"
+          (ionChange)="toggleStatus(item, $event.detail.checked)"
+        ></ion-toggle>
+      </div>
+    </article>
+    }
+  </section>
   }
 </div>
 
-<ion-modal [isOpen]="formOpen()" (didDismiss)="formOpen.set(false)" class="form-modal">
+<ion-modal
+  [isOpen]="formOpen()"
+  [focusTrap]="false"
+  (didDismiss)="formOpen.set(false)"
+  class="form-modal"
+>
   <ng-template>
     <div class="modal-shell">
-      <header><div><p>PACKAGE SETUP</p><h2>{{ selected() ? 'Edit package' : 'Create package' }}</h2></div><ion-button fill="clear" (click)="formOpen.set(false)"><ion-icon name="close-outline"></ion-icon></ion-button></header>
+      <header>
+        <div>
+          <p>PACKAGE SETUP</p>
+          <h2>{{ selected() ? 'Edit package' : 'Create package' }}</h2>
+        </div>
+        <ion-button fill="clear" (click)="formOpen.set(false)"
+          ><ion-icon name="close-outline"></ion-icon
+        ></ion-button>
+      </header>
       <form [formGroup]="packageForm" (ngSubmit)="savePackage()">
-        <label>Package name</label><ion-input fill="outline" formControlName="name" placeholder="e.g. 24 Hours"></ion-input>
-        <div class="form-grid"><div><label>Price (TZS)</label><ion-input fill="outline" type="number" formControlName="price"></ion-input></div><div><label>Duration (minutes)</label><ion-input fill="outline" type="number" formControlName="duration_minutes"></ion-input></div></div>
-        <label>Connection speed</label><ion-input fill="outline" formControlName="speed" placeholder="e.g. 10 Mbps"></ion-input>
-        <div class="toggle-field"><span><b>Package active</b><small>Show this offer in the customer portal</small></span><ion-toggle formControlName="is_active"></ion-toggle></div>
-        <div class="modal-actions"><ion-button fill="clear" type="button" (click)="formOpen.set(false)">Cancel</ion-button><ion-button type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save package' }}</ion-button></div>
+        <label>Package name</label
+        ><ion-input
+          fill="outline"
+          formControlName="name"
+          placeholder="e.g. 24 Hours"
+        ></ion-input>
+        <div class="form-grid">
+          <div>
+            <label>Price (TZS)</label
+            ><ion-input
+              fill="outline"
+              type="number"
+              formControlName="price"
+            ></ion-input>
+          </div>
+          <div>
+            <label>Duration (minutes)</label
+            ><ion-input
+              fill="outline"
+              type="number"
+              formControlName="duration_minutes"
+            ></ion-input>
+          </div>
+        </div>
+        <div class="toggle-field">
+          <span
+            ><b>Package active</b
+            ><small>Show this offer in the customer portal</small></span
+          ><ion-toggle formControlName="is_active"></ion-toggle>
+        </div>
+        <div class="modal-actions">
+          <ion-button fill="clear" type="button" (click)="formOpen.set(false)"
+            >Cancel</ion-button
+          ><ion-button type="submit" [disabled]="saving()"
+            >{{ saving() ? 'Saving…' : 'Save package' }}</ion-button
+          >
+        </div>
       </form>
     </div>
   </ng-template>
 </ion-modal>
 
-<ion-modal [isOpen]="scheduleOpen()" (didDismiss)="scheduleOpen.set(false)" class="form-modal">
+<ion-modal
+  [isOpen]="scheduleOpen()"
+  (didDismiss)="scheduleOpen.set(false)"
+  class="form-modal"
+>
   <ng-template>
     <div class="modal-shell">
-      <header><div><p>TEMPORARY AVAILABILITY</p><h2>Schedule {{ selected()?.name }}</h2></div><ion-button fill="clear" (click)="scheduleOpen.set(false)"><ion-icon name="close-outline"></ion-icon></ion-button></header>
+      <header>
+        <div>
+          <p>TEMPORARY AVAILABILITY</p>
+          <h2>Schedule {{ selected()?.name }}</h2>
+        </div>
+        <ion-button fill="clear" (click)="scheduleOpen.set(false)"
+          ><ion-icon name="close-outline"></ion-icon
+        ></ion-button>
+      </header>
       <form [formGroup]="scheduleForm" (ngSubmit)="saveSchedule()">
-        <label>Available from</label><ion-datetime presentation="date-time" formControlName="available_from"></ion-datetime>
-        <label>Available until</label><ion-datetime presentation="date-time" formControlName="available_until"></ion-datetime>
+        <label>Available from</label
+        ><ion-datetime
+          presentation="date-time"
+          formControlName="available_from"
+        ></ion-datetime>
+        <label>Available until</label
+        ><ion-datetime
+          presentation="date-time"
+          formControlName="available_until"
+        ></ion-datetime>
         <p class="form-hint">The end time must be later than the start time.</p>
-        <div class="modal-actions spread"><ion-button color="danger" fill="clear" type="button" (click)="removeSchedule()">Remove schedule</ion-button><span></span><ion-button fill="clear" type="button" (click)="scheduleOpen.set(false)">Cancel</ion-button><ion-button type="submit" [disabled]="saving()">Save schedule</ion-button></div>
+        <div class="modal-actions spread">
+          <ion-button
+            color="danger"
+            fill="clear"
+            type="button"
+            (click)="removeSchedule()"
+            >Remove schedule</ion-button
+          ><span></span
+          ><ion-button
+            fill="clear"
+            type="button"
+            (click)="scheduleOpen.set(false)"
+            >Cancel</ion-button
+          ><ion-button type="submit" [disabled]="saving()"
+            >Save schedule</ion-button
+          >
+        </div>
       </form>
     </div>
   </ng-template>

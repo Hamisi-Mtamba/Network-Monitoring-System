@@ -8,6 +8,7 @@ import {
 // Import router utilities
 import {
     RouterLink,
+    RouterLinkActive,
     RouterOutlet
 } from '@angular/router';
 
@@ -31,7 +32,8 @@ import {
 
     imports: [
         RouterOutlet,
-        RouterLink
+        RouterLink,
+        RouterLinkActive
     ],
 
     templateUrl: './app.html',

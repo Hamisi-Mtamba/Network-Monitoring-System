@@ -1,154 +1,39 @@
-// Import Angular utilities
-import {
-    Injectable,
-    signal
-} from '@angular/core';
-
-// Import HttpClient
-import {
-    HttpClient
-} from '@angular/common/http';
-
-// Import RxJS
-import {
-    Observable,
-    tap
-} from 'rxjs';
-
-// Import company model
-import {
-    Company,
-    CompanyResponse
-} from '../models/company.model';
-
-// Import API helper
-import {
-    getCompanyPublicApiUrl
-} from '../config/api.config';
-
-
-@Injectable({
-    providedIn: 'root'
-})
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap, timer, fromEvent, merge, filter, exhaustMap, catchError, EMPTY } from 'rxjs';
+import { Company, CompanyResponse } from '../models/company.model';
+import { getCompanyPublicApiUrl } from '../config/api.config';
+import { applyCompanyBranding } from '../../../../shared/company-branding';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+@Injectable({providedIn:'root'})
 export class TenantService {
-
-    // Current company slug
-    private readonly slugState =
-        signal<string | null>(null);
-
-    // Current company profile
-    private readonly companyState =
-        signal<Company | null>(null);
-
-
-    // Expose read-only state
-    readonly companySlug =
-        this.slugState.asReadonly();
-
-    readonly company =
-        this.companyState.asReadonly();
-
-
-    constructor(
-        private readonly http: HttpClient
-    ) {}
-
-
-    // Set the company currently being viewed
-    setCompanySlug(
-        slug: string
-    ): void {
-
-        const normalizedSlug =
-            slug
-                .trim()
-                .toLowerCase();
-
-        this.slugState.set(
-            normalizedSlug
-        );
+    private readonly slugState=signal<string|null>(null);
+    private readonly companyState=signal<Company|null>(null);
+    readonly companySlug=this.slugState.asReadonly();
+    readonly company=this.companyState.asReadonly();
+    constructor(private readonly http:HttpClient){
+        applyCompanyBranding();
+        merge(timer(30000,30000),fromEvent(window,'focus')).pipe(
+            filter(()=>!!this.companyState() && document.visibilityState==='visible'),
+            exhaustMap(()=>this.loadCompany(this.requireSlug()).pipe(catchError(()=>EMPTY))),
+            takeUntilDestroyed(inject(DestroyRef)),
+        ).subscribe();
     }
-
-
-    // Load public company information
-    loadCompany(
-        slug: string
-    ): Observable<CompanyResponse> {
-
-        // Save current slug
-        this.setCompanySlug(slug);
-
-        return this.http
-            .get<CompanyResponse>(
-                getCompanyPublicApiUrl(slug)
-            )
-            .pipe(
-                tap((response) => {
-
-                    // Save company
-                    this.companyState.set(
-                        response.company
-                    );
-
-                    // Apply company theme
-                    this.applyBranding(
-                        response.company
-                    );
-                })
-            );
+    setCompanySlug(slug:string):void {
+        const normalized=slug.trim().toLowerCase();
+        if(normalized!==this.slugState()) {this.companyState.set(null);this.applyBranding();}
+        this.slugState.set(normalized);
     }
-
-
-    // Return current slug or throw a clear error
-    requireSlug(): string {
-
-        const slug =
-            this.slugState();
-
-        if (!slug) {
-            throw new Error(
-                'Company tenant has not been resolved'
-            );
-        }
-
-        return slug;
+    loadCompany(slug:string) {
+        this.setCompanySlug(slug);const normalized=this.requireSlug();
+        return this.http.get<CompanyResponse>(getCompanyPublicApiUrl(normalized)).pipe(tap(response=>{
+            // Ignore responses from a company the visitor has already left.
+            if(this.slugState()!==normalized || response.company?.slug!==normalized)return;
+            this.companyState.set(response.company);this.applyBranding(response.company);
+        }));
     }
-
-
-    // Apply company CSS variables
-    private applyBranding(
-        company: Company
-    ): void {
-
-        const branding =
-            company.settings?.branding;
-
-        const root =
-            document.documentElement;
-
-        root.style.setProperty(
-            '--company-primary',
-            branding?.primary_color || '#2563EB'
-        );
-
-        root.style.setProperty(
-            '--company-secondary',
-            branding?.secondary_color || '#0F172A'
-        );
-
-        root.style.setProperty(
-            '--company-accent',
-            branding?.accent_color || '#22C55E'
-        );
-
-        root.style.setProperty(
-            '--company-background',
-            branding?.background_color || '#F8FAFC'
-        );
-
-        root.style.setProperty(
-            '--company-navbar',
-            branding?.navbar_color || '#FFFFFF'
-        );
+    requireSlug():string {const slug=this.slugState();if(!slug)throw new Error('Company is unavailable');return slug;}
+    private applyBranding(company?:Company):void {
+        applyCompanyBranding(company?.settings?.branding);
     }
 }

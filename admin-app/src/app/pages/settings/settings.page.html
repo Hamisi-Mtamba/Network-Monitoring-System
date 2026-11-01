@@ -1,1298 +1,594 @@
 <div class="settings-page">
-
-    <!-- =====================================================
+  <!-- =====================================================
          HEADER
          ===================================================== -->
 
-    <header class="page-heading">
+  <header class="page-heading">
+    <div>
+      <p>COMPANY SETTINGS</p>
 
-        <div>
+      <h1>Profile & Branding</h1>
 
-            <p>
-                COMPANY SETTINGS
-            </p>
+      <span>
+        Manage your company identity, portal appearance, branding images, and
+        administrator account.
+      </span>
+    </div>
 
-            <h1>
-                Profile & Branding
-            </h1>
+    <ion-button
+      fill="outline"
+      size="small"
+      (click)="load()"
+      [disabled]="loading()"
+    >
+      <ion-icon slot="start" name="refresh-outline"></ion-icon>
 
-            <span>
-                Manage your company identity, portal appearance,
-                branding images, and administrator account.
-            </span>
+      Refresh
+    </ion-button>
+  </header>
 
-        </div>
-
-
-        <ion-button
-            fill="outline"
-            size="small"
-            (click)="load()"
-            [disabled]="loading()"
-        >
-
-            <ion-icon
-                slot="start"
-                name="refresh-outline"
-            ></ion-icon>
-
-            Refresh
-
-        </ion-button>
-
-    </header>
-
-
-    <!-- =====================================================
+  <!-- =====================================================
          LOADING
          ===================================================== -->
 
-    @if (loading()) {
+  @if (loading()) {
 
-        <section class="state-card">
+  <section class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
 
-            <ion-spinner
-                name="crescent"
-            ></ion-spinner>
+    <div>
+      <strong> Loading company settings </strong>
 
-            <div>
+      <p>Fetching your company profile and branding.</p>
+    </div>
+  </section>
 
-                <strong>
-                    Loading company settings
-                </strong>
+  }
 
-                <p>
-                    Fetching your company profile and branding.
-                </p>
-
-            </div>
-
-        </section>
-
-    }
-
-
-    <!-- =====================================================
+  <!-- =====================================================
          LOAD ERROR
          ===================================================== -->
 
-    @else if (error()) {
+  @else if (error()) {
 
-        <section class="state-card error-state">
+  <section class="state-card error-state">
+    <h2>Settings unavailable</h2>
 
-            <h2>
-                Settings unavailable
-            </h2>
+    <p>Your company profile could not be loaded.</p>
 
-            <p>
-                Your company profile could not be loaded.
-            </p>
+    <ion-button (click)="load()"> Try again </ion-button>
+  </section>
 
-            <ion-button
-                (click)="load()"
-            >
-                Try again
-            </ion-button>
+  }
 
-        </section>
-
-    }
-
-
-    <!-- =====================================================
+  <!-- =====================================================
          SETTINGS CONTENT
          ===================================================== -->
 
-    @else if (company(); as currentCompany) {
+  @else {
+  @if (company(); as currentCompany) {
 
-        <!-- =================================================
+  <!-- =================================================
              COMPANY IDENTITY
              ================================================= -->
 
-        <section class="company-banner">
+  <section class="company-banner">
+    <div class="company-banner__logo">
+      @if (logoUrl()) {
 
-            <div class="company-banner__logo">
+      <img
+        [src]="publicImageUrl(logoUrl())"
+        [alt]="currentCompany.name + ' logo'"
+      />
 
-                @if (logoUrl()) {
+      } @else {
 
-                    <img
-                        [src]="publicImageUrl(logoUrl())"
-                        [alt]="currentCompany.name + ' logo'"
-                    />
+      <ion-icon name="business-outline"></ion-icon>
 
-                } @else {
+      }
+    </div>
 
-                    <ion-icon
-                        name="business-outline"
-                    ></ion-icon>
+    <div class="company-banner__identity">
+      <span> YOUR COMPANY </span>
 
-                }
+      <h2>{{ currentCompany.name }}</h2>
 
-            </div>
+      <p>/{{ currentCompany.slug }}</p>
+    </div>
 
-
-            <div class="company-banner__identity">
-
-                <span>
-                    YOUR COMPANY
-                </span>
-
-                <h2>
-                    {{ currentCompany.name }}
-                </h2>
-
-                <p>
-                    /{{ currentCompany.slug }}
-                </p>
-
-            </div>
-
-
-            <div
-                class="company-status"
-                [class.company-status--active]="
+    <div
+      class="company-status"
+      [class.company-status--active]="
                     currentCompany.status === 'active'
                 "
-            >
+    >
+      <i></i>
 
-                <i></i>
+      {{ currentCompany.status === 'active' ? 'Active company' :
+      currentCompany.status }}
+    </div>
+  </section>
 
-                {{
-                    currentCompany.status === 'active'
-                        ? 'Active company'
-                        : currentCompany.status
-                }}
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
+  <!-- =================================================
              GLOBAL MESSAGES
              ================================================= -->
 
-        @if (formError()) {
+  @if (formError()) {
 
-            <section class="inline-message inline-message--error">
+  <section class="inline-message inline-message--error">
+    <ion-icon name="close-circle-outline"></ion-icon>
 
-                <ion-icon
-                    name="close-circle-outline"
-                ></ion-icon>
+    <span> {{ formError() }} </span>
+  </section>
 
-                <span>
-                    {{ formError() }}
-                </span>
+  } @if ( profileSuccess() || brandingSuccess() ) {
 
-            </section>
+  <section class="inline-message inline-message--success">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
 
-        }
+    <span> {{ brandingSuccess() || profileSuccess() }} </span>
+  </section>
 
+  }
 
-        @if (
-            profileSuccess() ||
-            brandingSuccess()
-        ) {
-
-            <section class="inline-message inline-message--success">
-
-                <ion-icon
-                    name="checkmark-circle-outline"
-                ></ion-icon>
-
-                <span>
-                    {{
-                        brandingSuccess() ||
-                        profileSuccess()
-                    }}
-                </span>
-
-            </section>
-
-        }
-
-
-        <!-- =================================================
+  <!-- =================================================
              COMPANY PROFILE
              ================================================= -->
 
-        <section class="settings-card">
+  <section class="settings-card">
+    <header class="settings-card__header">
+      <div>
+        <span class="section-eyebrow"> COMPANY PROFILE </span>
 
-            <header class="settings-card__header">
+        <h2>Business information</h2>
 
-                <div>
+        <p>
+          These details identify your company throughout the administration
+          system and customer portal.
+        </p>
+      </div>
 
-                    <span class="section-eyebrow">
-                        COMPANY PROFILE
-                    </span>
+      <ion-icon name="business-outline"></ion-icon>
+    </header>
 
-                    <h2>
-                        Business information
-                    </h2>
+    <form
+      class="settings-form"
+      [formGroup]="profileForm"
+      (ngSubmit)="saveProfile()"
+    >
+      <div class="form-grid">
+        <label class="form-field">
+          <span> Company name </span>
 
-                    <p>
-                        These details identify your company throughout
-                        the administration system and customer portal.
-                    </p>
+          <ion-input
+            formControlName="name"
+            placeholder="Company name"
+          ></ion-input>
 
-                </div>
+          @if ( profileForm.controls.name.touched &&
+          profileForm.controls.name.invalid ) {
 
-                <ion-icon
-                    name="business-outline"
-                ></ion-icon>
+          <small class="field-error"> Enter a valid company name. </small>
 
-            </header>
+          }
+        </label>
 
+        <label class="form-field">
+          <span> Email address </span>
 
-            <form
-                class="settings-form"
-                [formGroup]="profileForm"
-                (ngSubmit)="saveProfile()"
-            >
+          <ion-input
+            type="email"
+            formControlName="email"
+            placeholder="company@example.com"
+          ></ion-input>
+        </label>
 
-                <div class="form-grid">
+        <label class="form-field">
+          <span> Phone number </span>
 
-                    <label class="form-field">
+          <ion-input formControlName="phone" placeholder="+255..."></ion-input>
+        </label>
 
-                        <span>
-                            Company name
-                        </span>
+        <label class="form-field">
+          <span> Address </span>
 
-                        <ion-input
-                            formControlName="name"
-                            placeholder="Company name"
-                        ></ion-input>
+          <ion-input
+            formControlName="address"
+            placeholder="Company address"
+          ></ion-input>
+        </label>
+      </div>
 
-                        @if (
-                            profileForm.controls.name.touched &&
-                            profileForm.controls.name.invalid
-                        ) {
+      <div class="form-actions">
+        <ion-button
+          type="button"
+          fill="outline"
+          (click)="resetProfile()"
+          [disabled]="savingProfile()"
+        >
+          Reset
+        </ion-button>
 
-                            <small class="field-error">
-                                Enter a valid company name.
-                            </small>
-
-                        }
-
-                    </label>
-
-
-                    <label class="form-field">
-
-                        <span>
-                            Email address
-                        </span>
-
-                        <ion-input
-                            type="email"
-                            formControlName="email"
-                            placeholder="company@example.com"
-                        ></ion-input>
-
-                    </label>
-
-
-                    <label class="form-field">
-
-                        <span>
-                            Phone number
-                        </span>
-
-                        <ion-input
-                            formControlName="phone"
-                            placeholder="+255..."
-                        ></ion-input>
-
-                    </label>
-
-
-                    <label class="form-field">
-
-                        <span>
-                            Address
-                        </span>
-
-                        <ion-input
-                            formControlName="address"
-                            placeholder="Company address"
-                        ></ion-input>
-
-                    </label>
-
-                </div>
-
-
-                <div class="form-actions">
-
-                    <ion-button
-                        type="button"
-                        fill="outline"
-                        (click)="resetProfile()"
-                        [disabled]="savingProfile()"
-                    >
-                        Reset
-                    </ion-button>
-
-
-                    <ion-button
-                        type="submit"
-                        [disabled]="
+        <ion-button
+          type="submit"
+          [disabled]="
                             savingProfile() ||
                             profileForm.invalid
                         "
-                    >
+        >
+          @if (savingProfile()) {
 
-                        @if (savingProfile()) {
+          <ion-spinner slot="start" name="crescent"></ion-spinner>
 
-                            <ion-spinner
-                                slot="start"
-                                name="crescent"
-                            ></ion-spinner>
+          } @else {
 
-                        } @else {
+          <ion-icon slot="start" name="save-outline"></ion-icon>
 
-                            <ion-icon
-                                slot="start"
-                                name="save-outline"
-                            ></ion-icon>
-
-                        }
-
-                        Save profile
-
-                    </ion-button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-
-        <!-- =================================================
-             COMPANY LOGO
+          } Save profile
+        </ion-button>
+      </div>
+    </form>
+  </section>
+  <!-- =================================================
+             COMPANY BRANDING (UNIFIED)
              ================================================= -->
 
-        <section class="settings-card">
+  <section class="settings-card branding-unified-card">
+    <header class="settings-card__header">
+      <div>
+        <span class="section-eyebrow"> COMPANY BRANDING </span>
+        <h2>Brand Identity & Customer Portal Appearance</h2>
+        <p>
+          Configure the branding elements shared between your company administration portal
+          and customer Wi-Fi portal.
+        </p>
+      </div>
+      <ion-icon name="color-palette-outline"></ion-icon>
+    </header>
 
-            <header class="settings-card__header">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        COMPANY LOGO
-                    </span>
-
-                    <h2>
-                        Brand identity
-                    </h2>
-
-                    <p>
-                        Your logo can appear in the customer portal
-                        and company administration interface.
-                    </p>
-
+    <div class="branding-unified-grid">
+      <!-- LEFT COLUMN: CONTROLS -->
+      <div class="branding-controls-column">
+        <!-- 1. COMPANY LOGO -->
+        <div class="branding-field-group">
+          <label class="group-title">Company Logo</label>
+          <p class="group-description">Appears in sidebar, header, and customer Wi-Fi portal.</p>
+          <div class="asset-uploader-row">
+            <div class="asset-preview-box logo-box">
+              @if (logoUrl()) {
+                <img [src]="publicImageUrl(logoUrl())" [alt]="currentCompany.name + ' logo'" />
+              } @else {
+                <div class="empty-asset">
+                  <ion-icon name="image-outline"></ion-icon>
+                  <span>No logo</span>
                 </div>
-
-                <ion-icon
-                    name="image-outline"
-                ></ion-icon>
-
-            </header>
-
-
-            <div class="logo-section">
-
-                <div class="logo-preview">
-
-                    @if (logoUrl()) {
-
-                        <img
-                            [src]="publicImageUrl(logoUrl())"
-                            [alt]="currentCompany.name + ' logo'"
-                        />
-
-                    } @else {
-
-                        <div class="image-placeholder">
-
-                            <ion-icon
-                                name="image-outline"
-                            ></ion-icon>
-
-                            <span>
-                                No company logo
-                            </span>
-
-                        </div>
-
-                    }
-
-                </div>
-
-
-                <div class="logo-actions">
-
-                    <div>
-
-                        <strong>
-                            Upload company logo
-                        </strong>
-
-                        <p>
-                            JPG, PNG or WEBP. Maximum file size 5 MB.
-                        </p>
-
-                    </div>
-
-
-                    <div class="button-row">
-
-                        <label
-                            class="upload-button"
-                            [class.upload-button--disabled]="
-                                uploadingLogo()
-                            "
-                        >
-
-                            @if (uploadingLogo()) {
-
-                                <ion-spinner
-                                    name="crescent"
-                                ></ion-spinner>
-
-                                Uploading...
-
-                            } @else {
-
-                                <ion-icon
-                                    name="cloud-upload-outline"
-                                ></ion-icon>
-
-                                Upload logo
-
-                            }
-
-                            <input
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp"
-                                (change)="onLogoSelected($event)"
-                            />
-
-                        </label>
-
-
-                        @if (logoUrl()) {
-
-                            <ion-button
-                                color="danger"
-                                fill="outline"
-                                size="small"
-                                (click)="removeLogo()"
-                                [disabled]="removingLogo()"
-                            >
-
-                                @if (removingLogo()) {
-
-                                    <ion-spinner
-                                        slot="start"
-                                        name="crescent"
-                                    ></ion-spinner>
-
-                                } @else {
-
-                                    <ion-icon
-                                        slot="start"
-                                        name="trash-outline"
-                                    ></ion-icon>
-
-                                }
-
-                                Remove
-
-                            </ion-button>
-
-                        }
-
-                    </div>
-
-                </div>
-
+              }
             </div>
 
-        </section>
-                <!-- =================================================
+            <div class="asset-buttons">
+              <label class="asset-upload-btn" [class.is-busy]="uploadingLogo()">
+                @if (uploadingLogo()) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <span>Uploading…</span>
+                } @else {
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  <span>{{ logoUrl() ? 'Replace Logo' : 'Upload Logo' }}</span>
+                }
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  [disabled]="uploadingLogo()"
+                  (change)="onLogoSelected($event)"
+                />
+              </label>
+
+              @if (logoUrl()) {
+                <button type="button" class="asset-remove-btn" [disabled]="removingLogo()" (click)="removeLogo()">
+                  <ion-icon name="trash-outline"></ion-icon>
+                  <span>Remove</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. CUSTOMER PORTAL BANNER -->
+        <div class="branding-field-group">
+          <label class="group-title">Customer Portal Banner</label>
+          <p class="group-description">Hero banner image displayed atop the customer Wi-Fi portal.</p>
+          <div class="asset-uploader-row">
+            <div class="asset-preview-box banner-box">
+              @if (bannerImageUrl()) {
+                <img [src]="publicImageUrl(bannerImageUrl())" alt="Customer portal banner" />
+              } @else {
+                <div class="empty-asset banner-placeholder">
+                  <span>Default Sunset Wi-Fi Banner</span>
+                </div>
+              }
+            </div>
+
+            <div class="asset-buttons">
+              <label class="asset-upload-btn" [class.is-busy]="uploadingBanner()">
+                @if (uploadingBanner()) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                  <span>Uploading…</span>
+                } @else {
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  <span>{{ bannerImageUrl() ? 'Replace Banner' : 'Upload Banner' }}</span>
+                }
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  [disabled]="uploadingBanner()"
+                  (change)="onBannerSelected($event)"
+                />
+              </label>
+
+              @if (bannerImageUrl()) {
+                <button type="button" class="asset-remove-btn" [disabled]="removingBanner()" (click)="removeBanner()">
+                  <ion-icon name="trash-outline"></ion-icon>
+                  <span>Remove</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. BRAND COLORS FORM -->
+        <form class="branding-form" [formGroup]="brandingForm" (ngSubmit)="saveBranding()">
+          <div class="color-inputs-grid">
+            <label class="color-picker-item">
+              <span class="color-label">Primary Color</span>
+              <div class="color-picker-box">
+                <input type="color" formControlName="primary_color" />
+                <input type="text" formControlName="primary_color" class="color-hex-text" />
+              </div>
+            </label>
+
+            <label class="color-picker-item">
+              <span class="color-label">Secondary or Accent Color</span>
+              <div class="color-picker-box">
+                <input type="color" formControlName="accent_color" />
+                <input type="text" formControlName="accent_color" class="color-hex-text" />
+              </div>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <ion-button
+              type="button"
+              fill="outline"
+              size="small"
+              (click)="resetBranding()"
+              [disabled]="savingBranding()"
+            >
+              Reset
+            </ion-button>
+
+            <ion-button
+              type="submit"
+              size="small"
+              [disabled]="savingBranding() || brandingForm.invalid"
+            >
+              @if (savingBranding()) {
+                <ion-spinner slot="start" name="crescent"></ion-spinner>
+              } @else {
+                <ion-icon slot="start" name="save-outline"></ion-icon>
+              }
+              Save Branding
+            </ion-button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: LIVE PREVIEW -->
+      <div class="branding-preview-column">
+        <div class="preview-title-bar">
+          <strong>Live Preview</strong>
+          <small>Customer portal appearance</small>
+        </div>
+
+        <div class="preview-mobile-device" [style.background]="previewBranding()['--company-background']">
+          <!-- Status Bar -->
+          <div class="preview-status-bar">
+            <span>9:41</span>
+            <div class="status-bar-icons">
+              <ion-icon name="wifi-outline"></ion-icon>
+              <ion-icon name="card-outline"></ion-icon>
+            </div>
+          </div>
+
+          <!-- Header -->
+          <div class="preview-mobile-header">
+            <div class="preview-mobile-brand">
+              @if (logoUrl()) {
+                <img [src]="publicImageUrl(logoUrl())" alt="Logo preview" />
+              } @else {
+                <span class="preview-logo-symbol" [style.color]="previewBranding()['--company-primary']">
+                  <ion-icon name="wifi-outline"></ion-icon>
+                </span>
+              }
+              <div class="preview-mobile-brand-text">
+                <strong>{{ currentCompany.name }}</strong>
+                <small [style.color]="previewBranding()['--company-accent']">STAY CONNECTED</small>
+              </div>
+            </div>
+            <span class="preview-mobile-lang">EN ▾</span>
+          </div>
+
+          <!-- Hero Banner -->
+          <div class="preview-mobile-hero" [class.has-banner]="bannerImageUrl()">
+            @if (bannerImageUrl()) {
+              <img [src]="publicImageUrl(bannerImageUrl())" class="preview-hero-bg" alt="Banner" />
+            }
+            <div class="preview-hero-overlay">
+              <span>Welcome to</span>
+              <strong>{{ currentCompany.name }} Wi-Fi</strong>
+              <p>Fast. Reliable. Affordable.</p>
+            </div>
+          </div>
+
+          <!-- Package Section -->
+          <div class="preview-mobile-content">
+            <div class="preview-section-heading">
+              <span class="heading-wifi-icon" [style.color]="previewBranding()['--company-primary']">
+                <ion-icon name="wifi-outline"></ion-icon>
+              </span>
+              <div>
+                <strong>Choose a package</strong>
+                <small>Get connected in seconds.</small>
+              </div>
+            </div>
+
+            <!-- Package Card 1 -->
+            <div class="preview-pkg-card">
+              <div class="pkg-card-left">
+                <strong>1 Hour</strong>
+                <small>Perfect for quick access</small>
+              </div>
+              <div class="pkg-card-right">
+                <span class="pkg-price">TZS 500</span>
+                <span
+                  class="pkg-pay-btn"
+                  [style.background]="previewBranding()['--company-primary']"
+                  [style.color]="previewBranding()['--on-primary']"
+                >
+                  Pay →
+                </span>
+              </div>
+            </div>
+
+            <!-- Package Card 2 -->
+            <div class="preview-pkg-card">
+              <div class="pkg-card-left">
+                <strong>6 Hours</strong>
+                <small>Great for longer browsing</small>
+              </div>
+              <div class="pkg-card-right">
+                <span class="pkg-price">TZS 2,000</span>
+                <span
+                  class="pkg-pay-btn"
+                  [style.background]="previewBranding()['--company-primary']"
+                  [style.color]="previewBranding()['--on-primary']"
+                >
+                  Pay →
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================
              PAYMENT SETTINGS
              ================================================= -->
-        <section class="settings-card payment-settings-card">
-            <header class="settings-card__header">
-                <div>
-                    <span class="section-eyebrow">
-                        PAYMENT
-                    </span>
-                    <h2>
-                        Lipa payment settings
-                    </h2>
-                    <p>
-                        Set the Lipa number customers will see after
-                        entering the phone number they will use to pay.
-                    </p>
-                </div>
-                <ion-icon
-                    name="card-outline"
-                ></ion-icon>
-            </header>
-            <form
-                class="payment-settings-form"
-                [formGroup]="paymentForm"
-                (ngSubmit)="savePaymentSettings()"
-            >
-                <fieldset class="payment-settings-group">
-                    <legend>Payment Details</legend>
-                    <div class="form-grid">
-                        <label class="form-field">
-                            <span>
-                                Lipa number
-                            </span>
-                            <ion-input
-                                aria-label="Lipa number" formControlName="lipa_number"
-                                placeholder="Enter merchant/Lipa number"
-                            ></ion-input>
-                            @if (
-                                paymentForm.controls.lipa_number.touched &&
-                                paymentForm.controls.lipa_number.invalid
-                            ) {
-                                <small class="field-error">
-                                    Enter a valid Lipa number.
-                                </small>
-                            }
-                        </label>
-                        <label class="form-field">
-                            <span>
-                                Merchant / account name
-                            </span>
-                            <ion-input
-                                aria-label="Merchant / account name" formControlName="account_name"
-                                placeholder="Optional account name"
-                            ></ion-input>
-                        </label>
-                    </div>
-                    </fieldset>
-                <fieldset class="payment-settings-group">
-                    <legend>Customer Instructions</legend>
-                    <label class="form-field">
-                        <span>
-                            Customer payment instructions
-                        </span>
-                        <textarea
-                            formControlName="instructions" rows="3"
-                            placeholder="Example: Pay the exact amount shown, then wait for automatic approval."
-                        ></textarea>
-                        <small class="field-help">
-                            Optional short instruction shown with the Lipa card.
-                        </small>
-                    </label>
-                </fieldset>
-                <fieldset class="payment-settings-group">
-                    <legend>Automatic Verification</legend>
-                    <p class="payment-settings-hint">Details for the phone receiving payment messages for this company.</p>
-                    <div class="form-grid">
-                        <label class="form-field"><span>httpSMS owner</span>
-                            <ion-input aria-label="httpSMS owner" formControlName="httpsms_owner" placeholder="Copy the owner value from httpSMS"></ion-input>
-                        </label>
-                        <label class="form-field"><span>Payment phone</span>
-                            <ion-input aria-label="Payment phone" formControlName="payment_phone" placeholder="+255..."></ion-input>
-                        </label>
-                        <label class="form-field"><span>Device name</span>
-                            <ion-input aria-label="Device name" formControlName="device_name" placeholder="Payment phone"></ion-input>
-                        </label>
-                    </div>
-                </fieldset>
+  <app-selcom-settings />
 
-                @if (paymentSuccess()) {
-                    <div class="inline-success">
-                        <ion-icon
-                            name="checkmark-circle-outline"
-                        ></ion-icon>
-                        {{ paymentSuccess() }}
-                    </div>
-                }
-                <div class="form-actions">
-                    <ion-button
-                        type="button"
-                        fill="outline"
-                        (click)="resetPaymentSettings()"
-                        [disabled]="savingPayment()"
-                    >
-                        Reset
-                    </ion-button>
-                    <ion-button
-                        type="submit"
-                        [disabled]="
-                            savingPayment() ||
-                            paymentForm.invalid
-                        "
-                    >
-                        @if (savingPayment()) {
-                            <ion-spinner
-                                slot="start"
-                                name="crescent"
-                            ></ion-spinner>
-                            Saving...
-                        } @else {
-                            <ion-icon
-                                slot="start"
-                                name="save-outline"
-                            ></ion-icon>
-                            Save payment settings
-                        }
-                    </ion-button>
-                </div>
-            </form>
-        </section>
-<!-- =================================================
-             BRAND COLORS
-             ================================================= -->
-
-        <section class="settings-card">
-
-            <header class="settings-card__header">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        BRAND COLORS
-                    </span>
-
-                    <h2>
-                        Portal appearance
-                    </h2>
-
-                    <p>
-                        Customize the colors used by your customer
-                        portal and company administration experience.
-                    </p>
-
-                </div>
-
-                <ion-icon
-                    name="color-palette-outline"
-                ></ion-icon>
-
-            </header>
-
-
-            <form
-                class="branding-form"
-                [formGroup]="brandingForm"
-                (ngSubmit)="saveBranding()"
-            >
-
-                <div class="color-grid">
-
-                    <label class="color-field">
-
-                        <span>
-                            Primary color
-                        </span>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                formControlName="primary_color"
-                            />
-
-                            <ion-input
-                                formControlName="primary_color"
-                            ></ion-input>
-
-                        </div>
-
-                    </label>
-
-
-                    <label class="color-field">
-
-                        <span>
-                            Secondary color
-                        </span>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                formControlName="secondary_color"
-                            />
-
-                            <ion-input
-                                formControlName="secondary_color"
-                            ></ion-input>
-
-                        </div>
-
-                    </label>
-
-
-                    <label class="color-field">
-
-                        <span>
-                            Accent color
-                        </span>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                formControlName="accent_color"
-                            />
-
-                            <ion-input
-                                formControlName="accent_color"
-                            ></ion-input>
-
-                        </div>
-
-                    </label>
-
-
-                    <label class="color-field">
-
-                        <span>
-                            Background color
-                        </span>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                formControlName="background_color"
-                            />
-
-                            <ion-input
-                                formControlName="background_color"
-                            ></ion-input>
-
-                        </div>
-
-                    </label>
-
-
-                    <label class="color-field">
-
-                        <span>
-                            Navigation color
-                        </span>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                formControlName="navbar_color"
-                            />
-
-                            <ion-input
-                                formControlName="navbar_color"
-                            ></ion-input>
-
-                        </div>
-
-                    </label>
-
-                </div>
-
-
-                <!-- =========================================
-                     LIVE PREVIEW
-                     ========================================= -->
-
-                <section
-                    class="portal-preview"
-                    [style.background]="
-                        brandingForm.controls.background_color.value
-                    "
-                >
-
-                    <div
-                        class="portal-preview__navbar"
-                        [style.background]="
-                            brandingForm.controls.navbar_color.value
-                        "
-                    >
-
-                        <div>
-
-                            @if (logoUrl()) {
-
-                                <img
-                                    [src]="publicImageUrl(logoUrl())"
-                                    alt=""
-                                />
-
-                            }
-
-                            <strong>
-                                {{ currentCompany.name }}
-                            </strong>
-
-                        </div>
-
-                        <span>
-                            Customer Portal
-                        </span>
-
-                    </div>
-
-
-                    <div class="portal-preview__body">
-
-                        <span
-                            [style.color]="
-                                brandingForm.controls.primary_color.value
-                            "
-                        >
-                            INTERNET ACCESS
-                        </span>
-
-                        <h3
-                            [style.color]="
-                                brandingForm.controls.secondary_color.value
-                            "
-                        >
-                            Choose your package
-                        </h3>
-
-                        <p>
-                            Connect quickly using your company-branded
-                            Wi-Fi portal.
-                        </p>
-
-
-                        <button
-                            type="button"
-                            [style.background]="
-                                brandingForm.controls.accent_color.value
-                            "
-                        >
-                            Buy package
-                        </button>
-
-                    </div>
-
-                </section>
-
-
-                <div class="form-actions">
-
-                    <ion-button
-                        type="button"
-                        fill="outline"
-                        (click)="resetBranding()"
-                        [disabled]="savingBranding()"
-                    >
-                        Reset
-                    </ion-button>
-
-
-                    <ion-button
-                        type="submit"
-                        [disabled]="
-                            savingBranding() ||
-                            brandingForm.invalid
-                        "
-                    >
-
-                        @if (savingBranding()) {
-
-                            <ion-spinner
-                                slot="start"
-                                name="crescent"
-                            ></ion-spinner>
-
-                        } @else {
-
-                            <ion-icon
-                                slot="start"
-                                name="save-outline"
-                            ></ion-icon>
-
-                        }
-
-                        Save colors
-
-                    </ion-button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-
-        <!-- =================================================
-             BRANDING IMAGES
-             ================================================= -->
-
-        <section class="settings-card">
-
-            <header class="settings-card__header">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        BRANDING IMAGES
-                    </span>
-
-                    <h2>
-                        Portal photography
-                    </h2>
-
-                    <p>
-                        Upload imagery used across the customer portal,
-                        login experience, and promotional banner.
-                    </p>
-
-                </div>
-
-                <ion-icon
-                    name="image-outline"
-                ></ion-icon>
-
-            </header>
-            @if (company(); as imageCompany) {
-                <app-branding-images [company]="imageCompany" (updated)="onImagesUpdated($event)" />
-            }
-
-
-            <div class="branding-images-grid">
-
-<!-- LOGIN -->
-
-                <article class="branding-image-card">
-
-                    <div class="branding-image-preview">
-
-                        @if (loginImageUrl()) {
-
-                            <img
-                                [src]="
-                                    publicImageUrl(
-                                        loginImageUrl()
-                                    )
-                                "
-                                alt="Login branding"
-                            />
-
-                        } @else {
-
-                            <div class="image-placeholder">
-
-                                <ion-icon
-                                    name="image-outline"
-                                ></ion-icon>
-
-                                <span>
-                                    No login image
-                                </span>
-
-                            </div>
-
-                        }
-
-                    </div>
-
-
-                    <div class="branding-image-content">
-
-                        <div>
-
-                            <strong>
-                                Login image
-                            </strong>
-
-                            <p>
-                                Image used around portal login/payment entry.
-                            </p>
-
-                        </div>
-
-
-                        <div class="button-row">
-
-                            <label class="upload-button">
-
-                                @if (
-                                    uploadingImage() ===
-                                    'login'
-                                ) {
-
-                                    <ion-spinner
-                                        name="crescent"
-                                    ></ion-spinner>
-
-                                    Uploading...
-
-                                } @else {
-
-                                    <ion-icon
-                                        name="cloud-upload-outline"
-                                    ></ion-icon>
-
-                                    Upload
-
-                                }
-
-                                <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    (change)="
-                                        onBrandingFileSelected(
-                                            $event,
-                                            'login'
-                                        )
-                                    "
-                                />
-
-                            </label>
-
-
-                            @if (loginImageUrl()) {
-
-                                <ion-button
-                                    fill="outline"
-                                    color="danger"
-                                    size="small"
-                                    (click)="
-                                        removeBrandingImage(
-                                            'login'
-                                        )
-                                    "
-                                    [disabled]="
-                                        removingImage() ===
-                                        'login'
-                                    "
-                                >
-                                    Remove
-                                </ion-button>
-
-                            }
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-</div>
-
-        </section>
-
-
-        <!-- =================================================
+  <!-- =================================================
              ADMINISTRATOR ACCOUNT
              ================================================= -->
 
-        @if (auth.admin(); as admin) {
+  @if (auth.admin(); as admin) {
 
-            <section class="settings-card">
+  <section class="settings-card">
+    <header class="settings-card__header">
+      <div>
+        <span class="section-eyebrow"> ADMINISTRATOR </span>
 
-                <header class="settings-card__header">
+        <h2>Your account</h2>
 
-                    <div>
+        <p>
+          The account currently authorized to manage {{ currentCompany.name }}.
+        </p>
+      </div>
 
-                        <span class="section-eyebrow">
-                            ADMINISTRATOR
-                        </span>
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+    </header>
 
-                        <h2>
-                            Your account
-                        </h2>
+    <div class="profile-hero">
+      <span> {{ initials() }} </span>
 
-                        <p>
-                            The account currently authorized to manage
-                            {{ currentCompany.name }}.
-                        </p>
+      <div>
+        <p>AUTHORIZED ADMINISTRATOR</p>
 
-                    </div>
+        <h2>{{ admin.name }}</h2>
 
-                    <ion-icon
-                        name="shield-checkmark-outline"
-                    ></ion-icon>
+        <small> {{ admin.email }} </small>
+      </div>
 
-                </header>
+      <b>
+        <i></i>
 
+        {{ admin.status === 'active' ? 'Account active' : admin.status }}
+      </b>
+    </div>
 
-                <div class="profile-hero">
+    <div class="profile-details">
+      <article>
+        <span>
+          <ion-icon name="person-outline"></ion-icon>
+        </span>
 
-                    <span>
-                        {{ initials() }}
-                    </span>
+        <div>
+          <small> FULL NAME </small>
 
+          <strong> {{ admin.name }} </strong>
+        </div>
+      </article>
 
-                    <div>
+      <article>
+        <span>
+          <ion-icon name="mail-outline"></ion-icon>
+        </span>
 
-                        <p>
-                            AUTHORIZED ADMINISTRATOR
-                        </p>
+        <div>
+          <small> EMAIL ADDRESS </small>
 
-                        <h2>
-                            {{ admin.name }}
-                        </h2>
+          <strong> {{ admin.email }} </strong>
+        </div>
+      </article>
 
-                        <small>
-                            {{ admin.email }}
-                        </small>
+      <article>
+        <span>
+          <ion-icon name="business-outline"></ion-icon>
+        </span>
 
-                    </div>
+        <div>
+          <small> COMPANY </small>
 
+          <strong> {{ currentCompany.name }} </strong>
+        </div>
+      </article>
 
-                    <b>
+      <article>
+        <span>
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </span>
 
-                        <i></i>
+        <div>
+          <small> ACCESS LEVEL </small>
 
-                        {{
-                            admin.status === 'active'
-                                ? 'Account active'
-                                : admin.status
-                        }}
+          <strong> Company administrator </strong>
+        </div>
+      </article>
+    </div>
 
-                    </b>
+    <footer class="account-footer">
+      <div>
+        <strong> End administrator session </strong>
 
-                </div>
+        <small> You will return to the secure login screen. </small>
+      </div>
 
+      <ion-button color="danger" fill="outline" (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
 
-                <div class="profile-details">
+        Log out
+      </ion-button>
+    </footer>
+  </section>
 
-                    <article>
-
-                        <span>
-                            <ion-icon
-                                name="person-outline"
-                            ></ion-icon>
-                        </span>
-
-                        <div>
-
-                            <small>
-                                FULL NAME
-                            </small>
-
-                            <strong>
-                                {{ admin.name }}
-                            </strong>
-
-                        </div>
-
-                    </article>
-
-
-                    <article>
-
-                        <span>
-                            <ion-icon
-                                name="mail-outline"
-                            ></ion-icon>
-                        </span>
-
-                        <div>
-
-                            <small>
-                                EMAIL ADDRESS
-                            </small>
-
-                            <strong>
-                                {{ admin.email }}
-                            </strong>
-
-                        </div>
-
-                    </article>
-
-
-                    <article>
-
-                        <span>
-                            <ion-icon
-                                name="business-outline"
-                            ></ion-icon>
-                        </span>
-
-                        <div>
-
-                            <small>
-                                COMPANY
-                            </small>
-
-                            <strong>
-                                {{ currentCompany.name }}
-                            </strong>
-
-                        </div>
-
-                    </article>
-
-
-                    <article>
-
-                        <span>
-                            <ion-icon
-                                name="shield-checkmark-outline"
-                            ></ion-icon>
-                        </span>
-
-                        <div>
-
-                            <small>
-                                ACCESS LEVEL
-                            </small>
-
-                            <strong>
-                                Company administrator
-                            </strong>
-
-                        </div>
-
-                    </article>
-
-                </div>
-
-
-                <footer class="account-footer">
-
-                    <div>
-
-                        <strong>
-                            End administrator session
-                        </strong>
-
-                        <small>
-                            You will return to the secure login screen.
-                        </small>
-
-                    </div>
-
-
-                    <ion-button
-                        color="danger"
-                        fill="outline"
-                        (click)="logout()"
-                    >
-
-                        <ion-icon
-                            slot="start"
-                            name="log-out-outline"
-                        ></ion-icon>
-
-                        Log out
-
-                    </ion-button>
-
-                </footer>
-
-            </section>
-
-        }
-
-    }
-
+  } } }
 </div>

@@ -1,15 +1,147 @@
 <div class="page-container">
-  <header class="page-heading"><div><p>ANALYTICS</p><h1>Reports</h1><span>Revenue, payment and internet-session performance.</span></div><ion-button fill="outline" (click)="load()"><ion-icon slot="start" name="refresh-outline"></ion-icon>Refresh</ion-button></header>
-  @if(loading()){<div class="state-card"><ion-spinner name="crescent"></ion-spinner><p>Preparing reports…</p></div>}
-  @else if(error()){<div class="state-card error-state"><h2>Reports unavailable</h2><p>We could not retrieve report data.</p><ion-button (click)="load()">Try again</ion-button></div>}
-  @else if(reports();as data){
-    <section class="report-summary"><article class="primary"><span><ion-icon name="cash-outline"></ion-icon></span><div><small>TOTAL REVENUE</small><strong>{{money(data.revenue.total_revenue)}}</strong><p>Confirmed customer payments</p></div></article><article><span class="icon green"><ion-icon name="wifi-outline"></ion-icon></span><small>ACTIVE SESSIONS</small><strong>{{data.sessions.active_sessions}}</strong></article><article><span class="icon slate"><ion-icon name="bar-chart-outline"></ion-icon></span><small>EXPIRED SESSIONS</small><strong>{{data.sessions.expired_sessions}}</strong></article></section>
-    <section class="report-grid">
-      <article class="report-card wide"><header><div><p>REVENUE TREND</p><h2>Revenue over time</h2></div></header>@if(data.revenue.revenue_by_date.length){<div class="revenue-chart">@for(point of data.revenue.revenue_by_date;track point.date){<div class="bar-column"><span class="bar-value">{{money(point.revenue)}}</span><i [style.height.%]="revenueHeight(point.revenue)"></i><small>{{point.date|date:'MMM d'}}</small></div>}</div>}@else{<p class="inline-empty">No dated revenue records yet.</p>}</article>
-      <article class="report-card"><header><p>PAYMENTS</p><h2>Status breakdown</h2></header><div class="progress-list">@for(item of data.payments.by_status;track label(item)){<div><p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p><i><b [style.width.%]="width(item.count,data.payments.by_status)"></b></i></div>}@empty{<p class="inline-empty">No payment status data.</p>}</div></article>
-      <article class="report-card"><header><p>CHANNELS</p><h2>Payment methods</h2></header><div class="progress-list purple">@for(item of data.payments.by_payment_method;track label(item)){<div><p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p><i><b [style.width.%]="width(item.count,data.payments.by_payment_method)"></b></i></div>}@empty{<p class="inline-empty">No payment method data.</p>}</div></article>
-      <article class="report-card"><header><p>ACCESS</p><h2>Sessions by status</h2></header><div class="progress-list green">@for(item of data.sessions.by_status;track label(item)){<div><p><span>{{label(item).replace('_',' ')}}</span><strong>{{item.count}}</strong></p><i><b [style.width.%]="width(item.count,data.sessions.by_status)"></b></i></div>}@empty{<p class="inline-empty">No session status data.</p>}</div></article>
-      <article class="report-card"><header><p>POPULARITY</p><h2>Top packages</h2></header><div class="progress-list orange">@for(item of data.sessions.by_package;track label(item)){<div><p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p><i><b [style.width.%]="width(item.count,data.sessions.by_package)"></b></i></div>}@empty{<p class="inline-empty">No package usage data.</p>}</div></article>
-    </section>
+  <header class="page-heading">
+    <div>
+      <p>ANALYTICS</p>
+      <h1>Reports</h1>
+      <span>Revenue, payment and internet-session performance.</span>
+    </div>
+    <ion-button fill="outline" (click)="load()"
+      ><ion-icon slot="start" name="refresh-outline"></ion-icon
+      >Refresh</ion-button
+    >
+  </header>
+  @if(loading()){
+  <div class="state-card">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Preparing reports…</p>
+  </div>
+  } @else if(error()){
+  <div class="state-card error-state">
+    <h2>Reports unavailable</h2>
+    <p>We could not retrieve report data.</p>
+    <ion-button (click)="load()">Try again</ion-button>
+  </div>
+  } @else if(reports();as data){
+  <section class="report-summary">
+    <article class="primary">
+      <span><ion-icon name="cash-outline"></ion-icon></span>
+      <div>
+        <small>TOTAL REVENUE</small
+        ><strong>{{money(data.revenue.total_revenue)}}</strong>
+        <p>Confirmed customer payments</p>
+      </div>
+    </article>
+    <article>
+      <span class="icon green"><ion-icon name="wifi-outline"></ion-icon></span
+      ><small>ACTIVE SESSIONS</small
+      ><strong>{{data.sessions.active_sessions}}</strong>
+    </article>
+    <article>
+      <span class="icon slate"
+        ><ion-icon name="bar-chart-outline"></ion-icon></span
+      ><small>EXPIRED SESSIONS</small
+      ><strong>{{data.sessions.expired_sessions}}</strong>
+    </article>
+  </section>
+  <section class="report-grid">
+    <article class="report-card wide">
+      <header>
+        <div>
+          <p>REVENUE TREND</p>
+          <h2>Revenue over time</h2>
+        </div>
+      </header>
+      @if(data.revenue.revenue_by_date.length){
+      <div class="revenue-chart">
+        @for(point of data.revenue.revenue_by_date;track point.date){
+        <div class="bar-column">
+          <span class="bar-value">{{money(point.revenue)}}</span
+          ><i [style.height.%]="revenueHeight(point.revenue)"></i
+          ><small>{{point.date|date:'MMM d'}}</small>
+        </div>
+        }
+      </div>
+      }@else{
+      <p class="inline-empty">No dated revenue records yet.</p>
+      }
+    </article>
+    <article class="report-card">
+      <header>
+        <p>PAYMENTS</p>
+        <h2>Status breakdown</h2>
+      </header>
+      <div class="progress-list">
+        @for(item of data.payments.by_status;track label(item)){
+        <div>
+          <p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p>
+          <i
+            ><b [style.width.%]="width(item.count,data.payments.by_status)"></b
+          ></i>
+        </div>
+        }@empty{
+        <p class="inline-empty">No payment status data.</p>
+        }
+      </div>
+    </article>
+    <article class="report-card">
+      <header>
+        <p>CHANNELS</p>
+        <h2>Payment methods</h2>
+      </header>
+      <div class="progress-list purple">
+        @for(item of data.payments.by_payment_method;track label(item)){
+        <div>
+          <p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p>
+          <i
+            ><b
+              [style.width.%]="width(item.count,data.payments.by_payment_method)"
+            ></b
+          ></i>
+        </div>
+        }@empty{
+        <p class="inline-empty">No payment method data.</p>
+        }
+      </div>
+    </article>
+    <article class="report-card">
+      <header>
+        <p>ACCESS</p>
+        <h2>Sessions by status</h2>
+      </header>
+      <div class="progress-list green">
+        @for(item of data.sessions.by_status;track label(item)){
+        <div>
+          <p>
+            <span>{{label(item).replace('_',' ')}}</span
+            ><strong>{{item.count}}</strong>
+          </p>
+          <i
+            ><b [style.width.%]="width(item.count,data.sessions.by_status)"></b
+          ></i>
+        </div>
+        }@empty{
+        <p class="inline-empty">No session status data.</p>
+        }
+      </div>
+    </article>
+    <article class="report-card">
+      <header>
+        <p>POPULARITY</p>
+        <h2>Top packages</h2>
+      </header>
+      <div class="progress-list orange">
+        @for(item of data.sessions.by_package;track label(item)){
+        <div>
+          <p><span>{{label(item)}}</span><strong>{{item.count}}</strong></p>
+          <i
+            ><b [style.width.%]="width(item.count,data.sessions.by_package)"></b
+          ></i>
+        </div>
+        }@empty{
+        <p class="inline-empty">No package usage data.</p>
+        }
+      </div>
+    </article>
+  </section>
   }
 </div>

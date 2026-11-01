@@ -1,0 +1,144 @@
+:host {
+  display: contents;
+}
+
+.toast-region {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(400px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast {
+  --toast-accent: var(--company-primary, #f05a22);
+
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 10px 12px 12px;
+  border: 1px solid var(--brand-border, #e8e5df);
+  border-left: 3px solid var(--toast-accent);
+  border-radius: 12px;
+  background: var(--company-surface, #ffffff);
+  color: var(--company-text, #1e2022);
+  box-shadow: 0 10px 28px rgba(30, 32, 34, 0.14), 0 2px 6px rgba(30, 32, 34, 0.06);
+  animation: toast-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.toast--success {
+  --toast-accent: #1f9254;
+}
+
+.toast--error {
+  --toast-accent: #d13438;
+}
+
+.toast--warning {
+  --toast-accent: #d98a06;
+}
+
+.toast--info {
+  --toast-accent: var(--company-primary, #f05a22);
+}
+
+.toast__icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--toast-accent);
+  background: color-mix(in srgb, var(--toast-accent) 12%, #ffffff);
+  font-size: 20px;
+}
+
+.toast__body {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    margin: 3px 0 0;
+    color: var(--brand-muted, #6b7280);
+    font-size: 13px;
+    line-height: 1.45;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+}
+
+.toast__close {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brand-muted, #6b7280);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: #f1f2f4;
+    color: var(--company-text, #1e2022);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--company-primary, #f05a22);
+    outline-offset: 1px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .toast-region {
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

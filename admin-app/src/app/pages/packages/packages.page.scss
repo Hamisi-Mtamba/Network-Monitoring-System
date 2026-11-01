@@ -3,132 +3,178 @@
    ========================================================= */
 
 .package-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
 }
 
 .package-card {
-    padding: 21px;
-    display: flex;
-    flex-direction: column;
-    min-height: 330px;
-    border: 1px solid #e4eaf1;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 5px 18px rgba(22, 48, 82, .035);
+  position: relative;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid var(--brand-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(30, 32, 34, 0.04);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.package-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--company-primary);
+}
+
+.package-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--company-primary);
+  box-shadow: 0 10px 26px rgba(30, 32, 34, 0.08);
 }
 
 .package-card.inactive {
-    opacity: .72;
+  opacity: 0.72;
+}
+
+.package-card.inactive::before {
+  background: var(--brand-muted);
 }
 
 .package-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .package-icon {
-    width: 43px;
-    height: 43px;
-    display: grid;
-    place-items: center;
-    border-radius: 12px;
-    color: #2563eb;
-    background: #eaf0ff;
-    font-size: 20px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--company-primary);
+  background: var(--brand-soft);
+  font-size: 22px;
 }
 
 .package-card > p {
-    margin: 22px 0 5px;
-    color: #2563eb;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .14em;
-    text-transform: uppercase;
+  align-self: flex-start;
+  margin: 18px 0 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--company-primary);
+  background: var(--brand-soft);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .package-card > h2 {
-    margin: 0;
-    color: #112b49;
-    font-size: 21px;
+  margin: 0;
+  color: var(--company-text);
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .package-card > strong {
-    margin: 12px 0 18px;
-    color: #102a49;
-    font-size: 19px;
+  margin: 8px 0 16px;
+  color: var(--company-primary);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .meta {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    color: #74869a;
-    font-size: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--brand-muted);
+  font-size: 13px;
 }
 
 .meta span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #F4F5F7;
+  color: #4B5563;
+  font-weight: 600;
+}
+
+.meta ion-icon {
+  color: var(--company-primary);
 }
 
 .schedule-note {
-    margin: 16px 0 0;
-    padding: 10px;
-    border-radius: 9px;
-    background: #f8fafc;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--brand-soft);
 }
 
 .schedule-note b,
 .schedule-note span {
-    display: block;
+  display: block;
 }
 
 .schedule-note b {
-    color: #52677e;
-    font-size: 9px;
-    text-transform: uppercase;
+  color: var(--brand-ink);
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
 .schedule-note span {
-    margin-top: 4px;
-    color: #8190a1;
-    font-size: 9px;
+  margin-top: 4px;
+  color: var(--brand-muted);
+  font-size: 13px;
 }
 
 .package-actions {
-    margin-top: auto;
-    padding-top: 18px;
-    display: flex;
-    gap: 5px;
-    border-top: 1px solid #eef2f6;
-    flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  border-top: 1px solid var(--brand-border);
 }
 
 .package-actions ion-button {
-    --border-radius: 9px;
-    font-size: 10px;
-    text-transform: none;
+  --border-radius: 9px;
+  flex: 0 1 auto;
+  margin: 0;
+  font-size: 13px;
+  text-transform: none;
+}
+
+.package-actions ion-button[fill="outline"] {
+  flex: 1 1 auto;
 }
 
 .status-row {
-    padding-top: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #607389;
-    font-size: 10px;
-    font-weight: 700;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--company-text);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .status-row ion-toggle {
-    --handle-width: 17px;
-    --handle-height: 17px;
-    transform: scale(.82);
-    transform-origin: right center;
+  --track-background-checked: var(--company-primary);
+  --handle-background-checked: #fff;
+  --handle-width: 17px;
+  --handle-height: 17px;
+  transform: scale(0.9);
+  transform-origin: right center;
 }
 
 /* =========================================================
@@ -136,29 +182,29 @@
    ========================================================= */
 
 ion-datetime {
-    width: 100%;
-    max-width: 100%;
-    margin: 5px 0 14px;
-    border: 1px solid #e1e7ee;
-    border-radius: 12px;
-    background: #f8fafc;
+  width: 100%;
+  max-width: 100%;
+  margin: 5px 0 14px;
+  border: 1px solid var(--company-background);
+  border-radius: 12px;
+  background: var(--company-background);
 }
 
 .spread {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .spread span {
-    flex: 1;
+  flex: 1;
 }
 
 .form-hint {
-    color: #8a99aa;
-    font-size: 10px;
+  color: var(--brand-ink);
+  font-size:14px;
 }
 
 /* =========================================================
@@ -166,26 +212,29 @@ ion-datetime {
    ========================================================= */
 
 @media (max-width: 1050px) {
-    .package-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .package-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 620px) {
-    .package-grid {
-        grid-template-columns: 1fr;
-    }
+  .package-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .spread {
-        flex-direction: column-reverse;
-        align-items: stretch;
-    }
+  .spread {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 
-    .spread ion-button {
-        width: 100%;
-    }
+  .spread ion-button {
+    width: 100%;
+  }
 
-    .spread span {
-        display: none;
-    }
+  .spread span {
+    display: none;
+  }
 }
+
+.package-actions{flex-wrap:wrap}
+

@@ -2,80 +2,72 @@
 // PAYMENT STATUS
 // =========================================================
 
-export type PaymentStatus =
-    'pending' |
-    'successful' |
-    'failed';
-
+export type PaymentStatus = 'pending' | 'successful' | 'failed' | 'awaiting_cash_confirmation' | 'cancelled' | 'rejected';
 
 // =========================================================
 // PAYMENT
 // =========================================================
 
 export interface Payment {
+  id: number;
 
-    id: number;
+  // Company ownership is returned by platform endpoints.
+  company_id?: number;
 
-    // Company ownership is returned by platform endpoints.
-    company_id?: number;
+  package_id: number;
 
-    package_id: number;
+  transaction_reference: string;
 
-    transaction_reference: string;
+  phone_number: string;
 
-    phone_number: string;
+  payment_method: string;
 
-    payment_method: string;
+  amount: number | string;
 
-    amount: number | string;
+  status: PaymentStatus;
 
-    status: PaymentStatus;
+  created_at: string;
 
-    created_at: string;
+  paid_at: string | null;
 
-    paid_at: string | null;
+  package_name: string;
 
-    package_name: string;
+  duration_minutes: number;
 
-    duration_minutes: number;
-
-    speed: string;
+  speed?: string;
+  device_mac?: string;
+  device_ip?: string;
+  router_id?: number;
 }
-
 
 // =========================================================
 // NORMAL COMPANY ADMIN RESPONSES
 // =========================================================
 
 export interface PaymentListResponse {
+  success: boolean;
 
-    success: boolean;
-
-    payments: Payment[];
+  payments: Payment[];
 }
-
 
 export interface PaymentResponse {
+  session?: PaymentInternetSession | null;
+  success: boolean;
 
-    success: boolean;
-
-    payment: Payment;
+  payment: Payment;
 }
-
 
 // =========================================================
 // PLATFORM COMPANY SUMMARY
 // =========================================================
 
 export interface PaymentCompanySummary {
+  id: number;
 
-    id: number;
+  name: string;
 
-    name: string;
-
-    status: string;
+  status: string;
 }
-
 
 // =========================================================
 // SUPERADMIN COMPANY PAYMENT LIST
@@ -87,14 +79,12 @@ export interface PaymentCompanySummary {
  * GET /api/platform/companies/:companyId/payments
  */
 export interface CompanyPaymentsResponse {
+  success: boolean;
 
-    success: boolean;
+  company: PaymentCompanySummary;
 
-    company: PaymentCompanySummary;
-
-    payments: Payment[];
+  payments: Payment[];
 }
-
 
 // =========================================================
 // RELATED INTERNET SESSION
@@ -108,30 +98,28 @@ export interface CompanyPaymentsResponse {
  * the frontend compatible with the existing schema.
  */
 export interface PaymentInternetSession {
+  id: number;
 
-    id: number;
+  company_id?: number;
 
-    company_id?: number;
+  payment_id?: number;
 
-    payment_id?: number;
+  package_id?: number;
 
-    package_id?: number;
+  phone_number?: string;
 
-    phone_number?: string;
+  status?: string;
 
-    status?: string;
+  started_at?: string | null;
 
-    started_at?: string | null;
+  expires_at?: string | null;
 
-    expires_at?: string | null;
+  ended_at?: string | null;
 
-    ended_at?: string | null;
+  created_at?: string;
 
-    created_at?: string;
-
-    [key: string]: unknown;
+  [key: string]: unknown;
 }
-
 
 // =========================================================
 // SUPERADMIN PAYMENT DETAIL RESPONSE
@@ -144,44 +132,13 @@ export interface PaymentInternetSession {
  * /api/platform/companies/:companyId/payments/:paymentId
  */
 export interface CompanyPaymentDetailsResponse {
+  success: boolean;
 
-    success: boolean;
+  payment: Payment;
 
-    payment: Payment;
-
-    session: PaymentInternetSession | null;
+  session: PaymentInternetSession | null;
 }
 // =========================================================
 // AUTOMATIC PAYMENT SMS REVIEW
 // =========================================================
 
-export interface PaymentSmsReview {
-    id: number;
-    sender: string | null;
-    raw_message: string;
-    provider: string | null;
-    provider_transaction_id: string | null;
-    payer_phone: string | null;
-    amount: number | string | null;
-    received_at: string;
-    processing_status: string;
-    processing_error: string | null;
-    payment_id: number | null;
-    device_name: string | null;
-    gateway_phone: string | null;
-}
-
-export interface PendingPaymentMatchOption {
-    id: number;
-    transaction_reference: string;
-    phone_number: string;
-    amount: number | string;
-    created_at: string;
-    package_name: string;
-}
-
-export interface PaymentSmsReviewResponse {
-    success: boolean;
-    sms_reviews: PaymentSmsReview[];
-    pending_payments: PendingPaymentMatchOption[];
-}

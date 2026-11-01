@@ -15,7 +15,7 @@ import { toInternationalPhone } from './subscriber-phone';
 
 const valid = ['712345678', '612345678'];
 const invalid = ['0712345678', '0612345678', '255712345678', '+255712345678', '812345678', '71234567', '7123456789', 'abcdefghi', '712 345678', '712-345678'];
-const methods = ['lipa', 'cash'] as const;
+const methods = ['selcom', 'cash'] as const;
 
 describe('Subscriber phone payment inputs', () => {
     beforeEach(() => {
@@ -47,10 +47,10 @@ describe('Subscriber phone payment inputs', () => {
         for (const subscriber of valid) {
             it(`${method}: sends ${subscriber} as +255${subscriber}`, async () => {
                 const { control, submit, harness } = await open(method);
-                const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.phone-input-wrap input')!;
+                const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.phone-field input')!;
                 expect(input.inputMode).toBe('numeric');
                 expect(input.maxLength).toBe(9);
-                expect(harness.routeNativeElement!.querySelector('.phone-input-wrap span')?.textContent?.trim()).toBe('+255');
+                expect(harness.routeNativeElement!.querySelector('.phone-field span')?.textContent?.trim()).toBe('+255');
                 input.value = subscriber;
                 input.dispatchEvent(new Event('input', { bubbles: true }));
                 expect(control.valid).toBe(true);
@@ -73,10 +73,10 @@ describe('Subscriber phone payment inputs', () => {
         }
     }
 
-    for (const method of ['lipa', 'cash'] as const) {
+    for (const method of ['selcom', 'cash'] as const) {
         it(`${method}: prevents invalid typing/pastes and permits corrections`, async () => {
             const { harness } = await open(method);
-            const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.phone-input-wrap input')!;
+            const input = harness.routeNativeElement!.querySelector<HTMLInputElement>('.phone-field input')!;
             for (const data of ['0', '2', '8', '+', '-', ' ', 'a']) {
                 const event = new InputEvent('beforeinput', { data, inputType: 'insertText', cancelable: true, bubbles: true });
                 input.dispatchEvent(event);
